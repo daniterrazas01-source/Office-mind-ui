@@ -87,7 +87,7 @@ def remoto():
         return {}
 
 
-def viejo(fecha, minutos=30):
+def viejo(fecha, minutos=24 * 60):   # la oficina decide el vencimiento (24 h); aquí solo se limpia lo ya vencido
     try:
         t = datetime.strptime(str(fecha), "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=timezone.utc)
         return (datetime.now(timezone.utc) - t).total_seconds() > minutos * 60

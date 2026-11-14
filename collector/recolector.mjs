@@ -1,14 +1,14 @@
 #!/usr/bin/env node
 // Recolector de la oficina.
 // Lee las sesiones de Claude Code de esta computadora (~/.claude/projects/*/*.jsonl)
-// y arma estado.json: una lista de sesiones con título, proyecto, estado y última
-// actividad. Las reglas de supervisores y vencimiento viven en src/roster.js; aquí
-// solo se reporta lo que hay.
+// y arma estado.json en el formato de la oficina: un monito por sesión, con su
+// cuarto, lo que hace, su modelo y su última actividad. Las reglas de supervisores
+// y vencimiento viven en src/reglas.js; aquí solo se reporta lo que hay.
 //
 // Uso:
 //   node collector/recolector.mjs                 imprime el estado una vez
 //   node collector/recolector.mjs --salida estado.json [--cada 10]
-//   node collector/recolector.mjs --servir [--puerto 4321] [--demo]
+//   node collector/recolector.mjs --servir [--puerto 8765] [--demo]
 //
 // Opciones: --carpeta <ruta de projects>  --equipo <nombre>  --dias <n>
 
@@ -23,7 +23,7 @@ import { estadoDemo } from '../src/demo.js';
 const RAIZ = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
 function leerArgs(argv) {
-  const a = { puerto: 4321, dias: 7, cada: 0 };
+  const a = { puerto: 8765, dias: 2, cada: 0 };
   for (let i = 0; i < argv.length; i++) {
     const k = argv[i];
     const v = () => argv[++i];
@@ -56,10 +56,40 @@ function recortar(t, n = 60) {
   return limpio.length > n ? `${limpio.slice(0, n - 1)}…` : limpio;
 }
 
-// Lee una transcripción y saca lo que la oficina necesita.
-export function resumirTranscripcion(texto, idArchivo) {
-  let id = idArchivo, cwd = '', titulo = {}, primerPrompt = '', inicio = null;
-  let ultimo = null; // último mensaje de la conversación principal
+// A qué cuarto va el monito según la herramienta que usa (igual que el aviso de la tableta).
+const QUE = {
+  Read: ['biblioteca', 'Leyendo {f}'], Grep: ['biblioteca', 'Buscando en el código'],
+  Glob: ['biblioteca', 'Buscando archivos'], Write: ['escritorio', 'Creando {f}'],
+  Edit: ['escritorio', 'Editando {f}'], NotebookEdit: ['escritorio', 'Editando {f}'],
+  WebSearch: ['internet', 'Buscando en internet'], WebFetch: ['internet', 'Leyendo una página'],
+  Agent: ['sala de juntas', 'Pidiendo ayuda a un ayudante'], Task: ['sala de juntas', 'Pidiendo ayuda a un ayudante'],
+};
+const MIN = 60 * 1000;
+const TOPE_HERRAMIENTA = 30 * MIN;   // una herramienta puede tardar; pasado esto se da por detenida
+const TOPE_RESPUESTA = 10 * MIN;     // lo mismo mientras Claude piensa su respuesta
+
+function queHace(tool) {
+  const inp = tool.input || {};
+  const ruta = inp.file_path || inp.notebook_path || '';
+  const f = ruta ? path.basename(String(ruta).replace(/\\/g, '/')) : 'un archivo';
+  if (QUE[tool.name]) return { area: QUE[tool.name][0], actividad: QUE[tool.name][1].replace('{f}', f) };
+  if (tool.name === 'Bash') return { area: 'escritorio', actividad: inp.description || 'Usando la terminal' };
+  if (tool.name === 'Workflow') return { area: 'escritorio', actividad: 'Trabajando en modo Ultra' };
+  return { area: 'escritorio', actividad: 'Trabajando' };
+}
+
+function modeloDe(nombre) {
+  const n = String(nombre || '').toLowerCase();
+  return ['haiku', 'sonnet', 'opus', 'fable'].find((m) => n.includes(m)) || null;
+}
+
+// Lee una transcripción de Claude Code y saca el monito que le toca, en el mismo
+// formato que ya usa la oficina (id, nombre, area, actividad, estado, modelo...).
+export function resumirTranscripcion(texto, idArchivo, ahora = Date.now()) {
+  let id = idArchivo, cwd = '', primerPrompt = '', modelo = null, ultra = false;
+  const titulo = {};
+  let ultimo = null;        // último mensaje de la conversación principal
+  let herramienta = null;   // última herramienta que usó
 
   for (const linea of texto.split('\n')) {
     if (!linea.trim()) continue;
@@ -69,41 +99,56 @@ export function resumirTranscripcion(texto, idArchivo) {
     if (d.type === 'custom-title' && d.customTitle) titulo.propio = d.customTitle;
     if (d.type === 'ai-title' && d.aiTitle) titulo.ia = d.aiTitle;
     if (d.type === 'summary' && d.summary) titulo.resumen = d.summary;
-    if ((d.type === 'user' || d.type === 'assistant') && !d.isSidechain && d.timestamp) {
-      if (d.cwd) cwd = d.cwd;
-      inicio ??= d.timestamp;
-      if (d.type === 'user' && !primerPrompt && !d.toolUseResult) {
+    if ((d.type !== 'user' && d.type !== 'assistant') || d.isSidechain || !d.timestamp) continue;
+    if (d.cwd) cwd = d.cwd;
+    const partes = Array.isArray(d.message?.content) ? d.message.content : [];
+    if (d.type === 'user') {
+      const esResultado = partes.some((p) => p.type === 'tool_result');
+      if (!esResultado) {
+        ultra = false;
         const t = textoDe(d.message?.content);
-        if (t && !t.startsWith('<')) primerPrompt = t;
+        if (t && !t.startsWith('<') && !primerPrompt) primerPrompt = t;
       }
-      ultimo = d;
+      d.esResultado = esResultado;
+    } else {
+      if (d.message?.model) modelo = modeloDe(d.message.model) || modelo;
+      for (const p of partes) if (p.type === 'tool_use') { herramienta = p; if (p.name === 'Workflow') ultra = true; }
+      d.usaHerramienta = partes.some((p) => p.type === 'tool_use');
     }
+    ultimo = d;
   }
   if (!ultimo) return null;
 
-  // Si lo último fue Claude terminando su turno, la sesión te espera a ti.
-  // Si fue una herramienta o un mensaje tuyo, está trabajando.
-  let estado = 'trabajando';
-  if (ultimo.type === 'assistant') {
-    const partes = Array.isArray(ultimo.message?.content) ? ultimo.message.content : [];
-    const usaHerramienta = partes.some((p) => p.type === 'tool_use');
-    if (!usaHerramienta && ultimo.message?.stop_reason !== 'tool_use') estado = 'esperando';
-  }
+  const ts = Date.parse(ultimo.timestamp);
+  const quieto = ahora - ts;
+  let estado = 'trabajando', area = 'escritorio', actividad = 'Trabajando';
+  if (ultimo.type === 'assistant' && !ultimo.usaHerramienta) estado = 'esperando';
+  else if (ultimo.type === 'user' && !ultimo.esResultado) actividad = 'Leyendo el mensaje';
+  else if (herramienta) ({ area, actividad } = queHace(herramienta));
+  // Sin nada nuevo por demasiado tiempo: se quedó detenida a medias.
+  if (estado === 'trabajando' && quieto > (ultimo.type === 'assistant' ? TOPE_HERRAMIENTA : TOPE_RESPUESTA)) estado = 'esperando';
+  if (estado === 'esperando') { area = 'descanso'; actividad = 'Esperando instrucciones'; }
 
+  const nombreLargo = recortar(titulo.propio || titulo.ia || titulo.resumen || primerPrompt || 'Sesión sin título');
   return {
-    id,
-    titulo: recortar(titulo.propio || titulo.ia || titulo.resumen || primerPrompt || 'Sesión sin título'),
-    proyecto: cwd ? path.basename(cwd) : '',
-    carpeta: cwd,
-    estado,
-    inicio,
-    ultimaActividad: ultimo.timestamp,
+    id: `ses-${String(id).replace(/[^A-Za-z0-9]/g, '').slice(0, 8)}`,
+    nombre: recortar(nombreLargo, 18),
+    titulo: nombreLargo,
+    proyecto: cwd ? path.basename(cwd.replace(/\\/g, '/')) : '',
+    area, actividad, estado,
+    modo: ultra && estado === 'trabajando' ? 'ultra' : 'normal',
+    modelo,
+    // `actualizado` es el latido (mientras trabaja, es ahora); `ultima_actividad`
+    // es lo último que de verdad pasó y es lo que cuenta para el vencimiento.
+    actualizado: new Date(estado === 'trabajando' ? ahora : ts).toISOString(),
+    ultima_actividad: ultimo.timestamp,
   };
 }
 
 export async function recolectar({ carpeta, equipo, dias }) {
-  const limite = Date.now() - dias * 24 * 3600 * 1000;
-  const sesiones = [];
+  const ahora = Date.now();
+  const limite = ahora - dias * 24 * 3600 * 1000;
+  const agentes = [];
   let proyectos = [];
   try { proyectos = await fsp.readdir(carpeta, { withFileTypes: true }); } catch { /* sin Claude Code aquí */ }
 
@@ -115,12 +160,12 @@ export async function recolectar({ carpeta, equipo, dias }) {
       const archivo = path.join(dir, f.name);
       const info = await fsp.stat(archivo);
       if (info.mtimeMs < limite) continue;
-      const s = resumirTranscripcion(await fsp.readFile(archivo, 'utf8'), f.name.replace(/\.jsonl$/, ''));
-      if (s) sesiones.push({ ...s, equipo });
+      const s = resumirTranscripcion(await fsp.readFile(archivo, 'utf8'), f.name.replace(/\.jsonl$/, ''), ahora);
+      if (s) agentes.push({ ...s, dispositivo: 'laptop', origen: 'laptop', equipo });
     }
   }
-  sesiones.sort((a, b) => Date.parse(b.ultimaActividad) - Date.parse(a.ultimaActividad));
-  return { generado: new Date().toISOString(), equipo, sesiones };
+  agentes.sort((a, b) => Date.parse(b.ultima_actividad) - Date.parse(a.ultima_actividad));
+  return { actualizado: new Date(ahora).toISOString(), agentes, archivos_recientes: [] };
 }
 
 const TIPOS = {
@@ -144,6 +189,10 @@ function servir(a) {
         res.writeHead(200, { 'content-type': TIPOS['.json'], 'cache-control': 'no-store' });
         return res.end(JSON.stringify(estado));
       }
+      if (ruta.startsWith('/api/')) {   // adornos que solo tenía el servidor de la laptop
+        res.writeHead(200, { 'content-type': TIPOS['.json'] });
+        return res.end(JSON.stringify({ error: 'sin datos' }));
+      }
       const archivo = path.join(RAIZ, path.normalize(ruta === '/' ? '/index.html' : ruta));
       if (!archivo.startsWith(RAIZ + path.sep) || archivo.includes(`${path.sep}.git`)) throw new Error('fuera');
       const datos = await fsp.readFile(archivo);
@@ -155,7 +204,7 @@ function servir(a) {
     }
   });
   servidor.listen(a.puerto, '127.0.0.1', () => {
-    console.log(`Oficina abierta en http://localhost:${a.puerto}${a.demo ? '  (modo demo)' : ''}`);
+    console.log(`Oficina abierta en http://localhost:${a.puerto}/oficina.html${a.demo ? '  (modo demo)' : ''}`);
     if (!a.demo) console.log(`Leyendo sesiones de ${a.carpeta}`);
   });
 }
@@ -174,7 +223,7 @@ async function principal() {
       const tmp = `${a.salida}.tmp`;
       await fsp.writeFile(tmp, JSON.stringify(estado, null, 2));
       await fsp.rename(tmp, a.salida); // la página nunca lee un archivo a medias
-      console.log(`${new Date().toLocaleTimeString()}  ${estado.sesiones.length} sesiones -> ${a.salida}`);
+      console.log(`${new Date().toLocaleTimeString()}  ${estado.agentes.length} sesiones -> ${a.salida}`);
     } else {
       console.log(JSON.stringify(estado, null, 2));
     }

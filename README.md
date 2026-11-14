@@ -1,43 +1,40 @@
-# Office Mind
+# Oficina · Monitoreo (pixel art)
 
-Oficina en pixel art donde se ven tus sesiones de Claude Code.
+La oficina de siempre (misma planta, mismos monitos, mismas viñetas), copiada de
+`KALLEROS/oficina-cloud-monitoreo`, con dos reglas nuevas sobre quién aparece:
 
-- **Supervisores**: los eliges tú en `config/oficina.json`. Nunca se van. Si su sesión no está activa, se quedan dormidos en su escritorio.
-- **Visitantes**: cualquier otra sesión. Llegan cuando la usas, se sientan en un escritorio mientras trabajan o te esperan, y se pasan al sillón cuando descansan. Si pasan **24 horas sin actividad**, se van de la oficina. En sus últimas 3 horas se ven transparentes.
+- **Supervisores (★)**: los eliges tú en `config/oficina.json`. Nunca se van. Si su sesión no reporta, se quedan dormidos esperando instrucciones (los de la tableta, en la Oficina Terrazas).
+- **Visitantes**: cualquier otra sesión. Entran caminando cuando la usas, van al cuarto que toca según lo que hacen y pasan a Descanso cuando paran. A las **24 horas sin actividad** salen de la oficina. En sus últimas 3 horas el gafete dice “se va en X h”.
 
-## Usarla
+Solo muestra; no edita nada.
 
-```
-node collector/recolector.mjs --servir     # tus sesiones reales, en http://localhost:4321
-node collector/recolector.mjs --servir --demo   # datos de ejemplo
-npm test                                   # prueba las reglas de supervisores y vencimiento
-```
+## Abrirla
+
+- **Windows:** doble clic en `iniciar_oficina.bat`.
+- **Cualquier sistema:** `node collector/recolector.mjs --servir` y abre `http://localhost:8765/oficina.html`.
+- **Datos de ejemplo:** agrega `--demo` al comando, o `?demo` al final de la dirección.
+- **Pruebas de las reglas:** `npm test`.
 
 Solo necesita Node 18 o más nuevo; no hay que instalar nada.
 
 ## Elegir supervisores
 
-En `config/oficina.json`, cada supervisor se amarra a sus sesiones por una de estas llaves:
+Cada supervisor de `config/oficina.json` se amarra a sus sesiones con una de estas llaves:
 
 | Llave | Ejemplo | Agarra |
 |---|---|---|
+| `id` | `"calleros"` | la sesión que reporta exactamente ese id |
 | `proyecto` | `"dragtrim"` | cualquier sesión abierta en una carpeta con ese nombre |
-| `id` | `"1cf51097-…"` | exactamente esa sesión |
-| `titulo` | `"oficina"` | sesiones cuyo título contiene ese texto |
+| `titulo` | `"dragtree"` | sesiones cuyo nombre o título contiene ese texto |
 
-Si un supervisor tiene varias sesiones, se muestra la más reciente y las demás no salen como visitantes.
+Un supervisor es un solo monito: si tiene varias sesiones, muestra la más reciente y las demás no salen como visitantes. `modelo`, `dispositivo` y `persona` dicen cómo se ve mientras no tiene sesión (`"dispositivo": "tableta-android"` lo deja en la Oficina Terrazas).
 
-Otros ajustes del mismo archivo: `venceHoras` (24), `activoMinutos` (5, cuánto dura “trabajando” después de la última actividad) y `avisoHoras` (3, cuándo empieza a desvanecerse).
+`venceHoras` (24) y `avisoHoras` (3) cambian el plazo de los visitantes.
 
 ## Cómo funciona
 
-- `collector/recolector.mjs` lee `~/.claude/projects/*/*.jsonl` y arma `estado.json` (título, proyecto, estado y última actividad de cada sesión). No decide quién es supervisor; solo reporta.
-- `src/roster.js` tiene las reglas: quién es supervisor, quién es visitante, quién ya venció. Son funciones puras con pruebas en `test/`.
-- `src/oficina.js` dibuja la escena; `src/main.js` lee `estado.json` cada 10 s.
-- Sin recolector (por ejemplo, abierta desde GitHub Pages) la página muestra el demo. `?demo` lo fuerza y `?estado=<url>` lee el estado de otro lado.
-
-Para guardar el estado en un archivo cada 10 s, en vez de servir la página:
-
-```
-node collector/recolector.mjs --salida estado.json --cada 10
-```
+- `oficina.html` es la oficina. Lee el estado cada 2 s en la laptop y cada 15 s desde el teléfono.
+- `src/reglas.js` decide quién se ve: supervisores fijos y visitantes sin vencer. Son funciones puras con pruebas en `test/`.
+- `collector/recolector.mjs` lee las sesiones de Claude Code de la computadora (`~/.claude/projects`) y arma `estado.json`: un monito por sesión, con su cuarto, lo que hace, su modelo y su última actividad.
+- `para-dragtrim/` es el aviso de la tableta (hook de Claude Code). Ahora conserva las sesiones 24 h en vez de 30 min, para que la oficina decida cuándo se van.
+- Desde el teléfono (GitHub Pages) la página lee los mismos archivos públicos que antes; se pueden cambiar con `"nube": { "estado": "…", "terrazas": "…" }` en la configuración.

@@ -43,18 +43,6 @@ header{position:fixed;top:0;left:0;right:0;height:46px;display:flex;align-items:
 .origen.tableta{background:#3ddc84;color:#0d2a1a}
 .origen.laptop{background:#d97757;color:#1a120e}
 .origen.borrado{background:#5a4a5f;color:#e9dcef}
-@media (max-width:760px){
-  header{height:auto;flex-wrap:wrap;gap:6px 12px;padding:calc(8px + env(safe-area-inset-top,0px)) max(12px,env(safe-area-inset-right,0px)) 8px max(12px,env(safe-area-inset-left,0px));
-    font-family:-apple-system,system-ui,"Segoe UI",sans-serif}
-  .titulo{font-size:14px;letter-spacing:1px}
-  .derecha{display:none}
-  .pisos{order:3;width:100%;overflow-x:auto}
-  .pisos button{flex:1;font-size:13px;padding:8px 6px;white-space:nowrap}
-  #panel{top:auto;left:0;width:100%;max-height:72vh;border-left:0;border-top:4px solid var(--borde);transform:translateY(105%);
-    padding-bottom:env(safe-area-inset-bottom,0px)}
-  #panelCuerpo{font-size:15px}
-  #bajar{display:none}
-}
 #mundo{position:relative;margin:0 auto}
 #lienzo{display:block;image-rendering:pixelated;box-shadow:0 0 0 4px var(--borde)}
 #capa{position:absolute;inset:0;pointer-events:none}
@@ -80,6 +68,8 @@ header{position:fixed;top:0;left:0;right:0;height:46px;display:flex;align-items:
   font-size:max(9px,calc(var(--s)*3.6px));line-height:1.25;padding:0 calc(var(--s)*1.5px);
   background:rgba(18,12,18,.8);border-left:calc(var(--s)*1.5px) solid var(--c,#d97757);z-index:2}
 .nombre i{font-style:normal;font-weight:700;margin-left:calc(var(--s)*1.5px)}
+.nombre .jefe{color:#ffd34d;margin-right:calc(var(--s)*1px)}
+.nombre.pronto{opacity:.62}
 .nombre b{display:inline-block;width:calc(var(--s)*2px);height:calc(var(--s)*2px);min-width:4px;min-height:4px;
   margin-left:calc(var(--s)*1.5px);background:var(--e,#6fd36f);vertical-align:middle}
 
@@ -140,6 +130,19 @@ textarea.campo{min-height:70px;resize:vertical}
 .fila{display:flex;justify-content:space-between;gap:10px;padding:6px 0;border-bottom:1px solid #2f2738}
 .fila span:first-child{color:var(--tenue)}
 .vacio{color:var(--tenue);font-style:italic}
+/* Teléfono: va al final para que sí le gane a las reglas de arriba (antes el panel quedaba encimado) */
+@media (max-width:760px){
+  header{height:auto;flex-wrap:wrap;gap:6px 12px;padding:calc(8px + env(safe-area-inset-top,0px)) max(12px,env(safe-area-inset-right,0px)) 8px max(12px,env(safe-area-inset-left,0px));
+    font-family:-apple-system,system-ui,"Segoe UI",sans-serif}
+  .titulo{font-size:14px;letter-spacing:1px}
+  .derecha{display:none}
+  .pisos{order:3;width:100%;overflow-x:auto}
+  .pisos button{flex:1;font-size:13px;padding:8px 6px;white-space:nowrap}
+  #panel{top:auto;left:0;width:100%;max-height:72vh;border-left:0;border-top:4px solid var(--borde);transform:translateY(105%);
+    padding-bottom:env(safe-area-inset-bottom,0px)}
+  #panelCuerpo{font-size:15px}
+  #bajar{display:none}
+}
 </style>
 </head>
 <body>
@@ -164,11 +167,14 @@ textarea.campo{min-height:70px;resize:vertical}
 </div>
 <div class="aviso" id="aviso"><div id="avisoTexto">
   Esta oficina se abre con <b>iniciar_oficina.bat</b> (doble clic).<br>
-  Así el navegador puede leer <b>estado.json</b> cada segundo.<br><br>
+  Así el navegador puede leer <b>estado.json</b> cada 2 segundos.<br><br>
   Si ya lo abriste, entra a: <b>http://localhost:8765/oficina.html</b>
 </div></div>
 
-<script>
+<script>if (location.protocol === 'file:') document.getElementById('aviso').style.display = 'flex';</script>
+<script type="module">
+import { aplicarReglas, textoPlazo } from './src/reglas.js';
+import { estadoDemo } from './src/demo.js';
 (() => {
 'use strict';
 
@@ -188,7 +194,14 @@ const NUBE = {
   estado: 'https://raw.githubusercontent.com/KALLEROS/oficina-cloud-monitoreo-estado/main/estado.json',
   terrazas: 'https://raw.githubusercontent.com/daniterrazas01-source/dragtrim/claude/oficina-estado/oficina/estado-terrazas.json',
 };
-const CADA_MS = EN_NUBE ? 15000 : 2000;   // el teléfono revisa cada 15 s
+const DEMO = new URLSearchParams(location.search).has('demo');   // ?demo = datos de ejemplo
+const CADA_MS = EN_NUBE && !DEMO ? 15000 : 2000;   // el teléfono revisa cada 15 s
+const CALLADO_MIN = 10;         // un visitante con más de esto sin actividad ya no trae viñeta, solo duerme
+/* Quiénes son supervisores y cuánto aguanta un visitante: config/oficina.json */
+let CONFIG = { supervisores: [] };
+async function cargarConfig(){
+  try { const c = await leerJSON('config/oficina.json'); if (c && typeof c === 'object') CONFIG = c; } catch (e) {}
+}
 const VELOCIDAD = 100;          // pixeles por segundo al caminar
 const AVISO = 0.35;             // segundos con "!" antes de levantarse
 const FPS = 30;                 // cuadros por segundo (ahorra batería)
@@ -1317,7 +1330,7 @@ function crearAgente(id, r){
   const aspecto = elegirAspecto(id, r.nombre, r.aspecto);
   const a = { id, nombre: '', aspecto, x: 0, y: 0, dir: 'abajo', fase: 'trabajando', ruta: [], recorrido: 0, tAviso: 0,
               lugar: null, areaDestino: null, textoPendiente: '', semilla: hashTexto(id), zzz: false,
-              modo: 'oculta', medir: true, bw: 40, bh: 10, tallo: null };
+              modo: 'oculta', medir: true, bw: 40, bh: 10, tallo: null, medirNombre: true, nw: 40, nh: 8 };
   a.el = document.createElement('div'); a.el.className = 'vineta';
   a.el.innerHTML = '<span></span>' + SVG_COLA;
   a.elTexto = a.el.firstChild; a.elCola = a.el.lastChild;
@@ -1328,14 +1341,18 @@ function crearAgente(id, r){
   return a;
 }
 function ponerNombre(a, nombre){
-  const clave = nombre + '|' + (a.modelo || '') + '|' + !!a.ultra + '|' + (a.dispositivo || '');
+  const plazo = a.seVaPronto && a.vence ? 'se va ' + textoPlazo(a.vence - Date.now()) : '';
+  const clave = nombre + '|' + (a.modelo || '') + '|' + !!a.ultra + '|' + (a.dispositivo || '') + '|' + (a.rol || '') + '|' + plazo;
   if (a.gafete === clave) return;
-  a.gafete = clave; a.nombre = nombre; a.elNombre.textContent = nombre;
+  a.gafete = clave; a.nombre = nombre; a.elNombre.textContent = nombre; a.medirNombre = true;
+  a.elNombre.classList.toggle('pronto', !!plazo);
+  if (a.rol === 'supervisor'){ const j = document.createElement('span'); j.className = 'jefe'; j.textContent = '★'; a.elNombre.prepend(j); }
   const m = MODELOS[a.modelo];
   if (m){ const i = document.createElement('i'); i.textContent = m.nombre; i.style.color = m.etiqueta; a.elNombre.appendChild(i); }
   if (a.ultra){ const u = document.createElement('span'); u.className = 'ultra'; u.textContent = 'ULTRA'; a.elNombre.appendChild(u); }
   a.elNombre.appendChild(document.createElement('b'));
-  if (a.dispositivo){ const s = document.createElement('small'); s.textContent = a.dispositivo; a.elNombre.appendChild(s); }
+  const abajo = [a.dispositivo, plazo].filter(Boolean).join(' · ');
+  if (abajo){ const s = document.createElement('small'); s.textContent = abajo; a.elNombre.appendChild(s); }
   a.elNombre.style.setProperty('--c', a.tableta ? '#3ddc84' : ASPECTOS[a.aspecto].etiqueta);
 }
 function ponerTexto(a, texto, pop){
@@ -1481,7 +1498,7 @@ function fecha(s){ if (!s) return null; const v = Date.parse(s); return isNaN(v)
 
 function procesar(datos){
   const ahora = Date.now();
-  const lista = Array.isArray(datos && datos.agentes) ? datos.agentes : [];
+  const lista = aplicarReglas(CONFIG, datos || {}, ahora).agentes;   // supervisores fijos + visitantes sin vencer
   const raizTs = fecha(datos && datos.actualizado);
   ARCHIVOS = Array.isArray(datos && datos.archivos_recientes) ? datos.archivos_recientes.filter(f => f && f.nombre) : [];
   let masReciente = raizTs || 0;
@@ -1498,14 +1515,19 @@ function procesar(datos){
     const modelo = String(r.modelo || '').toLowerCase();
     a.modelo = MODELOS[modelo] ? modelo : null;
     a.tableta = esTableta(r);
-    a.dispositivo = a.tableta ? 'Tableta Android' : (r.dispositivo || r.origen) ? 'Calleros — Laptop' : '';
+    a.rol = r.rol; a.vence = r.vence || 0; a.seVaPronto = !!r.se_va_pronto;
+    a.sesionNombre = r.sesion_nombre || ''; a.sesionesExtra = r.sesiones_extra || 0; a.proyecto = r.proyecto || '';
+    a.persona = r.persona || (a.tableta ? 'Alberto Terrazas' : 'Calleros');
+    a.dispositivo = a.tableta ? 'Tableta Android' : r.equipo ? String(r.equipo) : (r.dispositivo || r.origen) ? 'Calleros — Laptop' : '';
     a.ultraPedido = String(r.modo || '').toLowerCase() === 'ultra' || !!r.ultra;
     const firma = (r.area || '') + '|' + (r.actividad || '') + '|' + (r.actualizado || '');
     if (firma !== a.firma){ a.firma = firma; a.vistoCambio = ahora; }
-    const ts = fecha(r.actualizado) ?? raizTs ?? a.vistoCambio;
+    const ts = r.ausente ? 0 : (fecha(r.actualizado) ?? raizTs ?? a.vistoCambio);
     if (ts > masReciente) masReciente = ts;
-    a.ts = ts;
-    const inactivo = (ahora - ts) / 1000 > SEGUNDOS_INACTIVO;
+    a.ts = r.ausente ? 0 : (fecha(r.ultima_actividad) ?? ts);
+    const inactivo = !!r.ausente || (ahora - ts) / 1000 > SEGUNDOS_INACTIVO;
+    a.ausente = !!r.ausente;
+    a.callado = a.rol === 'visitante' && inactivo && ahora - a.ts > CALLADO_MIN * 60000;
     let area = normalizarArea(r.area) || 'escritorio';
     if (a.tableta) area = 'terrazas';                 // lo de la tableta nunca se mezcla con la oficina principal
     else if (area === 'terrazas') area = 'escritorio';
@@ -1515,7 +1537,7 @@ function procesar(datos){
     const estado = inactivo ? 'inactivo' : String(r.estado || 'trabajando').toLowerCase();
     a.elNombre.style.setProperty('--e', ESTADO_COLOR[estado] || ESTADO_COLOR.trabajando);
     a.estadoTxt = estado;
-    a.zzz = area === 'descanso' && (inactivo || estado === 'esperando');
+    a.zzz = (area === 'descanso' && (inactivo || estado === 'esperando')) || a.callado;
     a.ultra = a.ultraPedido && !inactivo;
     ponerNombre(a, nombreVisible);
     if (nuevo){ if (primeraLectura) colocar(a, area, texto); else entrar(a, area, texto); }
@@ -1550,9 +1572,12 @@ async function leerEstado(){
   if (location.protocol === 'file:' || leyendo) return;
   leyendo = true;
   try {
+    await configLista;
     let datos;
-    if (EN_NUBE){
-      const [base, terr] = await Promise.all([leerJSON(NUBE.estado), leerJSON(NUBE.terrazas).catch(() => null)]);
+    if (DEMO) datos = estadoDemo();
+    else if (EN_NUBE){
+      const nube = Object.assign({}, NUBE, CONFIG.nube);
+      const [base, terr] = await Promise.all([leerJSON(nube.estado), leerJSON(nube.terrazas).catch(() => null)]);
       datos = juntar(base, terr);
     } else {
       try { datos = await leerJSON('estado.json'); }
@@ -1569,10 +1594,28 @@ async function leerEstado(){
 /* ---------- Viñetas y gafetes (HTML encima del lienzo) ---------- */
 function ubicarVinetas(){
   const lista = [];
+  // Gafetes: si dos monitos quietos quedan pegados (el sillón de Descanso), el segundo baja un renglón
+  const gafetes = [];
   for (const a of agentes.values()){
-    a.elNombre.style.left = (a.x * escala) + 'px';
-    a.elNombre.style.top = ((a.y + 1) * escala) + 'px';
-    const visible = a.modo !== 'oculta';
+    if (a.medirNombre){ a.nw = a.elNombre.offsetWidth / escala; a.nh = a.elNombre.offsetHeight / escala; a.medirNombre = false; }
+    gafetes.push({ a, x: a.x - a.nw / 2, y: a.y + 1, quieto: a.fase === 'trabajando' });
+  }
+  gafetes.sort((p, q) => (p.y - q.y) || (p.x - q.x));
+  const fijos = [];
+  for (const b of gafetes){
+    if (b.quieto){
+      for (let vuelta = 0; vuelta < 10; vuelta++){
+        let choco = false;
+        for (const o of fijos) if (b.x < o.x + o.a.nw + 1 && b.x + b.a.nw + 1 > o.x && b.y < o.y + o.a.nh && b.y + b.a.nh > o.y){ b.y = o.y + o.a.nh + 0.5; choco = true; }
+        if (!choco) break;
+      }
+      fijos.push(b);
+    }
+    b.a.elNombre.style.left = (b.a.x * escala) + 'px';
+    b.a.elNombre.style.top = (b.y * escala) + 'px';
+  }
+  for (const a of agentes.values()){
+    const visible = a.modo !== 'oculta' && !(a.callado && a.fase === 'trabajando');
     a.el.style.display = visible ? '' : 'none';
     a.tallo = null;
     if (!visible) continue;
@@ -1648,7 +1691,7 @@ function ajustarEscala(){
   document.documentElement.style.setProperty('--s', escala.toFixed(3));
   for (const [area, A] of Object.entries(AREAS)){ LETREROS[area].style.left = (A.lx * escala) + 'px'; LETREROS[area].style.top = (A.ly * escala) + 'px'; }
   for (const x of EXTRAS){ x.el.style.left = (x.x * escala) + 'px'; x.el.style.top = (x.y * escala) + 'px'; }
-  for (const a of agentes.values()) a.medir = true;
+  for (const a of agentes.values()){ a.medir = true; a.medirNombre = true; }
 }
 
 /* ---------- Barra de arriba ---------- */
@@ -1705,9 +1748,14 @@ function listaArchivos(lista){
 }
 function fichaAgente(a){
   const m = MODELOS[a.modelo];
-  const filas = [['Persona', a.tableta ? 'Alberto Terrazas' : 'Calleros'], ['Dispositivo', a.dispositivo || '—'], ['Área', NOMBRE_AREA[a.areaDestino] || '—'], ['Haciendo', a.textoPendiente || '—'],
+  const filas = [['Rol', a.rol === 'supervisor' ? '★ Supervisor (no se va)' : 'Visitante'],
+                 ['Persona', a.persona], ['Dispositivo', a.dispositivo || '—'], ['Área', NOMBRE_AREA[a.areaDestino] || '—'], ['Haciendo', a.ausente ? 'Sin sesión abierta' : a.textoPendiente || '—'],
                  ['Estado', a.estadoTxt || '—'], ['Modo', a.ultra ? 'ULTRA' : 'Normal'], ['Modelo', m ? m.nombre : 'sin dato todavía'],
                  ['Último aviso', a.ts ? hace(a.ts / 1000) : '—']];
+  if (a.rol === 'supervisor' && a.sesionNombre && a.sesionNombre !== a.nombre) filas.splice(2, 0, ['Sesión', a.sesionNombre]);
+  if (a.proyecto) filas.splice(2, 0, ['Proyecto', a.proyecto]);
+  if (a.sesionesExtra) filas.push(['Otras sesiones', a.sesionesExtra + ' más de este supervisor']);
+  if (a.rol !== 'supervisor' && a.vence) filas.push(['Se va', textoPlazo(a.vence - Date.now()) + ' si no hace nada']);
   let html = filas.map(([k, v]) => `<div class="fila"><span>${esc(k)}</span><span>${esc(v)}</span></div>`).join('');
   if (a.tableta) html += '<h4 style="margin:16px 0 8px">Archivos recientes de la tableta</h4>' + listaArchivos(archivosTableta());
   abrirPanel(a.nombre, html);
@@ -1859,6 +1907,8 @@ ajustarEscala();
 window.addEventListener('resize', ajustarEscala);
 if (location.protocol === 'file:') $('aviso').style.display = 'flex';
 document.addEventListener('visibilitychange', () => { if (!document.hidden) leerEstado(); });
+const configLista = cargarConfig();
+setInterval(cargarConfig, 60000);
 leerEstado();
 setInterval(leerEstado, CADA_MS);
 if ('serviceWorker' in navigator && EN_NUBE) navigator.serviceWorker.register('sw.js').catch(() => {});

@@ -1,7 +1,7 @@
 // Guarda el dibujo de la oficina en el teléfono para que abra al instante.
 // El estado NUNCA se guarda: siempre se pide fresco a GitHub.
-var CACHE = 'oficina-monitoreo-v2';
-var FILES = ['./', './oficina.html', './manifest.webmanifest', './icon-180.png', './icon-192.png', './icon-512.png'];
+var CACHE = 'oficina-monitoreo-v3';
+var FILES = ['./', './oficina.html', './src/reglas.js', './src/demo.js', './config/oficina.json', './manifest.webmanifest', './icon-180.png', './icon-192.png', './icon-512.png'];
 
 self.addEventListener('install', function(e){
   e.waitUntil(caches.open(CACHE).then(function(c){ return c.addAll(FILES); }));

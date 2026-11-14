@@ -1,32 +1,28 @@
-// Datos inventados para ver la oficina sin sesiones reales. Las fechas son
-// relativas a ahora, así se ven todos los casos: trabajando, esperando, en
-// descanso, a punto de irse.
-export function estadoDemo(config = {}) {
+// Datos inventados para ver la oficina sin sesiones reales, en el mismo formato
+// que el estado de verdad. Las fechas son relativas a ahora, así se ven todos los
+// casos: supervisores, visitantes trabajando, en descanso, a punto de irse y uno
+// ya vencido (que no debe aparecer).
+export function estadoDemo() {
   const ahora = Date.now();
   const hace = (min) => new Date(ahora - min * 60000).toISOString();
-  const sup = config.supervisores ?? [];
-  const deSup = sup.slice(0, Math.max(0, sup.length - 1)).map((s, i) => ({
-    id: s.id || `demo-sup-${i}`,
-    titulo: s.titulo || `Trabajo de ${s.nombre}`,
-    proyecto: s.proyecto || '',
-    estado: i % 2 ? 'esperando' : 'trabajando',
-    ultimaActividad: hace(i % 2 ? 2 : 0.3),
-  }));
-  const visitantes = [
-    ['Arreglar login del dashboard', 'trabajando', 0.5],
-    ['Investigar precios de envío', 'esperando', 1],
-    ['Resumen de correos', 'trabajando', 2],
-    ['Script de respaldo', 'descanso', 45],
-    ['Landing de producto nuevo', 'descanso', 180],
-    ['Pregunta rápida de Excel', 'descanso', 600],
-    ['Revisión de PR', 'descanso', 22 * 60],
-    ['Sesión de ayer (ya venció)', 'descanso', 25 * 60],
-  ].map(([titulo, estado, min], i) => ({
-    id: `demo-vis-${i}`,
-    titulo,
-    proyecto: 'demo',
-    estado: estado === 'descanso' ? 'esperando' : estado,
-    ultimaActividad: hace(min),
-  }));
-  return { generado: new Date(ahora).toISOString(), equipo: 'demo', demo: true, sesiones: [...deSup, ...visitantes] };
+  const v = (id, nombre, area, actividad, min, extra = {}) => ({
+    id, nombre, area, actividad, estado: min > 1 ? 'esperando' : 'trabajando', modo: 'normal', modelo: 'sonnet',
+    dispositivo: 'laptop', origen: 'laptop', actualizado: hace(Math.min(min, 0.2)), ultima_actividad: hace(min), ...extra,
+  });
+  return {
+    actualizado: hace(0),
+    demo: true,
+    agentes: [
+      v('calleros', 'Calleros', 'calleros', 'Revisando pendientes', 0.1, { modelo: 'opus', dispositivo: 'laptop-windows' }),
+      v('demo-1', 'Arreglar login', 'escritorio', 'Editando login.js', 0.1, { modelo: 'fable', modo: 'ultra' }),
+      v('demo-2', 'Precios de envío', 'internet', 'Buscando en internet', 0.2, { modelo: 'haiku' }),
+      v('demo-3', 'Resumen correos', 'biblioteca', 'Leyendo notas.md', 0.3),
+      v('demo-4', 'Plan de la app', 'sala de juntas', 'Pidiendo ayuda a un ayudante', 0.4, { modelo: 'opus' }),
+      v('demo-5', 'Script respaldo', 'descanso', 'Esperando instrucciones', 45, { actualizado: hace(45) }),
+      v('demo-6', 'Duda de Excel', 'descanso', 'Esperando instrucciones', 600, { actualizado: hace(600), modelo: 'haiku' }),
+      v('demo-7', 'Revisión de PR', 'descanso', 'Esperando instrucciones', 22 * 60, { actualizado: hace(22 * 60) }),
+      v('demo-8', 'Sesión de ayer', 'descanso', 'Esperando instrucciones', 25 * 60, { actualizado: hace(25 * 60) }),
+    ],
+    archivos_recientes: [],
+  };
 }

@@ -1,11 +1,8 @@
 {
-  "nombre": "Office Mind",
   "venceHoras": 24,
-  "activoMinutos": 5,
   "avisoHoras": 3,
   "supervisores": [
-    { "nombre": "Office Mind", "proyecto": "Office-mind-ui", "color": "#e8b04a" },
-    { "nombre": "DragTree", "proyecto": "dragtrim", "color": "#5fb3e8" },
-    { "nombre": "Tablero", "proyecto": "tablero-limites", "color": "#9be06a" }
+    { "nombre": "Calleros", "id": "calleros", "modelo": "opus", "dispositivo": "laptop-windows" },
+    { "nombre": "DragTree", "titulo": "dragtree", "dispositivo": "tableta-android", "persona": "Alberto Terrazas" }
   ]
 }
