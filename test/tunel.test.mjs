@@ -43,11 +43,11 @@ test('el paquete avanza de la salida a la llegada', () => {
 
 test('el periférico va de Internet a la Ampliación pasando por el túnel central', () => {
   const ruta = rutaTunel('internet', 'ampliacion');
-  assert.ok(ruta.some((p) => p.x === 200 && p.y === 13 * 16 + 8), 'baja hacia la Sala de Juntas');
+  assert.ok(ruta.some((p) => p.x === 208 && p.y === 224), 'baja hacia la Sala de Juntas');
   assert.ok(ruta.some((p) => p.x === TRONCO.x && p.y > TRONCO.y0 && p.y < TRONCO.y1), 'recorre el tronco');
-  for (let i = 1; i < ruta.length - 1; i++){                       // todos los tramos son rectos, salvo el quiebre de la boca
+  for (let i = 1; i < ruta.length; i++){                           // todos los tramos son rectos
     const a = ruta[i - 1], b = ruta[i];
-    assert.ok(a.x === b.x || a.y === b.y || Math.hypot(a.x - b.x, a.y - b.y) < 16, `tramo ${i} recto`);
+    assert.ok(a.x === b.x || a.y === b.y, `tramo ${i} recto`);
   }
   const doc = rutaTunel('internet', 'noticias');                    // un documento de Internet a la pantalla
   assert.deepEqual(doc[0], NODOS.internet);

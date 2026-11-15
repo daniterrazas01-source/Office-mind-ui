@@ -40,7 +40,7 @@ Un supervisor es un solo monito: si tiene varias sesiones, muestra la más recie
 
 Son permanentes, como los supervisores, pero trabajan solos: cada uno es una tarea programada de Claude que corre cuando le toca, deja su resumen en la base del Artifact y aquí se lee. Viven en un cuarto, salen a trabajar, y avisan con una viñeta cuando traen resumen nuevo. Al tocarlos sale el resumen y los anteriores. En el Artifact se leen de su base; en la página web, del archivo público `monitos.json` de la rama `datos`, que la misma tarea actualiza con `publicar.py`.
 
-El primero es **Nitro**: noticias de arrancones, diario a las 7:23 a.m. (hora de la Ciudad de México).
+El primero es **Nitro**: noticias de arrancones, diario a las 7:23 a.m. (hora de la Ciudad de México). El segundo es **Pole**: noticias de Fórmula 1 (resultados, calendario, cambios en los equipos), diario a las 7:29 a.m. Los dos viven en la Oficina Terrazas y sus noticias se turnan en la pantalla.
 
 Entre tarea y tarea no se quedan quietos: cada pocos minutos cambian de plan. A veces hacen algo por su cuenta (el campo `rutina` de su ficha: lista de `{ area, actividad }`), a veces se quedan en su lugar y a veces se van a Descanso, donde también se pasean. Eso es ambiente; la tarea de verdad es la programada.
 
@@ -63,7 +63,7 @@ La página web recibe todo esto con el **mensajero**: una segunda tarea programa
 
 ## El periférico y los envíos
 
-El periférico es una sola línea que recorre la oficina de arriba a abajo: sale de **Internet**, cruza el pasillo 1, pasa por debajo de la **Sala de Juntas**, cruza el pasillo 2, baja entre la **Oficina Calleros** y el **Cerebro Delta**, sigue por el **túnel central** (su parte ancha, en el gran pasillo), cruza el pasillo 4, pasa por debajo del cuarto libre de en medio y termina en la **Ampliación**. Se ve como un canal con tapa de vidrio en el piso; debajo de los muros no se ve. De él salen ramales cortos a Calleros, Cerebro Delta, **Oficina Terrazas**, **Centro de Pensado** (que también atiende al almacén) y **Sala de Noticias**. En cada uno hay una **estación** con buzón: siete en total.
+El periférico es una sola línea que recorre la oficina de arriba a abajo: sale de **Internet**, cruza el pasillo 1, pasa por debajo de la **Sala de Juntas**, cruza el pasillo 2, baja entre la **Oficina Calleros** y el **Cerebro Delta**, sigue por el **túnel central** (su parte ancha, en el gran pasillo), cruza el pasillo 4, pasa por debajo del cuarto libre de en medio y termina en la **Ampliación**. Toda la línea es del mismo grueso que el túnel central (dos casillas), va hundida en el piso con tapa de vidrio y se camina por encima; debajo de los muros no se ve. Empieza y termina en una **terminal**: una boca de túnel en Internet y otra en la Ampliación. De él salen ramales delgados y cortos a Calleros, Cerebro Delta, **Oficina Terrazas**, **Centro de Pensado** (que también atiende al almacén) y **Sala de Noticias**. En cada uno hay una **estación** con buzón: siete en total.
 
 Los supervisores y los monitos con tarea programada (los que nunca se van) también lo usan para moverse: cuando les queda más corto, caminan a la estación de su cuarto, viajan como cápsula y salen por la estación de destino.
 

@@ -198,7 +198,7 @@ textarea.campo{min-height:70px;resize:vertical}
 import { aplicarReglas, textoPlazo } from './src/reglas.js';
 import { estadoDemo } from './src/demo.js';
 import { estadoDeSesiones, modeloDeRespuesta, conVisitas } from './src/sesiones.js';
-import { ESTACIONES, NODOS, TRAMOS, TRONCO, rutaTunel, largoRuta, puntoEnRuta, enviosLimpios } from './src/tunel.js';
+import { ESTACIONES, NODOS, RAMALES, ANCHOS, TRONCO, rutaTunel, largoRuta, puntoEnRuta, enviosLimpios } from './src/tunel.js';
 import { CADA_PANTALLA, turnos, turnoDe, esDeHoy } from './src/pantalla.js';
 (() => {
 'use strict';
@@ -365,7 +365,7 @@ const LUGARES = {
     L(28, 3, 'arriba', { oy: -3, sentado: true, silla: 'oficina' }),
     L(23, 5, 'der', { ox: 3, oy: 8, sentado: true, silla: 'oficina' }),
     L(26, 5, 'izq', { ox: -3, oy: 8, sentado: true, silla: 'oficina' }),
-    L(24, 8, 'izq', { tubo: true }),                                   // en la estación del periférico
+    L(25, 8, 'izq', { tubo: true }),                                   // junto a la terminal del periférico
   ],
   'sala de juntas': [
     L(3, 17, 'der', { ox: 2, oy: 8 }),
@@ -818,6 +818,7 @@ function estacionTunel(clave){
   const e = ESTACIONES[clave], x = e.tx * T + 1, y = e.ty * T - 8;
   BLOQUEO.add(e.ty * COLS + e.tx);
   if (e.pie) PIES.set(e.pie.ty * COLS + e.pie.tx, clave);
+  if (e.boca) for (let dy = 0; dy < 2; dy++) for (let dx = 0; dx < 2; dx++){ const i = (e.boca.ty + dy) * COLS + e.boca.tx + dx; BLOQUEO.add(i); BOCAS.add(i); }
   muebleN(e.ty * T + 15, (t) => {
     const sin = SIN_LEER[clave] > 0, viaja = VIAJES.some(v => t >= v.sale && (v.e.de === clave || v.e.para === clave)), llego = t - (LLEGO[clave] ?? -9) < 2.5;
     if (e.lado !== 'abajo'){                                                         // el tubo que se mete a la pared
@@ -836,8 +837,16 @@ function estacionTunel(clave){
 }
 
 const PIES = new Map();   // casilla donde se para quien usa una estación -> qué estación es
+const ANCHO = new Map(), BOCAS = new Set();   // casillas de piso por donde pasa el periférico ancho ('v', 'h' o 'x' en las esquinas) · casillas de sus terminales
+const enAncho = (x, y) => { const i = Math.floor(y / T) * COLS + Math.floor(x / T); return ANCHO.has(i) || BOCAS.has(i); };
 function construirEstaciones(){
   for (const clave of Object.keys(ESTACIONES)) estacionTunel(clave);
+  for (const [x0, y0, x1, y1, s] of ANCHOS) for (let y = y0; y <= y1; y++) for (let x = x0; x <= x1; x++){   // debajo de los muros no se ve
+    const i = y * COLS + x;
+    if (CAMINABLE.has(MAPA[y][x]) && !BLOQUEO.has(i)) ANCHO.set(i, ANCHO.has(i) && ANCHO.get(i) !== s ? 'x' : s);
+  }
+  for (const [clave, e] of Object.entries(ESTACIONES)) if (e.boca)
+    zonaLectura(e.boca.tx * T - 4, e.boca.ty * T - 6, 40, 40, () => `Terminal del periférico · ${e.nombre}` + (SIN_LEER[clave] ? ` · ${SIN_LEER[clave]} sin leer` : ''), () => panelEstacion(clave));
   zonaLectura(TRONCO.x - 20, TRONCO.y0, 40, TRONCO.y1 - TRONCO.y0, () => `Periférico: ${enviosTodos().length} envíos`, () => panelTunel());
   for (const [clave, e] of Object.entries(ESTACIONES))
     zonaLectura(e.tx * T - 2, e.ty * T - 13, 20, 31, () => `Estación del periférico · ${e.nombre}` + (SIN_LEER[clave] ? ` · ${SIN_LEER[clave]} sin leer` : ''), () => panelEstacion(clave));
@@ -925,7 +934,6 @@ function construirMuebles(){
     R(403, 88, 9, 10, K); R(405, 89, 6, 8, '#cfd5df'); R(404, 89, 1, 8, on ? '#7fd0ff' : '#33415a');
     R(398, 84, 4, 4, '#f2efe6');
   });
-  planta(22, 8);
 
   /* Sala de juntas */
   bloquear(4, 17, 10, 18);
@@ -1184,8 +1192,11 @@ function pintarEstatica(){
     if (izq === '#'){ g.fillStyle = 'rgba(0,0,0,0.12)'; g.fillRect(x * T, y * T, 3, T); }
   }
   enBandas(adornosFijos);      // los adornos de siempre, con medidas de antes
-  pintarRamales();             // el periférico, con medidas de ahora
+  pintarAncho();               // el periférico, con medidas de ahora
+  enBandas(pintarTunel);       // el túnel central encima, para que sus bocas tapen las uniones
+  pintarRamales();
   pintarUniones();
+  pintarBocas();
   g = antes;
 }
 function adornosFijos(){
@@ -1375,18 +1386,75 @@ function pintarTunel(){
   }
 }
 const esPiso = (x, y) => { const tx = Math.floor(x / T), ty = Math.floor(y / T), c = MAPA[ty] && MAPA[ty][tx]; return !!c && c !== '#' && c !== '=' && c !== 'u' && !BLOQUEO.has(ty * COLS + tx); };
-function pintarRamales(){   // canales en el piso; debajo de los muros no se ven
-  for (const [na, nb] of TRAMOS){
+/* El periférico ancho: del mismo grueso que el túnel central, hundido en el piso y con tapa de vidrio (se camina encima) */
+function pintarAncho(){
+  const une = (x, y) => { const i = y * COLS + x; return ANCHO.has(i) || BOCAS.has(i) || (MAPA[y] && MAPA[y][x] === 'u'); };
+  for (const [i, s] of ANCHO){
+    const tx = i % COLS, ty = (i - tx) / COLS, px = tx * T, py = ty * T;
+    R(px, py, T, T, '#15161d');
+    if (s === 'v'){ R(px, py, T, 1, '#23252f'); R(px, py + 8, T, 1, '#23252f'); }
+    else if (s === 'h'){ R(px, py, 1, T, '#23252f'); R(px + 8, py, 1, T, '#23252f'); }
+    if (!une(tx - 1, ty)){ R(px, py, 4, T, '#7c8596'); R(px, py, 1, T, '#aab3c4'); R(px + 3, py, 1, T, '#3a3f4d'); }             // rieles en las orillas
+    if (!une(tx + 1, ty)){ R(px + 12, py, 4, T, '#7c8596'); R(px + 12, py, 1, T, '#3a3f4d'); R(px + 15, py, 1, T, '#565e6e'); }
+    if (!une(tx, ty - 1)){ R(px, py, T, 4, '#7c8596'); R(px, py, T, 1, '#aab3c4'); R(px, py + 3, T, 1, '#3a3f4d'); }
+    if (!une(tx, ty + 1)){ R(px, py + 12, T, 4, '#7c8596'); R(px, py + 12, T, 1, '#3a3f4d'); R(px, py + 15, T, 1, '#565e6e'); }
+  }
+  for (const [i, s] of ANCHO){                                       // costillas de la tapa de vidrio
+    const tx = i % COLS, ty = (i - tx) / COLS, px = tx * T, py = ty * T;
+    if (s === 'v' && ty % 2 === 0 && ANCHO.get(i - COLS) === 'v'){ R(px, py - 2, T, 4, K); R(px, py - 1, T, 2, '#8fa3b8'); R(px, py - 1, T, 1, '#c5d3e2'); }
+    if (s === 'h' && tx % 2 === 0 && ANCHO.get(i - 1) === 'h'){ R(px - 2, py, 4, T, K); R(px - 1, py, 2, T, '#8fa3b8'); R(px - 1, py, 1, T, '#c5d3e2'); }
+  }
+}
+function pintarBocas(){   // las terminales: una boca como las del túnel central
+  for (const e of Object.values(ESTACIONES)){
+    if (!e.boca) continue;
+    const x = e.boca.tx * T, yy = e.boca.ty * T;
+    R(x, yy, 32, 32, '#20222c');
+    R(x, yy, 4, 32, '#7c8596'); R(x, yy, 1, 32, '#aab3c4'); R(x + 3, yy, 1, 32, '#3a3f4d');
+    R(x + 28, yy, 4, 32, '#7c8596'); R(x + 28, yy, 1, 32, '#3a3f4d'); R(x + 31, yy, 1, 32, '#565e6e');
+    R(x + 6, yy, 20, 32, '#15161d'); for (let y = yy; y < yy + 32; y += 8) R(x + 6, y, 20, 1, '#23252f');
+    g.fillStyle = 'rgba(0,0,0,0.45)'; g.fillRect(x + 4, yy, 24, 32);
+    R(x - 4, yy - 6, 40, 11, K); R(x - 3, yy - 5, 38, 9, '#4a5368'); R(x - 3, yy - 5, 38, 1, '#66718a');
+    for (let i = 0; i < 7; i++) R(x - 1 + i * 5, yy - 2, 3, 4, i % 2 ? '#15161d' : '#e6c229');
+    R(x - 4, yy - 6, 5, 42, K); R(x - 3, yy - 5, 3, 40, '#4a5368'); R(x + 31, yy - 6, 5, 42, K); R(x + 32, yy - 5, 3, 40, '#4a5368');
+    R(x - 4, yy + 31, 40, 5, K); R(x - 3, yy + 32, 38, 3, '#4a5368');
+    for (let i = 0; i < 7; i++) R(x - 1 + i * 5, yy + 32, 3, 2, i % 2 ? '#15161d' : '#e6c229');
+  }
+}
+function ancho(t){   // lo que se mueve: flechas que corren por la banda y el brillo del vidrio
+  for (const [x0, y0, x1, y1, s, d] of ANCHOS){
+    const largo = (s === 'v' ? y1 - y0 + 1 : x1 - x0 + 1) * T, c = '#2f6f8f';
+    for (let k = 0; k * 24 < largo; k++){
+      const u = (k * 24 + t * 30) % largo, a = d > 0 ? u : largo - 3 - u;
+      if (s === 'v'){
+        const x = x0 * T, y = Math.round(y0 * T + a);
+        if (ANCHO.get(Math.floor((y + 1) / T) * COLS + x0) !== 'v') continue;
+        const f = d > 0 ? 1 : -1, yb = d > 0 ? y : y + 2;
+        R(x + 11, yb, 2, 1, c); R(x + 19, yb, 2, 1, c); R(x + 13, yb + f, 2, 1, c); R(x + 17, yb + f, 2, 1, c); R(x + 15, yb + 2 * f, 2, 1, c);
+      } else {
+        const y = y0 * T, x = Math.round(x0 * T + a);
+        if (ANCHO.get(y0 * COLS + Math.floor((x + 1) / T)) !== 'h') continue;
+        const f = d > 0 ? 1 : -1, xb = d > 0 ? x : x + 2;
+        R(xb, y + 11, 1, 2, c); R(xb, y + 19, 1, 2, c); R(xb + f, y + 13, 1, 2, c); R(xb + f, y + 17, 1, 2, c); R(xb + 2 * f, y + 15, 1, 2, c);
+      }
+    }
+  }
+  g.fillStyle = 'rgba(143,211,255,0.08)';
+  for (const i of ANCHO.keys()) g.fillRect((i % COLS) * T, Math.floor(i / COLS) * T, T, T);
+}
+const esCanal = (x, y) => esPiso(x, y) && !ANCHO.has(Math.floor(y / T) * COLS + Math.floor(x / T));
+function pintarRamales(){   // canales delgados en el piso; debajo de los muros no se ven
+  for (const [na, nb] of RAMALES){
     const a = NODOS[na], b = NODOS[nb];
     if (a.y === b.y){
       for (let x = Math.min(a.x, b.x); x <= Math.max(a.x, b.x); x++){
-        if (!esPiso(x, a.y)) continue;
+        if (!esCanal(x, a.y)) continue;
         R(x, a.y - 4, 1, 8, '#8a7c62'); R(x, a.y - 3, 1, 6, K); R(x, a.y - 2, 1, 4, '#1d2a36'); R(x, a.y - 2, 1, 1, '#35506a');
         if (x % 8 === 0){ R(x, a.y - 4, 1, 1, '#c9b88f'); R(x, a.y + 3, 1, 1, '#c9b88f'); }
       }
     } else if (a.x === b.x){
       for (let y = Math.min(a.y, b.y) - 4; y <= Math.max(a.y, b.y); y++){
-        if (!esPiso(a.x, y)) continue;
+        if (!esCanal(a.x, y)) continue;
         R(a.x - 4, y, 8, 1, '#8a7c62'); R(a.x - 3, y, 6, 1, K); R(a.x - 2, y, 4, 1, '#1d2a36'); R(a.x - 2, y, 1, 1, '#35506a');
         if (y % 8 === 0){ R(a.x - 4, y, 1, 1, '#c9b88f'); R(a.x + 3, y, 1, 1, '#c9b88f'); }
       }
@@ -1416,7 +1484,7 @@ function dibujarViajes(t){
     if (s < 0) continue;
     if (s >= v.largo){ VIAJES.splice(i, 1); LLEGO[v.e.para] = t; continue; }
     const p = puntoEnRuta(v.ruta, s), x = Math.round(p.x), y = Math.round(p.y), c = (MAPA[Math.floor(p.y / T)] || [])[Math.floor(p.x / T)];
-    if (c === 'u') paquete(v.e.tipo, x - 5, y - 5);
+    if (c === 'u' || enAncho(p.x, p.y)) paquete(v.e.tipo, x - 5, y - 5);
     else if (esPiso(p.x, p.y)){
       const col = COLOR_ENVIO[v.e.tipo] || COLOR_ENVIO.nota;
       g.globalAlpha = 0.25; R(x - 5, y - 4, 10, 8, col); g.globalAlpha = 1;
@@ -1428,7 +1496,7 @@ function dibujarViajes(t){
   for (const a of agentes.values()){
     if (!a.viaja) continue;
     const x = Math.round(a.x), y = Math.round(a.y), c = (MAPA[Math.floor(a.y / T)] || [])[Math.floor(a.x / T)];
-    if (c !== 'u' && !esPiso(a.x, a.y)) continue;
+    if (c !== 'u' && !esPiso(a.x, a.y) && !enAncho(a.x, a.y)) continue;
     const col = MODELOS[a.modelo] ? MODELOS[a.modelo].color : '#d97757';
     g.globalAlpha = 0.3; R(x - 7, y - 6, 14, 12, '#7fe7ff'); g.globalAlpha = 1;
     R(x - 5, y - 4, 10, 8, K); R(x - 4, y - 3, 8, 6, col); R(x - 4, y - 3, 8, 1, '#ffffff'); R(x - 2, y - 1, 1, 2, K_OJO); R(x + 1, y - 1, 1, 2, K_OJO);
@@ -2563,9 +2631,10 @@ const avisosTodos = () => EN_CLAUDE && !DEMO ? AVISOS : AVISOS_DEMO;
 const notasDeMemoria = () => monitosTodos().reduce((n, m) => n + (m.memoria || []).length, 0);
 const diasArchivados = () => monitosTodos().reduce((n, m) => n + (m.reportes || []).length, 0);
 function cartelera(){
-  const noticias = [], capsulas = [], tareas = [], oficina = [];
+  const tareas = [], oficina = [], porMonito = [], capsMonito = [];
   for (const m of monitosTodos()){
-    const de = m.nombre || m.id, r = (m.reportes || [])[0];
+    const de = m.nombre || m.id, r = (m.reportes || [])[0], noticias = [], capsulas = [];
+    porMonito.push(noticias); capsMonito.push(capsulas);
     if (r){
       const hoy = esDeHoy(r.creado, Date.now());
       for (const p of Array.isArray(r.puntos) ? r.puntos : []) noticias.push({ tipo: hoy ? 'NOTICIA DE HOY' : 'NOTICIA', noticia: true, cuando: p.cuando || (hoy ? '' : r.fecha || ''), titulo: p.titulo, texto: p.resumen, fuente: p.fuente, url: p.url, de });
@@ -2575,6 +2644,8 @@ function cartelera(){
     tareas.push({ tipo: 'TAREA', titulo: de + ': ' + (m.horario || 'tarea programada'), texto: pend && pend.texto ? 'Pendientes: ' + pend.texto : (m.descripcion || ''), de });
   }
   for (const a of avisosTodos().slice(0, 6)) oficina.push({ tipo: 'OFICINA', titulo: a.titulo, texto: a.texto, de: 'Oficina' });
+  const alternar = listas => { const out = []; for (let i = 0; listas.some(l => l[i]); i++) for (const l of listas) if (l[i]) out.push(l[i]); return out; };
+  const noticias = alternar(porMonito), capsulas = alternar(capsMonito);   // un monito y luego otro
   const otros = [];                                                  // lo demás se va turnando: cápsula, tarea, aviso…
   for (let i = 0; capsulas[i] || tareas[i] || oficina[i]; i++) for (const l of [capsulas, tareas, oficina]) if (l[i]) otros.push(l[i]);
   return turnos(noticias, otros);                                    // noticia, otra cosa, noticia, otra cosa…
@@ -2867,6 +2938,7 @@ function dibujar(t){
   ctx.imageSmoothingEnabled = false;
   ctx.drawImage(estatica, 0, 0);
   enBandas(() => paredesAnimadas(t));
+  ancho(t);
   dibujarViajes(t);            // lo que va por el periférico
   const items = MUEBLES.slice();
   for (const a of agentes.values()) items.push({ sortY: a.y, a });
