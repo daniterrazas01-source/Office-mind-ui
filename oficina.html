@@ -77,6 +77,8 @@ header{position:fixed;top:0;left:0;right:0;height:46px;display:flex;align-items:
 .pantalla #ptTitulo{font-weight:700;color:#fff;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .pantalla #ptTexto{color:#9fc7dd;font-size:.9em;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;flex:1}
 .pantalla small{color:#6f8fa5;font-size:.72em}
+.viaje{position:absolute;transform:translate(-50%,-190%);white-space:nowrap;background:#12202c;color:#bfeeff;font-weight:700;
+  font-size:max(8px,calc(var(--s)*3.4px));line-height:1.3;padding:calc(var(--s)*.5px) calc(var(--s)*2px);box-shadow:0 0 0 calc(var(--s)*.6px) #7fe7ff;z-index:2;pointer-events:none;display:none}
 .tarjeta i.tipo{display:block;font-size:11px;letter-spacing:.08em;color:#ffd34d}
 .reporte h4{margin:14px 0 2px;font-size:16px}
 .reporte p{margin:6px 0}
@@ -177,7 +179,7 @@ textarea.campo{min-height:70px;resize:vertical}
 <div id="escenario">
   <div id="mundo">
     <canvas id="lienzo"></canvas>
-    <div id="capa"><div class="vacia" id="vacia">Nadie trabajando por ahora</div><div class="pantalla" id="pantalla"><b id="ptTipo"></b><div id="ptTitulo"></div><div id="ptTexto"></div><small id="ptPie"></small></div></div>
+    <div id="capa"><div class="vacia" id="vacia">Nadie trabajando por ahora</div><div class="viaje" id="viaje"></div><div class="pantalla" id="pantalla"><b id="ptTipo"></b><div id="ptTitulo"></div><div id="ptTexto"></div><small id="ptPie"></small></div></div>
   </div>
 </div>
 <div class="aviso" id="aviso"><div id="avisoTexto">
@@ -196,6 +198,8 @@ textarea.campo{min-height:70px;resize:vertical}
 import { aplicarReglas, textoPlazo } from './src/reglas.js';
 import { estadoDemo } from './src/demo.js';
 import { estadoDeSesiones, modeloDeRespuesta } from './src/sesiones.js';
+import { ESTACIONES, RAMALES, rutaTunel, largoRuta, puntoEnRuta, enviosLimpios } from './src/tunel.js';
+import { CADA_PANTALLA, turnos, turnoDe, esDeHoy } from './src/pantalla.js';
 (() => {
 'use strict';
 
@@ -364,6 +368,7 @@ const LUGARES = {
     L(5, 32, 'arriba', { oy: -4, sentado: true, silla: 'madera' }),   // visitas
     L(7, 32, 'arriba', { oy: -4, sentado: true, silla: 'madera' }),
     L(11, 30, 'der'),                                                  // frente a la repisa de logros
+    L(11, 33, 'der', { tubo: true }),                                  // en la estación del túnel
   ],
   'cerebro delta': [
     L(23, 34, 'arriba', { ox: 8 }),                                    // operando el mini botón del cerebro
@@ -371,11 +376,13 @@ const LUGARES = {
     L(27, 31, 'arriba', { ox: 8, oy: -3, sentado: true, silla: 'oficina' }),
     L(18, 28, 'arriba'),
     L(29, 28, 'arriba'),
+    L(18, 33, 'izq', { tubo: true }),
   ],
   'centro de pensado': [
     L(27, 50, 'arriba', { ox: 8, oy: -3, sentado: true, silla: 'oficina' }),   // en la computadora de la memoria
     L(24, 48, 'arriba'),                                               // frente al foco de ideas
     L(27, 46, 'izq'),
+    L(23, 49, 'izq', { tubo: true }),
   ],
   'almacen': [
     L(29, 44, 'arriba'),                                               // guardando en los anaqueles
@@ -387,6 +394,7 @@ const LUGARES = {
     L(27, 57, 'arriba', { sentado: true, puf: '#f2c230' }),
     L(29, 57, 'arriba', { sentado: true, puf: '#d97757' }),
     L(30, 55, 'izq'),
+    L(23, 56, 'izq', { tubo: true }),
   ],
   'terrazas': [                                                        // equipo DragTree
     L(6, 47, 'arriba', { oy: -3, sentado: true, silla: 'oficina' }),
@@ -395,6 +403,7 @@ const LUGARES = {
     L(5, 49, 'abajo'),
     L(4, 55, 'arriba'),                                                // en el otro carril, viendo el carro
     L(7, 44, 'arriba'),                                                // en el otro estante
+    L(8, 49, 'der', { tubo: true }),
   ],
 };
 for (const [area, lista] of Object.entries(LUGARES)) lista.forEach((l, i) => { l.area = area; l.idx = i; l.x = l.tx * T + 8 + l.ox; l.y = l.ty * T + 13 + l.oy; });
@@ -773,7 +782,27 @@ function centroDePensado(){
   mueble(49 * T + 15, () => {                                        // tambo
     R(450, 782, 12, 17, K); R(451, 783, 10, 15, '#3f6f9c'); R(451, 786, 10, 1, '#2a4d70'); R(451, 793, 10, 1, '#2a4d70'); R(452, 783, 3, 15, '#5a8fc0');
   });
-  planta(22, 50); planta(22, 43);
+  planta(22, 43);
+}
+
+/* ---------- Estaciones del túnel: una en cada cuarto principal ----------
+   Ahí se mete lo que se manda y ahí llega lo que mandan. Banderita roja y foquito verde = hay algo sin leer. */
+function estacionTunel(clave){
+  const e = ESTACIONES[clave], x = e.tx * T + 1, y = e.ty * T - 8;
+  bloquear(e.tx, e.ty);
+  mueble(e.ty * T + 15, (t) => {
+    const sin = SIN_LEER[clave] > 0, viaja = VIAJES.some(v => t >= v.sale && (v.e.de === clave || v.e.para === clave)), llego = t - (LLEGO[clave] ?? -9) < 2.5;
+    const tubo = e.lado === 'der' ? x + 13 : x - 3;                                  // el tubo que se mete a la pared
+    R(tubo, y + 12, 4, 9, K); R(tubo, y + 13, 4, 7, '#7c8596'); R(tubo, y + 13, 4, 1, '#aab3c4'); R(tubo, y + 19, 4, 1, '#565e6e');
+    R(x, y, 14, 24, K); R(x + 1, y + 1, 12, 22, '#4a5368'); R(x + 1, y + 1, 12, 1, '#66718a'); R(x + 1, y + 18, 12, 5, '#353c4c');
+    R(x + 3, y + 3, 8, 10, K); R(x + 4, y + 4, 6, 8, llego ? '#dff6ff' : '#12202c'); R(x + 4, y + 4, 1, 8, llego ? '#ffffff' : '#2c4a60');   // ventanilla
+    if (sin || llego){ R(x + 5, y + 6, 4, 5, '#e2b84a'); R(x + 5, y + 6, 4, 1, '#f6d57a'); R(x + 5, y + 10, 4, 1, '#b88c12'); }           // cápsula esperando
+    for (let i = 0; i < 4; i++) R(x + 1 + i * 3, y + 15, 3, 2, i % 2 ? '#15161d' : '#e6c229');
+    R(x + 2, y + 20, 5, 1, '#15161d');
+    const luz = viaja || llego ? (Math.floor(t * 6) % 2 ? '#7fe7ff' : '#2a4a5a') : sin ? (Math.floor(t * 2) % 2 ? '#5dff7a' : '#1f5a2a') : '#26332a';
+    R(x + 9, y + 19, 4, 4, K); R(x + 10, y + 20, 2, 2, luz);
+    if (sin){ R(x + 11, y - 6, 1, 6, K); R(x + 6, y - 6, 5, 4, K); R(x + 7, y - 5, 4, 2, '#ff5b5b'); }                                    // banderita: hay correo
+  });
 }
 
 /* ---------- Sala de Noticias: una pantalla grande donde los monitos muestran lo que traen ---------- */
@@ -978,6 +1007,7 @@ function construirMuebles(){
   tallerDragTree();
   centroDePensado();
   salaDeNoticias();
+  for (const clave of Object.keys(ESTACIONES)) estacionTunel(clave);
   caballete(5, 68, 'espacio-d'); caballete(16, 68, 'espacio-e'); caballete(25, 68, 'espacio-f');
 
   /* Sillas y pufs de cada lugar */
@@ -987,6 +1017,9 @@ function construirMuebles(){
   zonaLectura(352, 704, 90, 112, () => `Computadora del Centro de Pensado: ${notasDeMemoria()} notas de memoria`, () => panelMemoria());
   zonaLectura(442, 664, 54, 152, () => `Almacén: ${diasArchivados()} días guardados`, () => panelArchivo());
   zonaLectura(352, 828, 144, 60, () => 'Pantalla de noticias: ver la cartelera', () => panelCartelera());
+  zonaLectura(TUNEL.x - 4, TUNEL.y0, 40, TUNEL.y1 - TUNEL.y0, () => `Túnel central: ${enviosTodos().length} envíos`, () => panelTunel());
+  for (const [clave, e] of Object.entries(ESTACIONES))
+    zonaLectura(e.tx * T - 2, e.ty * T - 13, 20, 31, () => `Estación del túnel · ${e.nombre}` + (SIN_LEER[clave] ? ` · ${SIN_LEER[clave]} sin leer` : ''), () => panelEstacion(clave));
   zonaLectura(16, 672, 144, 272, () => `Oficina Terrazas: ${archivosTableta().length} archivos en los estantes`, () => panelTerrazas());
 }
 
@@ -1174,7 +1207,9 @@ function pintarEstatica(){
   for (let y = 692; y < 940; y += 8){ R(236, y, 1, 5, '#e6c229'); R(275, y, 1, 5, '#e6c229'); }
   const flecha = (cx, cy, abajo) => { for (let i = 0; i < 4; i++){ const yy = abajo ? cy + 3 - i : cy + i; R(cx - i, yy, 1 + i * 2, 1, '#b09f7c'); } R(cx - 1, abajo ? cy - 5 : cy + 4, 3, 5, '#b09f7c'); };
   for (const cy of [724, 804, 884]){ flecha(208, cy, true); flecha(304, cy, false); }
+  pintarRamales();
   pintarTunel();
+  pintarUniones();
   // Oficina Terrazas: pista de arrancones (dos carriles, línea de salida y orilla a cuadros)
   R(20, 836, 136, 64, '#22242b'); R(21, 837, 134, 62, '#3b3e48');
   for (let i = 0; i < 40; i++) R(24 + (i * 37) % 128, 839 + (i * 23) % 58, 2, 1, '#454852');
@@ -1260,7 +1295,9 @@ function teleSala(t){
   } else R(214, 232, 1, 1, '#d24040');
 }
 /* ---------- Túnel central: una banda que baja del pasillo de la ampliación al pasillo 4 ----------
-   Por ahora es de adorno (pasan paquetes de muestra). Más adelante puede llevar archivos o agentes. */
+   Es el tronco de la red: de él salen ramales (canales con tapa de vidrio en el piso) a la Oficina Calleros,
+   el Cerebro Delta, la Oficina Terrazas, el Centro de Pensado y la Sala de Noticias. Por ahí viaja lo que
+   se mandan los monitos. Solo pasan paquetes cuando hay un envío de verdad. */
 const TUNEL = { x: 240, y0: 656, y1: 976 };
 function pintarTunel(){
   const { x, y0, y1 } = TUNEL, alto = y1 - y0;
@@ -1275,6 +1312,62 @@ function pintarTunel(){
     for (let i = 0; i < 7; i++) R(x - 1 + i * 5, yy - 2, 3, 4, i % 2 ? '#15161d' : '#e6c229');
     R(x - 4, yy - 6, 5, 39, K); R(x - 3, yy - 5, 3, 37, '#4a5368'); R(x + 31, yy - 6, 5, 39, K); R(x + 32, yy - 5, 3, 37, '#4a5368');
   }
+}
+const esPiso = (x, y) => { const tx = Math.floor(x / T), ty = Math.floor(y / T), c = MAPA[ty] && MAPA[ty][tx]; return !!c && c !== '#' && c !== '=' && c !== 'u' && !BLOQUEO.has(ty * COLS + tx); };
+function pintarRamales(){   // canales en el piso; debajo de los muros no se ven
+  for (const ramal of Object.values(RAMALES)) for (let i = 1; i < ramal.length; i++){
+    const a = ramal[i - 1], b = ramal[i];
+    if (a.y === b.y){
+      for (let x = Math.min(a.x, b.x); x <= Math.max(a.x, b.x); x++){
+        if (!esPiso(x, a.y)) continue;
+        R(x, a.y - 4, 1, 8, '#8a7c62'); R(x, a.y - 3, 1, 6, K); R(x, a.y - 2, 1, 4, '#1d2a36'); R(x, a.y - 2, 1, 1, '#35506a');
+        if (x % 8 === 0){ R(x, a.y - 4, 1, 1, '#c9b88f'); R(x, a.y + 3, 1, 1, '#c9b88f'); }
+      }
+    } else if (a.x === b.x){
+      for (let y = Math.min(a.y, b.y) - 4; y <= Math.max(a.y, b.y); y++){
+        if (!esPiso(a.x, y)) continue;
+        R(a.x - 4, y, 8, 1, '#8a7c62'); R(a.x - 3, y, 6, 1, K); R(a.x - 2, y, 4, 1, '#1d2a36'); R(a.x - 2, y, 1, 1, '#35506a');
+        if (y % 8 === 0){ R(a.x - 4, y, 1, 1, '#c9b88f'); R(a.x + 3, y, 1, 1, '#c9b88f'); }
+      }
+    }
+  }
+}
+function pintarUniones(){   // donde cada ramal se mete al tronco
+  for (const [clave, e] of Object.entries(ESTACIONES)){
+    const y = e.ty * T + 8; if (y < TUNEL.y0) continue;
+    const x = e.tx * T < TUNEL.x ? TUNEL.x - 5 : TUNEL.x + 30;
+    R(x, y - 6, 7, 12, K); R(x + 1, y - 5, 5, 10, '#7c8596'); R(x + 1, y - 5, 5, 1, '#aab3c4'); R(x + 1, y - 1, 5, 2, '#e6c229');
+  }
+}
+/* Paquetes en camino. En el tronco se ven completos; en los ramales, una cápsula bajo el vidrio. */
+const COLOR_ENVIO = { archivo: '#e2b84a', nota: '#f7f3ea', noticias: '#ff8f6b', aviso: '#6fd36f', dato: '#7fe7ff' };
+function paquete(tipo, px, y){
+  if (tipo === 'archivo'){ R(px, y, 10, 8, K); R(px + 1, y + 1, 8, 6, '#e2b84a'); R(px + 1, y + 1, 4, 1, '#f6d57a'); R(px + 1, y + 3, 8, 1, '#b88c12'); }
+  else if (tipo === 'aviso'){ R(px, y, 10, 9, K); R(px + 1, y + 1, 8, 7, '#c79a5b'); R(px + 1, y + 1, 8, 2, '#dab06f'); R(px + 4, y + 1, 2, 7, '#6fd36f'); }
+  else { R(px + 1, y, 8, 10, K); R(px + 2, y + 1, 6, 8, '#f7f3ea'); if (tipo === 'noticias') R(px + 2, y + 1, 6, 2, '#d24040'); else if (tipo === 'dato') R(px + 2, y + 1, 6, 2, '#3fb6d6');
+    R(px + 3, y + 4, 4, 1, '#9a9488'); R(px + 3, y + 6, 4, 1, '#9a9488'); R(px + 3, y + 8, 3, 1, '#9a9488'); }
+}
+function dibujarViajes(t){
+  tDibujo = t;
+  const el = $('viaje'); let etiqueta = null;
+  for (let i = VIAJES.length - 1; i >= 0; i--){
+    const v = VIAJES[i], s = (t - v.sale) * VEL_TUNEL;
+    if (s < 0) continue;
+    if (s >= v.largo){ VIAJES.splice(i, 1); LLEGO[v.e.para] = t; continue; }
+    const p = puntoEnRuta(v.ruta, s), x = Math.round(p.x), y = Math.round(p.y), c = (MAPA[Math.floor(p.y / T)] || [])[Math.floor(p.x / T)];
+    if (c === 'u') paquete(v.e.tipo, x - 5, y - 5);
+    else if (esPiso(p.x, p.y)){
+      const col = COLOR_ENVIO[v.e.tipo] || COLOR_ENVIO.nota;
+      g.globalAlpha = 0.25; R(x - 5, y - 4, 10, 8, col); g.globalAlpha = 1;
+      R(x - 3, y - 2, 6, 4, col); R(x - 3, y - 2, 6, 1, '#ffffff'); R(x - 3, y + 1, 6, 1, tono(col, -60));
+    }
+    etiqueta = { v, x: p.x, y: p.y };
+  }
+  if (etiqueta){
+    const e = etiqueta.v.e, txt = (e.autor || ESTACIONES[e.de].nombre) + ' → ' + ESTACIONES[e.para].nombre;
+    if (el.textContent !== txt) el.textContent = txt;
+    el.style.left = (etiqueta.x * escala) + 'px'; el.style.top = (etiqueta.y * escala) + 'px'; el.style.display = 'block';
+  } else if (el.style.display !== 'none') el.style.display = 'none';
 }
 function subterraneo(t){   // lucecitas bajo las losas de vidrio, y un brillo donde va alguien por abajo
   let n = 0;
@@ -1295,12 +1388,7 @@ function tunel(t){
     const y = Math.round(y0 + 4 + ((k * 24 + t * 30) % largo)), c = '#2f6f8f';
     R(x + 11, y, 2, 1, c); R(x + 19, y, 2, 1, c); R(x + 13, y + 1, 2, 1, c); R(x + 17, y + 1, 2, 1, c); R(x + 15, y + 2, 2, 1, c);
   }
-  for (let i = 0; i < 3; i++){                                      // paquetes de muestra: carpeta, hoja y caja
-    const y = Math.round(y0 + 2 + ((t * 34 + i * 107) % largo)), px = x + 11;
-    if (i === 0){ R(px, y, 10, 8, K); R(px + 1, y + 1, 8, 6, '#e2b84a'); R(px + 1, y + 1, 4, 1, '#f6d57a'); R(px + 1, y + 3, 8, 1, '#b88c12'); }
-    else if (i === 1){ R(px + 1, y, 8, 10, K); R(px + 2, y + 1, 6, 8, '#f7f3ea'); R(px + 3, y + 3, 4, 1, '#9a9488'); R(px + 3, y + 5, 4, 1, '#9a9488'); R(px + 3, y + 7, 3, 1, '#9a9488'); }
-    else { R(px, y, 10, 9, K); R(px + 1, y + 1, 8, 7, '#c79a5b'); R(px + 1, y + 1, 8, 2, '#dab06f'); R(px + 4, y + 1, 2, 7, '#ead9ab'); }
-  }
+  dibujarViajes(t);                                                 // lo que va en camino
   for (let y = y0 + 36, n = 0; y < y1 - 36; y += 16, n++){          // lucecitas de los rieles, en fila
     const on = (n - Math.floor(t * 6)) % 5 === 0;
     R(x + 1, y, 2, 2, on ? '#7fe7ff' : '#2a4a5a'); R(x + 29, y, 2, 2, on ? '#7fe7ff' : '#2a4a5a');
@@ -1591,7 +1679,7 @@ function dibujarAgente(a, t){
   const sentado = enLugar && a.lugar.sentado;
   const camina = a.fase === 'caminando' || a.fase === 'saliendo';
   const paso = camina ? Math.floor(a.recorrido / 4) % 4 : 0;
-  const pose = enLugar ? (a.lugar.idx >= 0 ? AREAS[a.lugar.area].pose : 'parado') : null;
+  const pose = enLugar ? (a.lugar.tubo ? 'teclear' : a.lugar.idx >= 0 ? AREAS[a.lugar.area].pose : 'parado') : null;
   const m = modeloDe(a), dir = a.dir, bx = x - 7, sx = x - m.w / 2;
   let by = y - (sentado ? m.h : m.h + 2);
   if (camina && paso % 2 === 1) by -= 1;
@@ -1711,9 +1799,11 @@ function asignarLugar(a, area){
   const principal = x => x.id === 'claude' || x.id.startsWith('claude-');
   const reservarPrincipal = !principal(a) && [...agentes.values()].some(principal);
   let idx = -1;
-  if (principal(a) && !occ[0]) idx = 0;
-  for (let i = reservarPrincipal ? 1 : 0; idx < 0 && i < lista.length; i++) if (!occ[i]) idx = i;
-  if (idx < 0 && !occ[0]) idx = 0;
+  a.enTubo = false;
+  if (a.quiereTubo){ const i = lista.findIndex(l => l.tubo); if (i >= 0 && !occ[i]){ idx = i; a.enTubo = true; } }   // va a la estación del túnel
+  if (idx < 0 && principal(a) && !occ[0]) idx = 0;
+  for (let i = reservarPrincipal ? 1 : 0; idx < 0 && i < lista.length; i++) if (!occ[i] && !lista[i].tubo) idx = i;
+  if (idx < 0 && !occ[0] && !lista[0].tubo) idx = 0;
   if (idx >= 0){ occ[idx] = a.id; a.lugar = lista[idx]; return; }
   const usadas = new Set([...EXTRA[area].values()].map(c => c.ty * COLS + c.tx));
   const c = CANDIDATOS[area].find(c => !usadas.has(c.ty * COLS + c.tx)) || CANDIDATOS[area][0];
@@ -1878,6 +1968,7 @@ function procesar(datos){
   const lista = aplicarReglas(configActiva(), datos || {}, ahora).agentes;   // supervisores fijos + visitantes sin vencer
   if (datos && Array.isArray(datos.monitos)) MONITOS_DEMO = datos.monitos;
   if (datos && Array.isArray(datos.avisos)) AVISOS_DEMO = datos.avisos;
+  if (datos && Array.isArray(datos.envios)) ENVIOS_DEMO = datos.envios;
   for (const m of monitosTodos()) lista.push(registroProgramado(m, ahora));   // monitos con tarea programada: siempre están
   const raizTs = fecha(datos && datos.actualizado);
   ARCHIVOS = Array.isArray(datos && datos.archivos_recientes) ? datos.archivos_recientes.filter(f => f && f.nombre) : [];
@@ -1915,8 +2006,11 @@ function procesar(datos){
     if (enTerrazas) area = 'terrazas';
     else if (area === 'terrazas') area = 'escritorio';
     let texto = textoBreve(r.actividad);
+    const quiereTubo = !!r.tubo || (!!ESTACIONES[area] && ES_DEL_TUNEL.test(String(r.actividad || '')));
     if (inactivo){ area = enTerrazas ? 'terrazas' : 'descanso'; texto = 'Esperando instrucciones'; }   // Terrazas espera en su cuarto
     else if (area === 'descanso' && !texto) texto = 'Esperando instrucciones';
+    const cambiaTubo = (quiereTubo && !inactivo && !!ESTACIONES[area]) !== !!a.quiereTubo;
+    a.quiereTubo = quiereTubo && !inactivo && !!ESTACIONES[area];
     const estado = inactivo ? 'inactivo' : String(r.estado || 'trabajando').toLowerCase();
     a.elNombre.style.setProperty('--e', ESTADO_COLOR[estado] || ESTADO_COLOR.trabajando);
     a.estadoTxt = estado;
@@ -1925,7 +2019,7 @@ function procesar(datos){
     ponerNombre(a, nombreVisible);
     if (nuevo){ if (primeraLectura) colocar(a, area, texto); else entrar(a, area, texto); }
     else if (a.fase === 'saliendo') irA(a, area, texto);
-    else if (area !== a.areaDestino) irA(a, area, texto);
+    else if (area !== a.areaDestino || cambiaTubo) irA(a, area, texto);
     else if (texto !== a.textoPendiente){ a.textoPendiente = texto; if (a.fase === 'trabajando') ponerTexto(a, texto, true); }
   }
   for (const a of agentes.values()) if (!vistos.has(a.id) && a.fase !== 'saliendo') salir(a);
@@ -2066,6 +2160,7 @@ async function leerEstado(){
       datos = juntar(base, terr);
       datos.monitos = mon && Array.isArray(mon.monitos) ? mon.monitos : MONITOS_DEMO;   // si falla la lectura, se quedan los que ya había
       datos.avisos = mon && Array.isArray(mon.avisos) ? mon.avisos : AVISOS_DEMO;
+      datos.envios = mon && Array.isArray(mon.envios) ? mon.envios : ENVIOS_DEMO;
       if (relevo && Array.isArray(relevo.agentes)){                   // el relevo trae las sesiones de todos lados (ver relevo/INSTALAR.md)
         const ya = new Set(datos.agentes.map(a => String(a.id)));
         datos.agentes = datos.agentes.concat(relevo.agentes.filter(a => a && !ya.has(String(a.id))));
@@ -2192,6 +2287,7 @@ function ajustarEscala(){
 const $ = id => document.getElementById(id);
 function barra(){
   pintarPantalla();
+  revisarEnvios();
   $('reloj').textContent = new Date().toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
   const n = [...agentes.values()].filter(a => a.fase !== 'saliendo').length;
   $('cuantos').textContent = n === 0 ? 'sin agentes' : n === 1 ? '1 agente' : n + ' agentes';
@@ -2267,62 +2363,150 @@ function escucharMonitos(db){
     }
     for (const id of [...MONITOS.keys()]) if (!vivos.has(id)) MONITOS.delete(id);
   }, () => {});
+  db.collection('envios').orderBy('creado', 'desc').limit(40).onSnapshot(es => {
+    ENVIOS = es.docs.map(x => Object.assign({ id: x.id }, x.data())); revisarEnvios();
+  }, () => {});
   db.collection('avisos').onSnapshot(as => {
     AVISOS = as.docs.map(x => Object.assign({ id: x.id }, x.data())).sort((p, q) => String(q.creado || '').localeCompare(String(p.creado || '')));
   }, () => {});
 }
 
+/* ---------- Envíos por el túnel ----------
+   Un envío = algo que un monito o una sesión le manda a otro cuarto: { de, para, tipo, titulo, texto, autor, creado }.
+   Viven en la base del Artifact (colección "envios") y en el archivo público de la página web. La oficina no
+   inventa ninguno: el paquete viaja cuando el envío es nuevo, y se queda en el buzón de la estación. */
+let ENVIOS = [], ENVIOS_DEMO = [];
+const VIAJES = [], LLEGO = {}, SIN_LEER = {}, YA_VIAJO = new Set();
+const VEL_TUNEL = 60;                 // pixeles por segundo
+let tDibujo = 0, primerosEnvios = true, cacheEnvios = { de: null, n: -1, lista: [] };
+function casaDeMonito(quien){
+  const q = sinAcentos(quien).toLowerCase().trim();
+  const m = q && monitosTodos().find(m => m.id === q || sinAcentos(m.nombre).toLowerCase() === q);
+  return m ? m.casa : null;
+}
+function enviosTodos(){
+  const crudos = EN_CLAUDE && !DEMO ? ENVIOS : ENVIOS_DEMO, n = monitosTodos().length;
+  if (cacheEnvios.de !== crudos || cacheEnvios.n !== n) cacheEnvios = { de: crudos, n, lista: enviosLimpios(crudos, casaDeMonito) };
+  return cacheEnvios.lista;
+}
+const BUZON_LEIDO = {};
+function leidoBuzon(clave){
+  if (BUZON_LEIDO[clave] == null){ let v = 0; try { v = +localStorage.getItem('oficina.buzon.' + clave) || 0; } catch (e) {} BUZON_LEIDO[clave] = v; }
+  return BUZON_LEIDO[clave];
+}
+function marcarBuzon(clave){
+  BUZON_LEIDO[clave] = Date.now();
+  try { localStorage.setItem('oficina.buzon.' + clave, String(BUZON_LEIDO[clave])); } catch (e) {}
+  revisarEnvios();
+}
+function lanzarViaje(e, espera = 0){
+  const ruta = rutaTunel(e.de, e.para); if (!ruta) return;
+  VIAJES.push({ e, ruta, largo: largoRuta(ruta), sale: tDibujo + espera });
+}
+/* Cuenta lo que hay sin leer en cada buzón y echa a andar los paquetes nuevos. Al abrir la oficina también
+   repite (una vez) el viaje de lo que llegó en el último día y sigue sin leerse. */
+function revisarEnvios(){
+  const lista = enviosTodos(), ahora = Date.now();
+  for (const k of Object.keys(ESTACIONES)) SIN_LEER[k] = 0;
+  for (const e of lista) if (e.creado > leidoBuzon(e.para)) SIN_LEER[e.para]++;
+  const salen = [];
+  for (const e of lista){
+    if (YA_VIAJO.has(e.id)) continue;
+    YA_VIAJO.add(e.id);
+    if (ahora - e.creado < 15 * 60000 || (primerosEnvios && ahora - e.creado < 24 * 3600000 && e.creado > leidoBuzon(e.para))) salen.push(e);
+  }
+  salen.slice(0, 5).reverse().forEach((e, i) => lanzarViaje(e, 1 + i * 4));   // de uno en uno, del más viejo al más nuevo
+  if (lista.length || performance.now() > 20000) primerosEnvios = false;
+}
+const NOMBRE_TIPO = { archivo: 'ARCHIVO', nota: 'NOTA', noticias: 'NOTICIAS', aviso: 'AVISO', dato: 'DATO' };
+function tarjetaEnvio(e, nuevo){
+  const u = enlaceSeguro(e.url);
+  return `<div class="tarjeta" style="border-left-color:${COLOR_ENVIO[e.tipo] || '#f7f3ea'}${nuevo ? ';background:#352b42' : ''}"><i class="tipo">${NOMBRE_TIPO[e.tipo] || 'NOTA'}${nuevo ? ' · NUEVO' : ''}</i><b>${esc(e.titulo)}</b>` +
+    (e.texto ? `<div class="nota">${esc(e.texto)}</div>` : '') + (u ? `<div><a class="enlace" href="${esc(u)}" target="_blank" rel="noopener">${esc(u)}</a></div>` : '') +
+    `<div><i>${esc(e.autor || ESTACIONES[e.de].nombre)} · ${esc(ESTACIONES[e.de].nombre)} → ${esc(ESTACIONES[e.para].nombre)} · ${esc(e.creado ? fechaCorta(e.creado) : '—')}</i></div>` +
+    `<div class="botones"><button class="boton" data-viaje="${esc(e.id)}">▶ Ver el viaje</button></div></div>`;
+}
+function botonesViaje(){
+  cuerpo.querySelectorAll('[data-viaje]').forEach(b => b.addEventListener('click', () => {
+    const e = enviosTodos().find(x => x.id === b.dataset.viaje); if (!e) return;
+    lanzarViaje(e, 0.3);
+    if (innerWidth <= 760) cerrarPanel();
+    irAFila(Math.max(0, Math.min(ESTACIONES[e.de].ty, ESTACIONES[e.para].ty) - 6));
+  }));
+}
+function panelEstacion(clave){
+  const e = ESTACIONES[clave], lista = enviosTodos(), leido = leidoBuzon(clave);
+  const llegan = lista.filter(x => x.para === clave), salen = lista.filter(x => x.de === clave);
+  let html = `<p>Estación del túnel de <b>${esc(e.nombre)}</b>. Aquí llega lo que le mandan a este cuarto y de aquí sale lo que manda. Todo viaja por el túnel central.</p>`;
+  html += '<h4 style="margin:16px 0 8px">Recibido</h4>' + (llegan.length ? llegan.map(x => tarjetaEnvio(x, x.creado > leido)).join('') : '<p class="vacio">Todavía no ha llegado nada a esta estación.</p>');
+  html += '<h4 style="margin:16px 0 8px">Enviado</h4>' + (salen.length ? salen.map(x => tarjetaEnvio(x, false)).join('') : '<p class="vacio">De aquí todavía no ha salido nada.</p>');
+  abrirPanel('TÚNEL · ' + e.nombre.toUpperCase(), html);
+  botonesViaje();
+  marcarBuzon(clave);
+}
+function panelTunel(){
+  const lista = enviosTodos();
+  let html = '<p>El túnel central conecta la Oficina Calleros, el Cerebro Delta, la Oficina Terrazas, el Centro de Pensado y la Sala de Noticias. Por aquí viaja lo que se mandan los monitos. Toca la estación de un cuarto para ver su buzón.</p>';
+  html += '<div class="botones">' + Object.entries(ESTACIONES).map(([k, e]) => `<button class="boton" data-estacion="${esc(k)}">${esc(e.nombre)}${SIN_LEER[k] ? ' · ' + SIN_LEER[k] + ' sin leer' : ''}</button>`).join('') + '</div>';
+  html += '<h4 style="margin:16px 0 8px">Últimos envíos</h4>' + (lista.length ? lista.slice(0, 20).map(x => tarjetaEnvio(x, x.creado > leidoBuzon(x.para))).join('') : '<p class="vacio">Todavía no ha viajado nada por el túnel. Los envíos aparecen aquí cuando un monito manda algo.</p>');
+  abrirPanel('TÚNEL CENTRAL', html);
+  botonesViaje();
+  cuerpo.querySelectorAll('[data-estacion]').forEach(b => b.addEventListener('click', () => panelEstacion(b.dataset.estacion)));
+}
+
 /* ---------- Memoria, archivo y cartelera ----------
    Memoria (Centro de Pensado): notas que cada monito lee al empezar su tarea y actualiza al terminar.
    Archivo (Almacén): los resúmenes de cada día.
-   Cartelera (Sala de Noticias): todo lo que hay para mostrar; la pantalla cambia cada media hora. */
+   Cartelera (Sala de Noticias): todo lo que hay para mostrar; la pantalla cambia cada 5 minutos y una de cada
+   dos veces sale una noticia del día. */
 let AVISOS = [], AVISOS_DEMO = [];
 const avisosTodos = () => EN_CLAUDE && !DEMO ? AVISOS : AVISOS_DEMO;
 const notasDeMemoria = () => monitosTodos().reduce((n, m) => n + (m.memoria || []).length, 0);
 const diasArchivados = () => monitosTodos().reduce((n, m) => n + (m.reportes || []).length, 0);
-const MEDIA_HORA = 30 * 60000;
 function cartelera(){
   const noticias = [], capsulas = [], tareas = [], oficina = [];
   for (const m of monitosTodos()){
     const de = m.nombre || m.id, r = (m.reportes || [])[0];
     if (r){
-      for (const p of Array.isArray(r.puntos) ? r.puntos : []) noticias.push({ tipo: 'NOTICIA', titulo: p.titulo, texto: p.resumen, fuente: p.fuente, url: p.url, de });
+      const hoy = esDeHoy(r.creado, Date.now());
+      for (const p of Array.isArray(r.puntos) ? r.puntos : []) noticias.push({ tipo: hoy ? 'NOTICIA DE HOY' : 'NOTICIA', noticia: true, cuando: p.cuando || (hoy ? '' : r.fecha || ''), titulo: p.titulo, texto: p.resumen, fuente: p.fuente, url: p.url, de });
       for (const c of Array.isArray(r.capsulas) ? r.capsulas : []) capsulas.push({ tipo: String(c.tipo || 'cápsula').toUpperCase(), titulo: c.titulo, texto: c.texto, fuente: c.fuente, url: c.url, de });
     }
     const pend = (m.memoria || []).find(x => x.id === 'pendientes');
     tareas.push({ tipo: 'TAREA', titulo: de + ': ' + (m.horario || 'tarea programada'), texto: pend && pend.texto ? 'Pendientes: ' + pend.texto : (m.descripcion || ''), de });
   }
   for (const a of avisosTodos().slice(0, 6)) oficina.push({ tipo: 'OFICINA', titulo: a.titulo, texto: a.texto, de: 'Oficina' });
-  const out = [];                                                    // se van turnando: noticia, cápsula, tarea, aviso…
-  for (let i = 0; noticias[i] || capsulas[i] || tareas[i] || oficina[i]; i++) for (const l of [noticias, capsulas, tareas, oficina]) if (l[i]) out.push(l[i]);
-  return out;
+  const otros = [];                                                  // lo demás se va turnando: cápsula, tarea, aviso…
+  for (let i = 0; capsulas[i] || tareas[i] || oficina[i]; i++) for (const l of [capsulas, tareas, oficina]) if (l[i]) otros.push(l[i]);
+  return turnos(noticias, otros);                                    // noticia, otra cosa, noticia, otra cosa…
 }
 function enPantalla(ahora){
   const items = cartelera(); if (!items.length) return null;
-  const i = Math.floor(ahora / MEDIA_HORA) % items.length;
-  return Object.assign({ i, total: items.length }, items[i]);
+  const tn = turnoDe(ahora, items.length);
+  return Object.assign({ i: tn.i, total: items.length, vuelta: tn.vuelta, cambia: tn.cambia }, items[tn.i]);
 }
 let firmaPantalla = '';
 function pintarPantalla(){
   const ahora = Date.now(), x = enPantalla(ahora);
-  const sig = new Date((Math.floor(ahora / MEDIA_HORA) + 1) * MEDIA_HORA).toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' });
+  const sig = new Date(turnoDe(ahora, 1).cambia).toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' });
   const firma = x ? x.i + '|' + x.titulo + '|' + x.texto + '|' + sig : 'nada';
   if (firma === firmaPantalla) return;
   firmaPantalla = firma;
-  $('ptTipo').textContent = x ? x.tipo + (x.de && x.tipo !== 'OFICINA' && x.tipo !== 'TAREA' ? ' · ' + String(x.de).toUpperCase() : '') : 'SALA DE NOTICIAS';
+  $('ptTipo').textContent = x ? x.tipo + (x.cuando ? ' · ' + String(x.cuando).toUpperCase() : '') + (x.de && x.tipo !== 'OFICINA' && x.tipo !== 'TAREA' ? ' · ' + String(x.de).toUpperCase() : '') : 'SALA DE NOTICIAS';
   $('ptTitulo').textContent = x ? x.titulo || '' : 'Sin novedades por ahora';
   $('ptTexto').textContent = x ? x.texto || '' : 'Aquí saldrá lo que traigan los monitos.';
   $('ptPie').textContent = x ? `${x.i + 1} de ${x.total} · cambia a las ${sig}` : '';
 }
 function tarjetaCartelera(x, ahora){
-  const u = enlaceSeguro(x.url), color = { NOTICIA: '#d97757', TAREA: '#7fe7ff', OFICINA: '#6fd36f' }[x.tipo] || '#ffd34d';
+  const u = enlaceSeguro(x.url), color = x.noticia ? '#d97757' : { TAREA: '#7fe7ff', OFICINA: '#6fd36f' }[x.tipo] || '#ffd34d';
   return `<div class="tarjeta" style="border-left-color:${color}${ahora ? ';background:#352b42' : ''}"><i class="tipo">${esc(x.tipo)}${ahora ? ' · EN PANTALLA AHORA' : ''}</i><b>${esc(x.titulo || '')}</b><div>${esc(x.texto || '')}</div>` +
     (x.fuente || u ? `<div><i>Fuente: </i>${u ? `<a class="enlace" href="${esc(u)}" target="_blank" rel="noopener">${esc(x.fuente || u)}</a>` : esc(x.fuente)}</div>` : '') + '</div>';
 }
 function panelCartelera(){
-  const items = cartelera(), x = enPantalla(Date.now());
+  const items = cartelera(), x = enPantalla(Date.now()), ya = new Set();
+  const unicos = items.map((it, i) => ({ it, i })).filter(o => !ya.has(o.it) && ya.add(o.it));   // las noticias se repiten en la pantalla; aquí salen una vez
   abrirPanel('SALA DE NOTICIAS · CARTELERA', items.length
-    ? '<p>La pantalla cambia cada media hora. Esto es todo lo que hay para mostrar hoy.</p>' + items.map((it, i) => tarjetaCartelera(it, x && i === x.i)).join('')
+    ? '<p>La pantalla cambia cada 5 minutos y una de cada dos veces sale una noticia del día. Esto es todo lo que hay para mostrar hoy.</p>' + unicos.map(o => tarjetaCartelera(o.it, x && items[x.i] === o.it)).join('')
     : '<p class="vacio">Todavía no hay nada que mostrar. Aquí saldrán las noticias de los monitos, sus tareas y los cambios de la oficina.</p>');
 }
 function panelMemoria(){
@@ -2356,11 +2540,12 @@ function marcarLeido(id, reporte){ try { localStorage.setItem('oficina.leido.' +
    (su "rutina"), a veces se queda en su lugar y a veces se va a Descanso, donde también se pasea. Todos los
    que ven la oficina lo ven hacer lo mismo, porque el plan sale del reloj. */
 const RATO_MIN = 4;
+const ES_DEL_TUNEL = /t[uú]nel|buz[oó]n/i;   // lo que se hace en la estación del túnel
 function ratoLibre(m, ahora){
   const propia = (Array.isArray(m.rutina) ? m.rutina : []).filter(x => x && x.area);
   const planes = propia.concat(propia, [{ area: m.casa || 'descanso', actividad: '' }, { area: 'descanso', actividad: 'Descansando un rato' }, { area: 'descanso', actividad: 'Descansando un rato' }]);
-  const x = enPantalla(ahora);                                       // los primeros minutos de cada media hora presenta lo que salió en pantalla
-  if (x && ahora % MEDIA_HORA < 5 * 60000 && (x.de === (m.nombre || m.id) || (x.de === 'Oficina' && monitosTodos()[0] === m)))
+  const x = enPantalla(ahora);                                       // cada 20 minutos se para un rato junto a la pantalla a presentar su noticia
+  if (x && x.noticia && x.vuelta % 4 === 0 && ahora % CADA_PANTALLA < 150000 && x.de === (m.nombre || m.id))
     return { area: 'noticias', actividad: '', plan: 'Presentando en la pantalla: ' + (x.titulo || '') };   // sin viñeta: la pantalla ya lo dice
   const turno = Math.floor(ahora / (RATO_MIN * 60000));
   return planes[Math.floor(azar(Math.floor(hashTexto(m.id) * 1e9) + turno * 7919)() * planes.length)];   // azar() revuelve bien turnos seguidos
@@ -2372,12 +2557,14 @@ function registroProgramado(m, ahora){
   const frases = Array.isArray(m.frases) ? m.frases : [];
   const seg = ahora / 1000, frase = frases.length && seg % 50 < 9 ? frases[Math.floor(seg / 50) % frases.length] : '';   // de vez en cuando dice algo suyo
   const libre = ratoLibre(m, ahora);
+  const enEstacion = !trabajando && ES_DEL_TUNEL.test(libre.actividad || '');   // en la estación dice lo que hace ahí
   return {
     id: 'monito-' + m.id, monito: m.id, nombre: m.nombre || m.id, rol: 'programado', fijo: true,
     area: trabajando ? (m.area || 'internet') : libre.area,
-    actividad: trabajando ? (m.actividad || 'Trabajando') : libre.plan ? '' : nuevo ? '¡Traigo resumen nuevo!' : (frase || libre.actividad || ''),
+    actividad: trabajando ? (m.actividad || 'Trabajando') : libre.plan ? '' : enEstacion ? libre.actividad : nuevo ? '¡Traigo resumen nuevo!' : (frase || libre.actividad || ''),
     estado: trabajando ? 'trabajando' : libre.area === 'descanso' ? 'esperando' : (libre.actividad || libre.plan) ? 'por su cuenta' : nuevo ? 'terminado' : 'esperando',
     tarea: trabajando, plan: trabajando ? '' : (libre.plan || libre.actividad || 'En su lugar'),
+    tubo: enEstacion || (trabajando && ES_DEL_TUNEL.test(m.actividad || '')),
     modelo: m.modelo, aspecto: m.aspecto, equipo: m.horario || 'Tarea programada',
     actualizado: new Date(ahora).toISOString(), ultima_actividad: m.actualizado,
   };
