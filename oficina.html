@@ -1384,7 +1384,7 @@ const ASPECTOS = {
   bufanda:      { tipo: 'bufanda', c: '#f2c230', o: '#b88c12', etiqueta: '#f2c230' },
   'moño':       { tipo: 'moño', c: '#ff6fa8', o: '#b83b70', etiqueta: '#ff6fa8' },
 };
-const ESTADO_COLOR = { trabajando: '#6fd36f', esperando: '#f2c94c', terminado: '#79c0ff', error: '#ff6b5b', inactivo: '#8a8a8a' };
+const ESTADO_COLOR = { 'por su cuenta': '#7fe7ff', trabajando: '#6fd36f', esperando: '#f2c94c', terminado: '#79c0ff', error: '#ff6b5b', inactivo: '#8a8a8a' };
 
 function piernas(x, y, dir, paso, m){
   const pw = m.pierna, piel = tono(m.sombra, -20);
@@ -1853,7 +1853,7 @@ function procesar(datos){
     const modelo = String(r.modelo || '').toLowerCase();
     a.modelo = MODELOS[modelo] ? modelo : null;
     a.tableta = esTableta(r);
-    a.rol = r.rol; a.vence = r.vence || 0; a.seVaPronto = !!r.se_va_pronto; a.monito = r.monito || '';
+    a.rol = r.rol; a.vence = r.vence || 0; a.seVaPronto = !!r.se_va_pronto; a.monito = r.monito || ''; a.enTarea = !!r.tarea; a.plan = r.plan || '';
     a.sesionId = String(r.sesion_id || r.id || ''); a.tePide = r.te_pide || ''; a.loUltimo = r.lo_ultimo || '';
     a.sesionNombre = r.sesion_nombre || ''; a.sesionesExtra = r.sesiones_extra || 0; a.proyecto = r.proyecto || '';
     a.persona = r.persona || (a.tableta ? 'Alberto Terrazas' : 'Calleros');
@@ -2222,17 +2222,29 @@ function escucharMonitos(db){
 }
 function leidoDe(id){ try { return localStorage.getItem('oficina.leido.' + id) || ''; } catch (e) { return ''; } }
 function marcarLeido(id, reporte){ try { localStorage.setItem('oficina.leido.' + id, reporte); } catch (e) {} }
+/* Entre tarea y tarea no se queda quieto: cada pocos minutos cambia de plan. A veces hace algo por su cuenta
+   (su "rutina"), a veces se queda en su lugar y a veces se va a Descanso, donde también se pasea. Todos los
+   que ven la oficina lo ven hacer lo mismo, porque el plan sale del reloj. */
+const RATO_MIN = 4;
+function ratoLibre(m, ahora){
+  const propia = (Array.isArray(m.rutina) ? m.rutina : []).filter(x => x && x.area);
+  const planes = propia.concat(propia, [{ area: m.casa || 'descanso', actividad: '' }, { area: 'descanso', actividad: 'Descansando un rato' }, { area: 'descanso', actividad: 'Descansando un rato' }]);
+  const turno = Math.floor(ahora / (RATO_MIN * 60000));
+  return planes[Math.floor(azar(Math.floor(hashTexto(m.id) * 1e9) + turno * 7919)() * planes.length)];   // azar() revuelve bien turnos seguidos
+}
 function registroProgramado(m, ahora){
   const visto = fecha(m.actualizado) || 0;
   const trabajando = m.estado === 'trabajando' && ahora - visto < 30 * 60000;       // si la tarea se cayó, no se queda "trabajando" para siempre
   const ultimo = (m.reportes || [])[0], nuevo = !!ultimo && leidoDe(m.id) !== ultimo.id;
   const frases = Array.isArray(m.frases) ? m.frases : [];
   const seg = ahora / 1000, frase = frases.length && seg % 50 < 9 ? frases[Math.floor(seg / 50) % frases.length] : '';   // de vez en cuando dice algo suyo
+  const libre = ratoLibre(m, ahora);
   return {
     id: 'monito-' + m.id, monito: m.id, nombre: m.nombre || m.id, rol: 'programado', fijo: true,
-    area: trabajando ? (m.area || 'internet') : (m.casa || 'descanso'),
-    actividad: trabajando ? (m.actividad || 'Trabajando') : nuevo ? '¡Traigo resumen nuevo!' : frase,
-    estado: trabajando ? 'trabajando' : nuevo ? 'terminado' : 'esperando',
+    area: trabajando ? (m.area || 'internet') : libre.area,
+    actividad: trabajando ? (m.actividad || 'Trabajando') : nuevo ? '¡Traigo resumen nuevo!' : (frase || libre.actividad || ''),
+    estado: trabajando ? 'trabajando' : libre.area === 'descanso' ? 'esperando' : libre.actividad ? 'por su cuenta' : nuevo ? 'terminado' : 'esperando',
+    tarea: trabajando, plan: trabajando ? '' : (libre.actividad || 'En su lugar'),
     modelo: m.modelo, aspecto: m.aspecto, equipo: m.horario || 'Tarea programada',
     actualizado: new Date(ahora).toISOString(), ultima_actividad: m.actualizado,
   };
@@ -2254,7 +2266,7 @@ function fichaMonito(a, cual){
   const reportes = m.reportes || [], r = reportes.find(x => x.id === cual) || reportes[0];
   let html = (m.descripcion ? `<p>${esc(m.descripcion)}</p>` : '') +
     [['Rol', '◆ Tarea programada (no se va)'], ['Cuándo trabaja', m.horario || '—'], ['Vive en', NOMBRE_AREA[m.casa] || 'Descanso'],
-     ['Ahora', a.estadoTxt === 'trabajando' ? (a.textoPendiente || 'Trabajando') : 'Descansando'],
+     ['Ahora', a.enTarea ? 'En su tarea: ' + (a.textoPendiente || 'trabajando') : a.plan + ' (por su cuenta)'],
      ['Último resumen', reportes[0] ? (reportes[0].fecha || reportes[0].id) : 'todavía ninguno']]
       .map(([k, v]) => `<div class="fila"><span>${esc(k)}</span><span>${esc(v)}</span></div>`).join('');
   html += r ? htmlReporte(r) : '<p class="vacio" style="margin-top:14px">Todavía no trae ningún resumen. Aparecerá aquí cuando corra su tarea.</p>';
