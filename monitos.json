@@ -1,9 +1,9 @@
 {
-  "actualizado": "2026-11-15T17:51:05Z",
+  "actualizado": "2026-11-15T18:06:36Z",
   "monitos": [
     {
       "actividad": "",
-      "actualizado": "2026-11-15T03:56:00Z",
+      "actualizado": "2026-11-15T18:06:30Z",
       "area": "internet",
       "aspecto": "gorra_roja",
       "casa": "terrazas",
@@ -91,6 +91,20 @@
               "url": "https://racer.com/2026/11/14/herrera-wins-postponed-vegas-race-kalitta-capps-glenn-and-herrera-qualify-no-1-at-nhra-finals-in-pomona"
             },
             {
+              "fuente": "Drag Racing List",
+              "texto": "Llegó a Pomona 107 puntos arriba de Kalitta. Según Drag Racing List, una ventaja de 121 o más después de calificar le asegura el título.",
+              "tipo": "reglamento",
+              "titulo": "Langdon, con 107 puntos",
+              "url": "https://www.draglist.com/2026/11/13/nhra-pomona-finals-weather-report-and-points-outlook/"
+            },
+            {
+              "fuente": "Racer",
+              "texto": "El líder de Funny Car arranca noveno y abre contra Daniel Wilkerson. Vandergriff está a 39 puntos.",
+              "tipo": "próximo evento",
+              "titulo": "Hagan abre contra Wilkerson",
+              "url": "https://racer.com/2026/11/14/herrera-wins-postponed-vegas-race-kalitta-capps-glenn-and-herrera-qualify-no-1-at-nhra-finals-in-pomona"
+            },
+            {
               "texto": "Son las luces que arrancan la carrera: primero las amarillas y al final la verde. Salir antes de la verde es falso arranque y el pilotaje queda fuera.",
               "tipo": "cómo funciona",
               "titulo": "El árbol de luces"
@@ -109,37 +123,71 @@
               "texto": "Son poco más de 400 metros. Ahí se mide el tiempo de paso y la velocidad al cruzar la meta.",
               "tipo": "cómo funciona",
               "titulo": "El cuarto de milla"
-            },
-            {
-              "texto": "Top Fuel, Funny Car, Pro Stock y Pro Stock Motorcycle son las categorías que se definen en las finales de NHRA.",
-              "tipo": "cómo funciona",
-              "titulo": "Las clases de Pomona"
             }
           ],
-          "cierre": "Mañana el domingo define campeones. Aquí estaré con la nota. ¡Luz verde!",
-          "creado": "2026-11-15T03:55:00Z",
+          "cierre": "Hoy el domingo define campeones. Aquí estaré con la nota. ¡Luz verde!",
+          "creado": "2026-11-15T18:04:00Z",
+          "enviado": "2026-11-15T18:06:00Z",
+          "envios": [
+            {
+              "para": "almacen",
+              "texto": "Van 5 noticias y 12 cápsulas; la principal es Herrera ganando la final pospuesta de Las Vegas, y Pomona define campeones hoy.",
+              "tipo": "archivo",
+              "titulo": "Resumen del 15 de noviembre de 2026"
+            },
+            {
+              "para": "noticias",
+              "texto": "- Herrera gana la final pospuesta de Las Vegas (14 nov)\n- Kalitta, provisional No. 1 en Top Fuel; Langdon sigue arriba por 107 (14 nov)\n- Glenn, a un paso del bicampeonato de Pro Stock (14 nov)\n- Capps califica No. 1 en Funny Car; Hagan noveno (14 nov)\n- Pomona define campeones hoy: sin resultados de finales todavía",
+              "tipo": "noticias",
+              "titulo": "Noticias de hoy para la pantalla"
+            },
+            {
+              "para": "calleros",
+              "texto": "Hoy domingo se corren las eliminatorias finales de Pomona y se definen los campeones. Glenn necesita ganar la primera ronda para su bicampeonato de Pro Stock, y Langdon lleva 107 puntos de ventaja sobre Kalitta en Top Fuel. Todavía no hay resultados del domingo.",
+              "tipo": "nota",
+              "titulo": "Lo más importante de hoy"
+            },
+            {
+              "para": "cerebro delta",
+              "texto": "Según Drag Racing List, citando a Dragzine, una ventaja de 121 puntos o más después de calificar asegura el título de Top Fuel para Shawn Langdon. Langdon llegaba 107 puntos arriba.",
+              "tipo": "dato",
+              "titulo": "Dato para recordar: título de Top Fuel",
+              "url": "https://www.draglist.com/2026/11/13/nhra-pomona-finals-weather-report-and-points-outlook/"
+            }
+          ],
           "fecha": "15 de noviembre de 2026",
-          "intro": "Pomona sigue caliente, jefe, pero esta ronda no encontré resultados del domingo: lo más reciente que confirmé es del sábado 14. Lo de abajo va con su fecha, y lo que no pude reconfirmar lo marco como tal.",
+          "intro": "Pomona sigue caliente, jefe. Hoy domingo se define el campeonato, pero todavía no encontré resultados de las finales. Lo más reciente que confirmé es del sábado 14 de noviembre. La ronda de hoy no trajo nada nuevo sobre Chihuahua, así que esa fecha sigue sin reconfirmar.",
           "puntos": [
             {
+              "cuando": "14 de noviembre",
               "fuente": "Speed Sport",
               "resumen": "Gaige Herrera venció a Richard Gadson con 6.701 segundos a 201.13 mph en la final que se corrió en Pomona. Gadson llegaba con 55 puntos de ventaja en el campeonato de Pro Stock Motorcycle.",
               "titulo": "Herrera gana la final pospuesta de Las Vegas",
               "url": "https://speedsport.com/drag-racing/nhra/herrera-wins-make-up-race-kalitta-capps-glenn-speed/"
             },
             {
+              "cuando": "14 de noviembre",
               "fuente": "Competition Plus",
               "resumen": "Doug Kalitta marcó 3.677 segundos a 340.39 mph el viernes. La lluvia canceló la segunda sesión y solo le recortó cuatro puntos de bono a Shawn Langdon, que lidera 2,630 a 2,523.",
               "titulo": "Kalitta, provisional No. 1 en Top Fuel",
               "url": "https://competitionplus.com/doug-kalitta-grabs-provisional-no-1-at-nhra-pomona-finals-as-rain-shortens-championship-chase/"
             },
             {
+              "cuando": "13 de noviembre",
+              "fuente": "Drag Racing List",
+              "resumen": "Según Drag Racing List, Langdon llegó a Pomona 107 puntos arriba de Kalitta. Citando a Dragzine, la lista dice que una ventaja de 121 puntos o más después de calificar le asegura el título.",
+              "titulo": "Langdon llegó con 107 puntos de ventaja y necesita margen",
+              "url": "https://www.draglist.com/2026/11/13/nhra-pomona-finals-weather-report-and-points-outlook/"
+            },
+            {
+              "cuando": "14 de noviembre",
               "fuente": "Competition Plus",
               "resumen": "Dallas Glenn quedó No. 1 con 6.512 segundos a 208.42 mph. Según Competition Plus, con ganar la primera ronda del domingo asegura su segundo título consecutivo.",
               "titulo": "Glenn, a un paso del bicampeonato de Pro Stock",
               "url": "https://competitionplus.com/dallas-glenn-puts-second-straight-nhra-pro-stock-championship-within-reach-at-pomona/"
             },
             {
+              "cuando": "14 de noviembre",
               "fuente": "Racer",
               "resumen": "Racer reporta a Ron Capps como No. 1 en Pomona. El líder Matt Hagan quedó noveno y abre contra Daniel Wilkerson, con Jordan Vandergriff a 39 puntos. Los campeones se definen el domingo.",
               "titulo": "Capps califica No. 1 en Funny Car",
@@ -192,20 +240,20 @@
       ],
       "memoria": [
         {
-          "actualizado": "2026-11-15T03:55:00Z",
-          "texto": "- Sirvieron (vistos en búsqueda): Speed Sport, Racer, Speedway Media (comunicado oficial NHRA, 14 nov), Ocho Columnas.\n- competitionplus.com: aparece en búsqueda, pero no abre desde esta sesión (no resuelve el dominio).\n- nhra.com: aparece en búsqueda; no lo pude abrir a fondo hoy.\n- tiempo.com.mx: calendario Arrancones VIP 2026 solo hasta la novena fecha (20 sept).\n- Búsquedas genéricas en México (arrancones, noviembre 2026): sin resultados recientes útiles.",
+          "actualizado": "2026-11-15T18:05:00Z",
+          "texto": "- Sirvieron hoy: Draglist (calificación del sábado 14 y reporte del 13), Racer, Speed Sport, Competition Plus, Speedway Media, Ocho Columnas.\n- Sin cobertura del domingo 15 en la búsqueda: no encontré resultados de finales de Pomona.\n- NHRA.com: el índice solo muestra noticias de septiembre; no sirvió para lo de hoy.\n- tiempo.com.mx: calendario Arrancones VIP solo hasta la novena fecha (20 sept).\n- Búsquedas genéricas de México: sin resultados de noviembre fuera de Chihuahua.",
           "titulo": "Fuentes",
           "id": "fuentes"
         },
         {
-          "actualizado": "2026-11-15T03:55:00Z",
-          "texto": "- Domingo 15 nov, Pomona: resultados de eliminatorias finales.\n- Top Fuel: campeonato entre Kalitta y Langdon (Langdon lidera 2,630 a 2,523).\n- Pro Stock: Glenn necesita ganar la primera ronda del domingo para su bicampeonato.\n- Funny Car: Capps No. 1; Hagan noveno, Vandergriff a 39 puntos; sin resultado final.\n- Pro Stock Motorcycle: confirmar campeonato tras la final pospuesta de Herrera.\n- Chihuahua, onceava fecha Arrancones VIP, domingo 15 nov (Stege vs Valles): ver resultados.\n- Confirmar fecha de Chihuahua con fuente oficial; no lo reconfirmé hoy.",
+          "actualizado": "2026-11-15T18:05:00Z",
+          "texto": "- Domingo 15 nov, Pomona: sin resultados de eliminatorias finales en la búsqueda de hoy; revisar NHRA.com o Competition Plus para confirmar campeones.\n- Top Fuel: Langdon lidera a Kalitta por 107 puntos antes de Pomona; según Drag Racing List, 121 o más después de calificar asegura el título de Langdon. Confirmar cuál aplicó.\n- Pro Stock: Glenn necesita ganar la primera ronda del domingo para su bicampeonato.\n- Funny Car: Capps No. 1; Hagan noveno, Vandergriff a 39 puntos; sin resultado final.\n- Pro Stock Motorcycle: confirmar campeonato tras la final pospuesta de Herrera (Gadson llegaba con 55 puntos de ventaja).\n- Chihuahua, onceava fecha Arrancones VIP, domingo 15 nov (Stege vs Valles): ver resultados. La búsqueda de hoy no encontró cobertura; tiempo.com.mx solo llega a la novena fecha (20 sept).\n- Confirmar fecha de Chihuahua con fuente oficial; no lo reconfirmé hoy.",
           "titulo": "Pendientes",
           "id": "pendientes"
         },
         {
-          "actualizado": "2026-11-15T03:55:00Z",
-          "texto": "- 2026-11-14: Herrera gana final pospuesta de Las Vegas (Speed Sport).\n- 2026-11-14: Kalitta provisional No. 1 en Top Fuel (Competition Plus).\n- 2026-11-14: Glenn provisional No. 1 en Pro Stock (Competition Plus).\n- 2026-11-14: Capps No. 1 en Funny Car (Racer).\n- 2026-11-14: Arrancones VIP Chihuahua, onceava fecha, domingo 15 nov (Ocho Columnas).\n- 2026-11-15: búsqueda sin resultados nuevos de Pomona ni de México.",
+          "actualizado": "2026-11-15T18:05:00Z",
+          "texto": "- 2026-11-15: Langdon con 107 puntos de ventaja antes de Pomona (Drag Racing List, 13 nov).\n- 2026-11-14: Herrera gana final pospuesta de Las Vegas (Speed Sport).\n- 2026-11-14: Kalitta provisional No. 1 en Top Fuel (Competition Plus).\n- 2026-11-14: Glenn provisional No. 1 en Pro Stock (Competition Plus).\n- 2026-11-14: Capps No. 1 en Funny Car; Hagan noveno (Racer).\n- 2026-11-14: Arrancones VIP Chihuahua, onceava fecha, domingo 15 nov (Ocho Columnas).",
           "titulo": "Ya lo conté",
           "id": "ya-contado"
         }
@@ -213,6 +261,18 @@
     }
   ],
   "avisos": [
+    {
+      "creado": "2026-11-15T18:02:00Z",
+      "texto": "El túnel central ahora es parte de un periférico que va de Internet a la Ampliación, con siete estaciones. Los pasillos de arriba son el doble de anchos y la Ampliación se mudó hasta abajo.",
+      "titulo": "Periférico nuevo y pasillos más anchos",
+      "id": "2026-11-15-periferico"
+    },
+    {
+      "creado": "2026-11-15T18:01:00Z",
+      "texto": "Con el botón «＋ Sesión» se copia un texto que, pegado en cualquier sesión de Claude, hace que se registre sola en la oficina.",
+      "titulo": "Pase para agregar sesiones",
+      "id": "2026-11-15-pase"
+    },
     {
       "creado": "2026-11-15T13:15:00Z",
       "texto": "El túnel central conecta la Oficina Calleros, el Cerebro Delta, la Oficina Terrazas, el Centro de Pensado y la Sala de Noticias. Cada cuarto tiene una estación con buzón: tócala para ver lo que llegó.",
