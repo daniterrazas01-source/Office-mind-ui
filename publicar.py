@@ -12,7 +12,8 @@ La página web de la oficina lee este archivo; por eso todo lo que hay aquí es 
                                                        <carpeta>/monitos/<id>/reportes/<fecha>.json,
                                                        <carpeta>/monitos/<id>/memoria/<nota>.json,
                                                        <carpeta>/avisos/<id>.json y
-                                                       <carpeta>/envios/<id>.json, lo que viaja por el túnel)
+                                                       <carpeta>/envios/<id>.json, lo que viaja por el periférico, y
+                                                       <carpeta>/visitas/<id>.json, las sesiones con pase)
 """
 import json
 import subprocess
@@ -95,6 +96,13 @@ def sincronizar(carpeta):
         envios[e["id"]] = e
     if envios:
         datos["envios"] = sorted(envios.values(), key=lambda e: str(e.get("creado") or e.get("id")), reverse=True)[:40]
+    visitas = []                                           # sesiones que entraron con pase
+    for rr in glob.glob(os.path.join(carpeta, "visitas", "*.json")):
+        v = documento(rr)
+        v["id"] = os.path.basename(rr)[:-5]
+        visitas.append(v)
+    if os.path.isdir(os.path.join(carpeta, "visitas")):
+        datos["visitas"] = sorted(visitas, key=lambda v: str(v.get("actualizado") or ""), reverse=True)[:40]
     if json.dumps(datos, sort_keys=True, ensure_ascii=False) == antes:
         print("sin cambios")
         return
