@@ -10,8 +10,9 @@ La página web de la oficina lee este archivo; por eso todo lo que hay aquí es 
   python3 publicar.py sincronizar <carpeta>           (copia lo que ArtifactData guardó con out_dir:
                                                        <carpeta>/monitos/<id>.json y
                                                        <carpeta>/monitos/<id>/reportes/<fecha>.json,
-                                                       <carpeta>/monitos/<id>/memoria/<nota>.json y
-                                                       <carpeta>/avisos/<id>.json)
+                                                       <carpeta>/monitos/<id>/memoria/<nota>.json,
+                                                       <carpeta>/avisos/<id>.json y
+                                                       <carpeta>/envios/<id>.json, lo que viaja por el túnel)
 """
 import json
 import subprocess
@@ -87,6 +88,13 @@ def sincronizar(carpeta):
         avisos.append(a)
     if avisos:
         datos["avisos"] = sorted(avisos, key=lambda a: str(a.get("creado") or a.get("id")), reverse=True)[:20]
+    envios = {e.get("id"): e for e in datos.get("envios", [])}   # envíos por el túnel: se juntan con los que ya había
+    for rr in glob.glob(os.path.join(carpeta, "envios", "*.json")):
+        e = documento(rr)
+        e["id"] = os.path.basename(rr)[:-5]
+        envios[e["id"]] = e
+    if envios:
+        datos["envios"] = sorted(envios.values(), key=lambda e: str(e.get("creado") or e.get("id")), reverse=True)[:40]
     if json.dumps(datos, sort_keys=True, ensure_ascii=False) == antes:
         print("sin cambios")
         return
