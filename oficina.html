@@ -152,7 +152,7 @@ textarea.campo{min-height:70px;resize:vertical}
 <header>
   <div class="titulo"><span class="logo"></span>OFICINA · MONITOREO</div>
   <div class="senal" id="senal"><span class="punto"></span><span id="senalTexto">Conectando…</span></div>
-  <nav class="pisos"><button data-fila="0">Planta principal</button><button data-fila="21">Calleros · Cerebro</button><button data-fila="37">Ampliación</button></nav>
+  <nav class="pisos"><button data-fila="0">Planta principal</button><button data-fila="21">Calleros · Cerebro</button><button data-fila="37">Ampliación</button><button data-fila="59">Espacios libres</button></nav>
   <div class="derecha"><span id="ultimo"></span><span id="cuantos"></span><span id="reloj"></span></div>
 </header>
 <div id="tip"></div>
@@ -193,7 +193,7 @@ import { estadoDeSesiones, modeloDeRespuesta } from './src/sesiones.js';
    ===================================================================== */
 
 /* ---------- Ajustes ---------- */
-const T = 16, COLS = 32, ROWS = 60, W = COLS * T, H = ROWS * T;
+const T = 16, COLS = 32, ROWS = 74, W = COLS * T, H = ROWS * T;
 const FILAS_ARRIBA = 22;        // la planta principal; lo demás se ve bajando con el scroll
 const SEGUNDOS_INACTIVO = 60;   // sin reportar más de esto -> Descanso
 /* De dónde lee: en la laptop, estado.json del servidor local; en el teléfono (GitHub Pages),
@@ -266,8 +266,19 @@ const MAPA = (() => {
   llenar(1, 38, 13, 38, '='); llenar(16, 38, 30, 38, '=');
   llenar(1, 39, 30, 40, 'h');
   llenar(1, 42, 9, 42, '='); llenar(11, 42, 20, 42, '='); llenar(22, 42, 30, 42, '=');
-  llenar(1, 43, 9, 58, 't'); llenar(11, 43, 20, 58, 'v'); llenar(22, 43, 30, 58, 'v');   // t = Oficina Terrazas
-  for (const x of [4, 5, 15, 16, 25, 26]){ m[41][x] = 'D'; m[42][x] = 'D'; }
+  llenar(1, 43, 9, 58, 't');                                  // t = Oficina Terrazas (larga)
+  llenar(11, 43, 20, 58, 'h');                                // gran pasillo, con el túnel en medio
+  llenar(22, 43, 30, 50, 'v');                                // espacio libre de siempre
+  llenar(22, 52, 30, 52, '='); llenar(22, 53, 30, 58, 'v');   // otro espacio libre debajo
+  for (const x of [4, 5, 25, 26]){ m[41][x] = 'D'; m[42][x] = 'D'; }
+  // ---- Planta de hasta abajo: pasillo 4 y tres cuartos libres más ----
+  llenar(1, 60, 30, 60, '='); llenar(1, 61, 30, 62, 'h');
+  for (const x of [12, 13, 14, 17, 18, 19]) for (const y of [41, 42, 59, 60]) m[y][x] = 'D';   // entradas anchas del gran pasillo
+  for (const x of [25, 26]){ m[59][x] = 'D'; m[60][x] = 'D'; }                                 // el espacio de abajo a la derecha sale al pasillo 4
+  for (let y = 41; y <= 60; y++){ m[y][15] = 'u'; m[y][16] = 'u'; }                            // u = túnel central (por ahora no se camina)
+  llenar(1, 64, 9, 64, '='); llenar(11, 64, 20, 64, '='); llenar(22, 64, 30, 64, '=');
+  llenar(1, 65, 9, 72, 'v'); llenar(11, 65, 20, 72, 'v'); llenar(22, 65, 30, 72, 'v');
+  for (const x of [4, 5, 15, 16, 25, 26]){ m[63][x] = 'D'; m[64][x] = 'D'; }
   return m;
 })();
 const CAMINABLE = new Set(['h', 'b', 'e', 'i', 'j', 'd', 'D', 'E', 'c', 'x', 'v', 't']);
@@ -848,8 +859,11 @@ function construirMuebles(){
   /* ===== Pasillos y ampliación (la mudanza) ===== */
   planta(1, 23); caja(30, 23); caja(30, 24, true); caja(29, 23);
   caja(1, 39); caja(2, 39, true); escalera(30, 39); cubeta(30, 40);
-  escalera(19, 44); caja(12, 49); caja(13, 49, true); cubeta(18, 49);
-  caja(12, 57); caja(13, 57, true); cubeta(19, 53); escalera(28, 54); caja(29, 57); caja(23, 56, true);
+  escalera(28, 54); caja(29, 57); caja(23, 56, true);
+  planta(11, 43); planta(20, 43); planta(11, 58); planta(20, 58);                      // gran pasillo
+  planta(1, 61); caja(30, 61); caja(30, 62, true); caja(29, 61);                        // pasillo 4
+  caja(2, 71); caja(3, 71, true); cubeta(8, 66); escalera(19, 66); caja(12, 71); cubeta(13, 70);
+  caja(29, 66); caja(29, 67, true); caja(23, 71); escalera(23, 66);
   caja(29, 44); caja(29, 45, true); caja(23, 49); cubeta(27, 47);
   /* ===== Oficina Terrazas: archivos en estantes, y abajo el taller de DragTree ===== */
   estanteArchivos(18, 0, 1, 3); estanteArchivos(98, 1, 6, 8);
@@ -868,7 +882,8 @@ function construirMuebles(){
   });
   planta(1, 50); planta(9, 43); planta(9, 58); planta(1, 58);
   tallerDragTree();
-  caballete(16, 46, 'espacio-b'); caballete(25, 46, 'espacio-c');
+  caballete(25, 46, 'espacio-c'); caballete(25, 55, 'espacio-b');
+  caballete(5, 68, 'espacio-d'); caballete(16, 68, 'espacio-e'); caballete(25, 68, 'espacio-f');
 
   /* Sillas y pufs de cada lugar */
   for (const lista of Object.values(LUGARES)) for (const l of lista){ if (l.silla) silla(l); if (l.puf) puf(l); }
@@ -883,9 +898,10 @@ const CARA = { biblioteca: '#d4c3a0', escritorio: '#e2d4b4', internet: '#b8c3d4'
                calleros: '#d8c39b', cerebro: '#3a3157', vacio: '#cfcbc2', terrazas: '#e9d9bd' };
 function caraDe(x, y){
   if (y === 1) return x <= 9 ? CARA.biblioteca : x <= 20 ? CARA.escritorio : CARA.internet;
-  if (y === 10 || y === 22 || y === 38) return CARA.pasillo;
+  if (y === 10 || y === 22 || y === 38 || y === 60) return CARA.pasillo;
   if (y === 26) return x <= 12 ? CARA.calleros : CARA.cerebro;
-  if (y === 42) return x <= 9 ? CARA.terrazas : CARA.vacio;
+  if (y === 42) return x <= 9 ? CARA.terrazas : x <= 20 ? CARA.pasillo : CARA.vacio;
+  if (y === 52 || y === 64) return CARA.vacio;
   return x <= 14 ? CARA.sala : CARA.descanso;
 }
 function baldosa(x, y){
@@ -951,6 +967,9 @@ function baldosa(x, y){
         if ((x + fila * 3) % 4 === 0) R(px + ((fila * 5) % 12), yy + 1, 1, 6, '#a57a43');          // junta entre tablas
         if ((x * 7 + fila * 5) % 11 === 0){ R(px + 6, yy + 3, 3, 2, '#b3864c'); R(px + 7, yy + 3, 1, 1, '#8f6836'); }   // nudo
       }
+      break;
+    case 'u':   // túnel central: piso de metal oscuro (la banda y los rieles se pintan aparte)
+      R(px, py, T, T, '#20222c');
       break;
     case 'v':   // concreto sin terminar
       R(px, py, T, T, ((x + y) & 1) ? '#a8a59e' : '#a39f98');
@@ -1028,8 +1047,13 @@ function pintarEstatica(){
   // Oficina Terrazas: tapete verde tipo pasto
   R(40, 770, 96, 34, '#4f6d3c'); R(42, 772, 92, 30, '#6a8f50');
   for (let i = 0; i < 22; i++) R(46 + (i * 13) % 86, 775 + (i * 7) % 24, 1, 2, '#83a96a');
-  cinta(200, 704, 70, 44); cinta(372, 700, 80, 34); cinta(440, 768, 44, 36);
-  cinta(186, 846, 96, 62); cinta(362, 838, 70, 76);
+  cinta(372, 700, 80, 34); cinta(440, 768, 44, 36); cinta(366, 860, 70, 56);
+  cinta(40, 1076, 76, 44); cinta(196, 1088, 64, 52); cinta(380, 1072, 84, 46);
+  // Gran pasillo: una raya amarilla a cada lado del túnel y flechas en el piso (bajada a la izquierda, subida a la derecha)
+  for (let y = 692; y < 940; y += 8){ R(236, y, 1, 5, '#e6c229'); R(275, y, 1, 5, '#e6c229'); }
+  const flecha = (cx, cy, abajo) => { for (let i = 0; i < 4; i++){ const yy = abajo ? cy + 3 - i : cy + i; R(cx - i, yy, 1 + i * 2, 1, '#b09f7c'); } R(cx - 1, abajo ? cy - 5 : cy + 4, 3, 5, '#b09f7c'); };
+  for (const cy of [724, 804, 884]){ flecha(208, cy, true); flecha(304, cy, false); }
+  pintarTunel();
   // Oficina Terrazas: pista de arrancones (dos carriles, línea de salida y orilla a cuadros)
   R(20, 836, 136, 64, '#22242b'); R(21, 837, 134, 62, '#3b3e48');
   for (let i = 0; i < 40; i++) R(24 + (i * 37) % 128, 839 + (i * 23) % 58, 2, 1, '#454852');
@@ -1114,7 +1138,47 @@ function teleSala(t){
     R(168, 218, 20, 1, '#9fb3cf');
   } else R(214, 232, 1, 1, '#d24040');
 }
+/* ---------- Túnel central: una banda que baja del pasillo de la ampliación al pasillo 4 ----------
+   Por ahora es de adorno (pasan paquetes de muestra). Más adelante puede llevar archivos o agentes. */
+const TUNEL = { x: 240, y0: 656, y1: 976 };
+function pintarTunel(){
+  const { x, y0, y1 } = TUNEL, alto = y1 - y0;
+  R(x, y0, 32, alto, '#20222c');
+  R(x, y0, 4, alto, '#7c8596'); R(x, y0, 1, alto, '#aab3c4'); R(x + 3, y0, 1, alto, '#3a3f4d');             // riel izquierdo
+  R(x + 28, y0, 4, alto, '#7c8596'); R(x + 28, y0, 1, alto, '#3a3f4d'); R(x + 31, y0, 1, alto, '#565e6e');   // riel derecho
+  R(x + 6, y0, 20, alto, '#15161d');                                                                          // la banda
+  for (let y = y0; y < y1; y += 8) R(x + 6, y, 20, 1, '#23252f');
+  for (const yy of [y0, y1 - 32]){                                                                             // bocas: marco con franjas de aviso
+    g.fillStyle = 'rgba(0,0,0,0.45)'; g.fillRect(x + 4, yy, 24, 32);
+    R(x - 4, yy - 6, 40, 11, K); R(x - 3, yy - 5, 38, 9, '#4a5368'); R(x - 3, yy - 5, 38, 1, '#66718a');
+    for (let i = 0; i < 7; i++) R(x - 1 + i * 5, yy - 2, 3, 4, i % 2 ? '#15161d' : '#e6c229');
+    R(x - 4, yy - 6, 5, 39, K); R(x - 3, yy - 5, 3, 37, '#4a5368'); R(x + 31, yy - 6, 5, 39, K); R(x + 32, yy - 5, 3, 37, '#4a5368');
+  }
+}
+function tunel(t){
+  const { x, y0, y1 } = TUNEL, largo = y1 - y0 - 12;
+  for (let k = 0; k < 13; k++){                                     // flechitas que bajan por la banda
+    const y = Math.round(y0 + 4 + ((k * 24 + t * 30) % largo)), c = '#2f6f8f';
+    R(x + 11, y, 2, 1, c); R(x + 19, y, 2, 1, c); R(x + 13, y + 1, 2, 1, c); R(x + 17, y + 1, 2, 1, c); R(x + 15, y + 2, 2, 1, c);
+  }
+  for (let i = 0; i < 3; i++){                                      // paquetes de muestra: carpeta, hoja y caja
+    const y = Math.round(y0 + 2 + ((t * 34 + i * 107) % largo)), px = x + 11;
+    if (i === 0){ R(px, y, 10, 8, K); R(px + 1, y + 1, 8, 6, '#e2b84a'); R(px + 1, y + 1, 4, 1, '#f6d57a'); R(px + 1, y + 3, 8, 1, '#b88c12'); }
+    else if (i === 1){ R(px + 1, y, 8, 10, K); R(px + 2, y + 1, 6, 8, '#f7f3ea'); R(px + 3, y + 3, 4, 1, '#9a9488'); R(px + 3, y + 5, 4, 1, '#9a9488'); R(px + 3, y + 7, 3, 1, '#9a9488'); }
+    else { R(px, y, 10, 9, K); R(px + 1, y + 1, 8, 7, '#c79a5b'); R(px + 1, y + 1, 8, 2, '#dab06f'); R(px + 4, y + 1, 2, 7, '#ead9ab'); }
+  }
+  for (let y = y0 + 36, n = 0; y < y1 - 36; y += 16, n++){          // lucecitas de los rieles, en fila
+    const on = (n - Math.floor(t * 6)) % 5 === 0;
+    R(x + 1, y, 2, 2, on ? '#7fe7ff' : '#2a4a5a'); R(x + 29, y, 2, 2, on ? '#7fe7ff' : '#2a4a5a');
+  }
+  g.fillStyle = 'rgba(143,211,255,0.07)'; g.fillRect(x + 4, y0 + 32, 24, y1 - y0 - 64);   // cubierta de vidrio
+  g.fillStyle = 'rgba(255,255,255,0.10)'; g.fillRect(x + 8, y0 + 32, 2, y1 - y0 - 64);
+  for (let y = y0 + 56; y < y1 - 40; y += 32){                      // costillas de la cubierta
+    R(x - 2, y, 36, 4, K); R(x - 1, y + 1, 34, 2, '#8fa3b8'); R(x - 1, y + 1, 34, 1, '#c5d3e2');
+  }
+}
 function paredesAnimadas(t){
+  tunel(t);
   ventana(196, 17, 42, 12, t);
   relojPared(264, 24);
   pantallaGrande(t);
@@ -2025,7 +2089,9 @@ async function cargarCalleros(){
 
 const EXTRAS = [];   // letreros que no son áreas de trabajo
 function letreroExtra(x, y, texto){ const el = document.createElement('div'); el.className = 'letrero'; el.textContent = texto; capa.appendChild(el); EXTRAS.push({ el, x, y }); return el; }
-const LETREROS_ESPACIO = { 'espacio-b': letreroExtra(256, 664, ''), 'espacio-c': letreroExtra(416, 664, '') };
+const LETREROS_ESPACIO = { 'espacio-c': letreroExtra(416, 664, ''), 'espacio-b': letreroExtra(416, 840, ''),
+                           'espacio-d': letreroExtra(80, 1016, ''), 'espacio-e': letreroExtra(256, 1016, ''), 'espacio-f': letreroExtra(416, 1016, '') };
+letreroExtra(256, 642, 'TÚNEL CENTRAL');
 letreroExtra(120, 600, '↓ AMPLIACIÓN (EN OBRA)');
 function letrerosEspacios(){
   for (const [id, el] of Object.entries(LETREROS_ESPACIO)){
