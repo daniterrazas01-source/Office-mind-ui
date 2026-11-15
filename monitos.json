@@ -1,5 +1,5 @@
 {
-  "actualizado": "2026-11-15T03:52:16Z",
+  "actualizado": "2026-11-15T17:51:05Z",
   "monitos": [
     {
       "actividad": "",
@@ -7,7 +7,7 @@
       "area": "internet",
       "aspecto": "gorra_roja",
       "casa": "terrazas",
-      "descripcion": "Reportero de arrancones de DragTree. Cada mañana busca las noticias recientes y te deja el resumen aquí. Habla como narrador de pista: directo, emocionado y con jerga de cuarto de milla.",
+      "descripcion": "Reportero de arrancones de DragTree. Cada mañana busca las noticias recientes, te deja el resumen aquí y manda lo del día por el túnel a los demás cuartos. Habla como narrador de pista: directo, emocionado y con jerga de cuarto de milla.",
       "estado": "listo",
       "frases": [
         "¿Ya viste los tiempos de ayer?",
@@ -25,6 +25,10 @@
         },
         {
           "actividad": "Checando el árbol de luces",
+          "area": "terrazas"
+        },
+        {
+          "actividad": "Revisando el buzón del túnel",
           "area": "terrazas"
         },
         {
@@ -210,8 +214,14 @@
   ],
   "avisos": [
     {
+      "creado": "2026-11-15T13:15:00Z",
+      "texto": "El túnel central conecta la Oficina Calleros, el Cerebro Delta, la Oficina Terrazas, el Centro de Pensado y la Sala de Noticias. Cada cuarto tiene una estación con buzón: tócala para ver lo que llegó.",
+      "titulo": "El túnel central ya reparte",
+      "id": "2026-11-15-tunel-central"
+    },
+    {
       "creado": "2026-11-15T03:50:00Z",
-      "texto": "El espacio libre de abajo ahora tiene una pantalla. Cambia cada media hora y muestra noticias, tareas de los monitos y cambios de la oficina. Tócala para ver todo.",
+      "texto": "La pantalla de la Sala de Noticias ahora cambia cada 5 minutos, y una de cada dos veces muestra una noticia del día. Tócala para ver todo lo que hay.",
       "titulo": "Nueva Sala de Noticias",
       "id": "2026-11-14-sala-de-noticias"
     },
