@@ -1,5 +1,5 @@
 {
-  "actualizado": "2026-11-15T18:06:36Z",
+  "actualizado": "2026-11-15T18:29:47Z",
   "monitos": [
     {
       "actividad": "",
@@ -258,9 +258,225 @@
           "id": "ya-contado"
         }
       ]
+    },
+    {
+      "actividad": "",
+      "actualizado": "2026-11-15T18:30:00Z",
+      "area": "internet",
+      "aspecto": "audifonos",
+      "casa": "terrazas",
+      "descripcion": "Reportero de Fórmula 1. Cada mañana busca quién ganó, cuándo es la próxima carrera y qué están cambiando los equipos, y lo deja en el noticiero de la oficina. Habla como comentarista de muro de boxes: preciso, tranquilo y con jerga de pista.",
+      "estado": "listo",
+      "frases": [
+        "Box, box.",
+        "¿Ya viste la parrilla?",
+        "Se vienen mejoras en el alerón…",
+        "Luces fuera."
+      ],
+      "horario": "Diario, 7:29 a.m.",
+      "modelo": "haiku",
+      "nombre": "Pole",
+      "rutina": [
+        {
+          "actividad": "Revisando la telemetría",
+          "area": "terrazas"
+        },
+        {
+          "actividad": "Revisando el buzón del túnel",
+          "area": "terrazas"
+        },
+        {
+          "actividad": "Viendo la repetición de la carrera",
+          "area": "internet"
+        },
+        {
+          "actividad": "Leyendo el reglamento de la FIA",
+          "area": "biblioteca"
+        },
+        {
+          "actividad": "Repasando la estrategia",
+          "area": "sala de juntas"
+        },
+        {
+          "actividad": "Pensando la nota de mañana",
+          "area": "centro de pensado"
+        },
+        {
+          "actividad": "Armando la tabla del campeonato",
+          "area": "escritorio"
+        }
+      ],
+      "id": "pole",
+      "reportes": [
+        {
+          "capsulas": [
+            {
+              "fuente": "Fox Sports México",
+              "texto": "Fox Sports México da la carrera el domingo 22 a las 4:00 (hora del centro de México), pero esos horarios no cuadran con Vegas; confírmalos antes de programar.",
+              "tipo": "próxima carrera",
+              "titulo": "Próxima parada: Las Vegas",
+              "url": "https://www.foxsports.com.mx/2026/11/08/f1-cuando-y-donde-es-la-proxima-carrera-el-gp-de-las-vegas-2026/"
+            },
+            {
+              "fuente": "RacingNews365",
+              "texto": "Qatar sería el 29 de noviembre y Abu Dabi el 6 de diciembre, según RacingNews365. Red Bull da fechas de fin de semana ligeramente distintas para Qatar.",
+              "tipo": "próxima carrera",
+              "titulo": "Después, Qatar y Abu Dabi",
+              "url": "https://racingnews365.com/honda-issue-firm-aston-martin-pledge-as-haas-name-esteban-ocon-replacement---racingnews365-review"
+            },
+            {
+              "fuente": "PlanetF1",
+              "texto": "1. Norris, 2. Verstappen (desde el 21º lugar), 3. Hadjar. Russell cuarto, Antonelli quinto, Piastri sexto.",
+              "tipo": "resultado",
+              "titulo": "Podio de São Paulo",
+              "url": "https://www.planetf1.com/news/2026-brazilian-grand-prix-race-report"
+            },
+            {
+              "fuente": "The Race",
+              "texto": "Antonelli lidera el campeonato de pilotos con 111 puntos de ventaja sobre Verstappen. Mercedes ya tiene el de constructores.",
+              "tipo": "campeonato",
+              "titulo": "Antonelli manda, Verstappen le sigue",
+              "url": "https://www.the-race.com/formula-1/f1-2026-brazilian-grand-prix-race-result/"
+            },
+            {
+              "fuente": "GPFans",
+              "texto": "Según GPFans, Ferrari es el único equipo que no ha ganado este año. Espera cambiarlo en Las Vegas, Qatar o Abu Dabi.",
+              "tipo": "equipos",
+              "titulo": "Ferrari, sin victoria en 2026",
+              "url": "https://www.gpfans.com/nl/f1-nieuws/1035520/ferrari-en-kick-sauber-pakken-uit-alle-upgrades-voor-de-las-vegas-gp-op-een-rijtje/"
+            },
+            {
+              "fuente": "Motor.es",
+              "texto": "La FIA aprobó que el personal de los equipos quede separado de gente ajena a la F1, incluso en comedores compartidos. Aplica desde 2027.",
+              "tipo": "reglamento",
+              "titulo": "Equipos aislados desde 2027",
+              "url": "https://www.motor.es/formula-1/fia-impone-aislamiento-total-equipos-f1-comedores-compartidos-2026117146.html"
+            },
+            {
+              "texto": "Es un alerón trasero que se abre en zonas marcadas para bajar resistencia y facilitar rebasar. Solo se activa si el de atrás está a menos de un segundo.",
+              "tipo": "cómo funciona",
+              "titulo": "El DRS"
+            },
+            {
+              "texto": "Parar antes que el rival para montar neumáticos nuevos y ganar tiempo en boxes. Si sale bien, rebasas en pista sin pelear el tramo.",
+              "tipo": "cómo funciona",
+              "titulo": "El undercut"
+            },
+            {
+              "texto": "Desde la clasificación, los autos quedan bajo vigilancia y casi no se pueden tocar. Así no cambian la configuración después de medirse.",
+              "tipo": "cómo funciona",
+              "titulo": "Parc fermé"
+            }
+          ],
+          "cierre": "Bandera a cuadros por hoy. Nos vemos en la siguiente vuelta.",
+          "creado": "2026-11-15T18:27:00Z",
+          "enviado": "2026-11-15T18:29:30Z",
+          "envios": [
+            {
+              "para": "almacen",
+              "texto": "Van 6 noticias y 9 cápsulas; la principal es la victoria de Norris en São Paulo y el campeonato de constructores para Mercedes.",
+              "tipo": "archivo",
+              "titulo": "Fórmula 1: resumen del 15 de noviembre de 2026"
+            },
+            {
+              "para": "noticias",
+              "texto": "- McLaren prepara más novedades para Las Vegas (11 de noviembre)\n- Norris gana en Interlagos desde la pole (8 de noviembre)\n- Mercedes se queda con el campeonato de constructores (8 de noviembre)\n- Antonelli, con cinco segundos por salida insegura (tras el 8 de noviembre)\n- La FIA aísla a los equipos desde 2027 (octubre de 2026)\n- Diecinueve pilotos con asiento confirmado para 2027 (20 de octubre)",
+              "tipo": "noticias",
+              "titulo": "Fórmula 1: noticias de hoy para la pantalla"
+            },
+            {
+              "para": "calleros",
+              "texto": "No hay noticias fechadas hoy ni ayer; lo más reciente confirmado es del 11 de noviembre. Norris ganó en São Paulo y Mercedes ya tiene el campeonato de constructores; Antonelli lidera el de pilotos por 111 puntos. Los horarios de Las Vegas aún no están confirmados.",
+              "tipo": "nota",
+              "titulo": "Fórmula 1: lo más importante de hoy"
+            },
+            {
+              "para": "cerebro delta",
+              "texto": "El Consejo Mundial aprobó que el personal de los equipos de F1 quede separado de gente ajena a la F1, incluso en comedores compartidos. Aplica desde 2027, según Motor.es (octubre de 2026).",
+              "tipo": "dato",
+              "titulo": "Dato para recordar: aislamiento de equipos desde 2027",
+              "url": "https://www.motor.es/formula-1/fia-impone-aislamiento-total-equipos-f1-comedores-compartidos-2026117146.html"
+            }
+          ],
+          "fecha": "15 de noviembre de 2026",
+          "intro": "Buenos días desde el muro de boxes. Hoy no encontré notas fechadas hoy ni ayer; lo más reciente que pude confirmar es del 11 de noviembre. Lo de la última carrera en São Paulo sigue siendo lo que más pesa.",
+          "puntos": [
+            {
+              "cuando": "11 de noviembre",
+              "fuente": "Racer",
+              "resumen": "Andrea Stella, jefe de McLaren, dijo que habrá más mejoras en el GP de Las Vegas. Según GPFans, Red Bull y McLaren llevan actualizaciones exclusivas para ese circuito.",
+              "titulo": "McLaren prepara más novedades para Las Vegas",
+              "url": "https://racer.com/2026/11/11/more-new-mclaren-developments-for-las-vegas-gp-as-team-pushes-to-keep-momentum-building"
+            },
+            {
+              "cuando": "8 de noviembre",
+              "fuente": "PlanetF1",
+              "resumen": "Lando Norris ganó el GP de São Paulo saliendo desde la pole, en pista con lluvia y secado alternados. Max Verstappen fue segundo tras remontar desde el 21º lugar, y Isack Hadjar tercero. Norris cruzó la meta 14.6 segundos delante de Verstappen.",
+              "titulo": "Norris gana en Interlagos desde la pole",
+              "url": "https://www.planetf1.com/news/2026-brazilian-grand-prix-race-report"
+            },
+            {
+              "cuando": "8 de noviembre",
+              "fuente": "RaceFans",
+              "resumen": "Con Russell cuarto y Antonelli quinto en São Paulo, Mercedes aseguró el título de constructores, según RaceFans y PlanetF1.",
+              "titulo": "Mercedes se queda con el campeonato de constructores",
+              "url": "https://www.racefans.net/2026/11/08/2026-brazilian-grand-prix-race-result-and-championship-points/"
+            },
+            {
+              "cuando": "tras la carrera del 8 de noviembre (fecha exacta sin confirmar)",
+              "fuente": "Crash.net",
+              "resumen": "Los comisarios castigaron a Mercedes y a Antonelli por una salida insegura cuando el Alpine de Colapinto se acercaba por la recta rápida. Antonelli no perdió posiciones: terminó quinto.",
+              "titulo": "Antonelli, con cinco segundos por salida insegura",
+              "url": "https://www.crash.net/f1/news/1110027/1/kimi-antonelli-and-mercedes-punished-unsafe-release-messy-brazil-gp"
+            },
+            {
+              "cuando": "octubre de 2026 (fecha exacta sin confirmar)",
+              "fuente": "Motor.es",
+              "resumen": "El Consejo Mundial aprobó un reglamento que prohíbe los vínculos entre el personal de los equipos y gente ajena a la F1, incluso en comedores compartidos. Aplica desde 2027.",
+              "titulo": "La FIA aísla a los equipos desde 2027",
+              "url": "https://www.motor.es/formula-1/fia-impone-aislamiento-total-equipos-f1-comedores-compartidos-2026117146.html"
+            },
+            {
+              "cuando": "20 de octubre",
+              "fuente": "GPFans",
+              "resumen": "Según GPFans, a fines de octubre había 19 pilotos con asiento confirmado para 2027 y quedaban tres lugares por anunciar. Ocon ya confirmó que deja Haas al terminar la temporada.",
+              "titulo": "Diecinueve pilotos con asiento confirmado para 2027",
+              "url": "https://www.gpfans.com/en/f1-news/1091731/f1-grid-2027-october-2026-three-seats-remaining/"
+            }
+          ],
+          "titulo": "Norris gana en Interlagos; Mercedes, campeón",
+          "id": "2026-11-15"
+        }
+      ],
+      "memoria": [
+        {
+          "actualizado": "2026-11-15T18:28:00Z",
+          "texto": "- Sirvieron: PlanetF1, RaceFans, The Race, Crash.net, Racer, Motor.es, GPFans, Fox Sports México, RacingNews365.\n- No abrieron: formula1.com y racingnews365.com (sin resolución DNS desde la sesión); las búsquedas en ellos sí devolvieron resúmenes.\n- Poco fiables: calendarios de Motor.es (mezclan circuitos) y OKDiario (nota vieja).\n- Notas sin fecha clara: RacingNews365 y GPFans sobre upgrades; las tomé con cautela.",
+          "titulo": "Fuentes",
+          "id": "fuentes"
+        },
+        {
+          "actualizado": "2026-11-15T18:28:00Z",
+          "texto": "- Confirmar horario de la carrera de Las Vegas en CDMX: Fox Sports da domingo 22 a las 4:00, pero no cuadra con Vegas.\n- Confirmar fechas de Las Vegas (21-22 nov) y Qatar (29 nov) en fuente oficial.\n- Sanción de Antonelli: fecha exacta de la decisión de los comisarios.\n- Upgrades de McLaren y Red Bull para Las Vegas: confirmar cuáles llegan.\n- Asientos 2027 sin confirmar (3 según GPFans, 20 oct): Haas, Racing Bulls, Aston Martin (Alonso, fuentes en conflicto).\n- Ver si hay noticias de hoy 15 de noviembre; no encontré ninguna.",
+          "titulo": "Pendientes",
+          "id": "pendientes"
+        },
+        {
+          "actualizado": "2026-11-15T18:28:00Z",
+          "texto": "- 11 nov: McLaren prepara novedades para Las Vegas (Racer)\n- 8 nov: Norris gana en Interlagos desde la pole (PlanetF1)\n- 8 nov: Mercedes campeón de constructores (RaceFans)\n- 8 nov: Antonelli, 5 s por salida insegura (Crash.net)\n- oct: FIA aísla equipos desde 2027 (Motor.es)\n- 20 oct: 19 pilotos con asiento 2027 (GPFans)",
+          "titulo": "Ya lo conté",
+          "id": "ya-contado"
+        }
+      ]
     }
   ],
   "avisos": [
+    {
+      "creado": "2026-11-15T18:25:00Z",
+      "texto": "Pole vive en la Oficina Terrazas y cada mañana trae las noticias de Fórmula 1: resultados, próximas carreras y cambios en los equipos. Sus noticias se turnan con las de Nitro en la pantalla.",
+      "titulo": "Llegó Pole, el de Fórmula 1",
+      "id": "2026-11-15-pole"
+    },
     {
       "creado": "2026-11-15T18:02:00Z",
       "texto": "El túnel central ahora es parte de un periférico que va de Internet a la Ampliación, con siete estaciones. Los pasillos de arriba son el doble de anchos y la Ampliación se mudó hasta abajo.",
