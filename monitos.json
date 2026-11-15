@@ -1,5 +1,5 @@
 {
-  "actualizado": "2026-11-15T03:17:15Z",
+  "actualizado": "2026-11-15T03:17:24Z",
   "monitos": [
     {
       "id": "nitro",
@@ -15,10 +15,10 @@
         "Pre-stage listo, jefe.",
         "¡Luz verde!"
       ],
-      "estado": "trabajando",
+      "estado": "listo",
       "area": "internet",
-      "actividad": "Buscando noticias de arrancones",
-      "actualizado": "2026-11-15T03:17:15Z",
+      "actividad": "",
+      "actualizado": "2026-11-15T03:17:24Z",
       "reportes": [
         {
           "id": "2026-11-14",
