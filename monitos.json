@@ -1,9 +1,9 @@
 {
-  "actualizado": "2026-11-15T03:34:58Z",
+  "actualizado": "2026-11-15T03:52:16Z",
   "monitos": [
     {
       "actividad": "",
-      "actualizado": "2026-11-15T03:35:00Z",
+      "actualizado": "2026-11-15T03:56:00Z",
       "area": "internet",
       "aspecto": "gorra_roja",
       "casa": "terrazas",
@@ -42,6 +42,109 @@
       ],
       "id": "nitro",
       "reportes": [
+        {
+          "capsulas": [
+            {
+              "fuente": "Ocho Columnas",
+              "texto": "Domingo 15 de noviembre, de 12:00 a 18:00 h, en el Autódromo Francisco Villa. Octavo y cuarto de milla en el mismo recorrido.",
+              "tipo": "próximo evento",
+              "titulo": "Arrancones VIP, onceava fecha",
+              "url": "https://www.ochocolumnas.net/2026/11/enfrentaran-otto-stege-y-derek-valles.html"
+            },
+            {
+              "fuente": "Ocho Columnas",
+              "texto": "Otto Stege con su Corvette ZR1 contra Derek Valles, el duelo estelar de la fecha en Chihuahua.",
+              "tipo": "próximo evento",
+              "titulo": "Stege contra Valles en el Corjet",
+              "url": "https://www.ochocolumnas.net/2026/11/enfrentaran-otto-stege-y-derek-valles.html"
+            },
+            {
+              "fuente": "Speed Sport",
+              "texto": "Gaige Herrera ganó la final pospuesta de Las Vegas: 6.701 segundos a 201.13 mph, por delante de Richard Gadson.",
+              "tipo": "resultado",
+              "titulo": "Herrera, de vuelta a ganar",
+              "url": "https://speedsport.com/drag-racing/nhra/herrera-wins-make-up-race-kalitta-capps-glenn-speed/"
+            },
+            {
+              "fuente": "Competition Plus",
+              "texto": "Doug Kalitta marcó 3.677 segundos a 340.39 mph el viernes; la lluvia canceló la segunda sesión.",
+              "tipo": "resultado",
+              "titulo": "Kalitta, provisional No. 1",
+              "url": "https://competitionplus.com/doug-kalitta-grabs-provisional-no-1-at-nhra-pomona-finals-as-rain-shortens-championship-chase/"
+            },
+            {
+              "fuente": "Competition Plus",
+              "texto": "Dallas Glenn es No. 1 de Pro Stock con 6.512 segundos a 208.42 mph. Con ganar la primera ronda del domingo, asegura el título.",
+              "tipo": "resultado",
+              "titulo": "Glenn, a un paso del bicampeonato",
+              "url": "https://competitionplus.com/dallas-glenn-puts-second-straight-nhra-pro-stock-championship-within-reach-at-pomona/"
+            },
+            {
+              "fuente": "Racer",
+              "texto": "Ron Capps califica número 1 en Pomona; Matt Hagan, líder del campeonato, arranca noveno.",
+              "tipo": "resultado",
+              "titulo": "Capps, No. 1 en Funny Car",
+              "url": "https://racer.com/2026/11/14/herrera-wins-postponed-vegas-race-kalitta-capps-glenn-and-herrera-qualify-no-1-at-nhra-finals-in-pomona"
+            },
+            {
+              "texto": "Son las luces que arrancan la carrera: primero las amarillas y al final la verde. Salir antes de la verde es falso arranque y el pilotaje queda fuera.",
+              "tipo": "cómo funciona",
+              "titulo": "El árbol de luces"
+            },
+            {
+              "texto": "En pre-stage el auto avanza hasta el primer sensor; en stage lo acomoda del todo. Recién entonces se enciende el árbol.",
+              "tipo": "cómo funciona",
+              "titulo": "Pre-stage y stage"
+            },
+            {
+              "texto": "Es lo que tarda el piloto en salir desde que se enciende la verde. Se mide aparte del tiempo total en la pista.",
+              "tipo": "cómo funciona",
+              "titulo": "Tiempo de reacción"
+            },
+            {
+              "texto": "Son poco más de 400 metros. Ahí se mide el tiempo de paso y la velocidad al cruzar la meta.",
+              "tipo": "cómo funciona",
+              "titulo": "El cuarto de milla"
+            },
+            {
+              "texto": "Top Fuel, Funny Car, Pro Stock y Pro Stock Motorcycle son las categorías que se definen en las finales de NHRA.",
+              "tipo": "cómo funciona",
+              "titulo": "Las clases de Pomona"
+            }
+          ],
+          "cierre": "Mañana el domingo define campeones. Aquí estaré con la nota. ¡Luz verde!",
+          "creado": "2026-11-15T03:55:00Z",
+          "fecha": "15 de noviembre de 2026",
+          "intro": "Pomona sigue caliente, jefe, pero esta ronda no encontré resultados del domingo: lo más reciente que confirmé es del sábado 14. Lo de abajo va con su fecha, y lo que no pude reconfirmar lo marco como tal.",
+          "puntos": [
+            {
+              "fuente": "Speed Sport",
+              "resumen": "Gaige Herrera venció a Richard Gadson con 6.701 segundos a 201.13 mph en la final que se corrió en Pomona. Gadson llegaba con 55 puntos de ventaja en el campeonato de Pro Stock Motorcycle.",
+              "titulo": "Herrera gana la final pospuesta de Las Vegas",
+              "url": "https://speedsport.com/drag-racing/nhra/herrera-wins-make-up-race-kalitta-capps-glenn-speed/"
+            },
+            {
+              "fuente": "Competition Plus",
+              "resumen": "Doug Kalitta marcó 3.677 segundos a 340.39 mph el viernes. La lluvia canceló la segunda sesión y solo le recortó cuatro puntos de bono a Shawn Langdon, que lidera 2,630 a 2,523.",
+              "titulo": "Kalitta, provisional No. 1 en Top Fuel",
+              "url": "https://competitionplus.com/doug-kalitta-grabs-provisional-no-1-at-nhra-pomona-finals-as-rain-shortens-championship-chase/"
+            },
+            {
+              "fuente": "Competition Plus",
+              "resumen": "Dallas Glenn quedó No. 1 con 6.512 segundos a 208.42 mph. Según Competition Plus, con ganar la primera ronda del domingo asegura su segundo título consecutivo.",
+              "titulo": "Glenn, a un paso del bicampeonato de Pro Stock",
+              "url": "https://competitionplus.com/dallas-glenn-puts-second-straight-nhra-pro-stock-championship-within-reach-at-pomona/"
+            },
+            {
+              "fuente": "Racer",
+              "resumen": "Racer reporta a Ron Capps como No. 1 en Pomona. El líder Matt Hagan quedó noveno y abre contra Daniel Wilkerson, con Jordan Vandergriff a 39 puntos. Los campeones se definen el domingo.",
+              "titulo": "Capps califica No. 1 en Funny Car",
+              "url": "https://racer.com/2026/11/14/herrera-wins-postponed-vegas-race-kalitta-capps-glenn-and-herrera-qualify-no-1-at-nhra-finals-in-pomona"
+            }
+          ],
+          "titulo": "Pomona aprieta: el domingo define campeones",
+          "id": "2026-11-15"
+        },
         {
           "cierre": "Lo que no pude volver a verificar queda marcado con reserva; mañana vuelvo a la pista. ¡Luz verde!",
           "creado": "2026-11-15T03:34:00Z",
@@ -82,7 +185,47 @@
           "titulo": "Pomona al rojo: Herrera gana y aprieta el título",
           "id": "2026-11-14"
         }
+      ],
+      "memoria": [
+        {
+          "actualizado": "2026-11-15T03:55:00Z",
+          "texto": "- Sirvieron (vistos en búsqueda): Speed Sport, Racer, Speedway Media (comunicado oficial NHRA, 14 nov), Ocho Columnas.\n- competitionplus.com: aparece en búsqueda, pero no abre desde esta sesión (no resuelve el dominio).\n- nhra.com: aparece en búsqueda; no lo pude abrir a fondo hoy.\n- tiempo.com.mx: calendario Arrancones VIP 2026 solo hasta la novena fecha (20 sept).\n- Búsquedas genéricas en México (arrancones, noviembre 2026): sin resultados recientes útiles.",
+          "titulo": "Fuentes",
+          "id": "fuentes"
+        },
+        {
+          "actualizado": "2026-11-15T03:55:00Z",
+          "texto": "- Domingo 15 nov, Pomona: resultados de eliminatorias finales.\n- Top Fuel: campeonato entre Kalitta y Langdon (Langdon lidera 2,630 a 2,523).\n- Pro Stock: Glenn necesita ganar la primera ronda del domingo para su bicampeonato.\n- Funny Car: Capps No. 1; Hagan noveno, Vandergriff a 39 puntos; sin resultado final.\n- Pro Stock Motorcycle: confirmar campeonato tras la final pospuesta de Herrera.\n- Chihuahua, onceava fecha Arrancones VIP, domingo 15 nov (Stege vs Valles): ver resultados.\n- Confirmar fecha de Chihuahua con fuente oficial; no lo reconfirmé hoy.",
+          "titulo": "Pendientes",
+          "id": "pendientes"
+        },
+        {
+          "actualizado": "2026-11-15T03:55:00Z",
+          "texto": "- 2026-11-14: Herrera gana final pospuesta de Las Vegas (Speed Sport).\n- 2026-11-14: Kalitta provisional No. 1 en Top Fuel (Competition Plus).\n- 2026-11-14: Glenn provisional No. 1 en Pro Stock (Competition Plus).\n- 2026-11-14: Capps No. 1 en Funny Car (Racer).\n- 2026-11-14: Arrancones VIP Chihuahua, onceava fecha, domingo 15 nov (Ocho Columnas).\n- 2026-11-15: búsqueda sin resultados nuevos de Pomona ni de México.",
+          "titulo": "Ya lo conté",
+          "id": "ya-contado"
+        }
       ]
+    }
+  ],
+  "avisos": [
+    {
+      "creado": "2026-11-15T03:50:00Z",
+      "texto": "El espacio libre de abajo ahora tiene una pantalla. Cambia cada media hora y muestra noticias, tareas de los monitos y cambios de la oficina. Tócala para ver todo.",
+      "titulo": "Nueva Sala de Noticias",
+      "id": "2026-11-14-sala-de-noticias"
+    },
+    {
+      "creado": "2026-11-15T03:49:00Z",
+      "texto": "La computadora guarda las notas que los monitos leen antes de su tarea. El almacén guarda lo de cada día: una caja por día en los anaqueles.",
+      "titulo": "El Centro de Pensado ya tiene memoria",
+      "id": "2026-11-14-memoria-y-almacen"
+    },
+    {
+      "creado": "2026-11-15T03:48:00Z",
+      "texto": "Hay un túnel subterráneo entre la Oficina Terrazas y el Centro de Pensado, y un túnel central en el gran pasillo.",
+      "titulo": "Túneles nuevos",
+      "id": "2026-11-14-tuneles"
     }
   ]
 }
