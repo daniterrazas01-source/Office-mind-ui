@@ -207,6 +207,7 @@ const EN_NUBE = location.protocol !== 'file:' && !['localhost', '127.0.0.1', '[:
 const NUBE = {
   estado: 'https://raw.githubusercontent.com/KALLEROS/oficina-cloud-monitoreo-estado/main/estado.json',
   terrazas: 'https://raw.githubusercontent.com/daniterrazas01-source/dragtrim/claude/oficina-estado/oficina/estado-terrazas.json',
+  monitos: 'https://raw.githubusercontent.com/daniterrazas01-source/Office-mind-ui/datos/monitos.json',   // monitos con tarea programada y sus resúmenes
 };
 /* Dentro de claude.ai (Artifact) la página lee tus sesiones de Claude Code con tu propia cuenta. */
 const EN_CLAUDE = !!(window.claude && typeof window.claude.use === 'function');
@@ -2017,9 +2018,11 @@ async function leerEstado(){
     }
     else if (EN_NUBE){
       const nube = Object.assign({}, NUBE, CONFIG.nube);
-      const [base, terr, relevo] = await Promise.all([leerJSON(nube.estado), leerJSON(nube.terrazas).catch(() => null),
+      const [base, terr, mon, relevo] = await Promise.all([leerJSON(nube.estado), leerJSON(nube.terrazas).catch(() => null),
+        nube.monitos ? leerJSON(nube.monitos).catch(() => null) : null,
         nube.relevo ? leerJSON(String(nube.relevo).replace(/\/$/, '') + '/estado').catch(() => null) : null]);
       datos = juntar(base, terr);
+      datos.monitos = mon && Array.isArray(mon.monitos) ? mon.monitos : MONITOS_DEMO;   // si falla la lectura, se quedan los que ya había
       if (relevo && Array.isArray(relevo.agentes)){                   // el relevo trae las sesiones de todos lados (ver relevo/INSTALAR.md)
         const ya = new Set(datos.agentes.map(a => String(a.id)));
         datos.agentes = datos.agentes.concat(relevo.agentes.filter(a => a && !ya.has(String(a.id))));
@@ -2198,7 +2201,7 @@ function listaArchivos(lista){
    del Artifact y aquí se lee. Nunca se van: viven en su cuarto, salen a trabajar cuando les toca y avisan
    cuando traen resumen nuevo.   monitos/<id> = quién es · monitos/<id>/reportes/<fecha> = sus resúmenes */
 const MONITOS = new Map(); let MONITOS_DEMO = [];
-const monitosTodos = () => DEMO ? MONITOS_DEMO : [...MONITOS.values()];
+const monitosTodos = () => EN_CLAUDE && !DEMO ? [...MONITOS.values()] : MONITOS_DEMO;   // en la web vienen del archivo público de monitos
 const monitoPorId = id => monitosTodos().find(m => m.id === id);
 function escucharMonitos(db){
   db.collection('monitos').onSnapshot(snap => {
