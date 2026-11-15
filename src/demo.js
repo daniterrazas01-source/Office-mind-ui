@@ -41,8 +41,9 @@ export function estadoDemo() {
     envios: [
       { id: 'ej-2', de: 'terrazas', para: 'calleros', tipo: 'nota', autor: 'Nitro', titulo: 'Lo más importante de hoy (ejemplo)', texto: 'Una nota corta para la Oficina Calleros.', creado: desde(0.1) },
       { id: 'ej-3', de: 'centro de pensado', para: 'cerebro delta', tipo: 'dato', autor: 'Nitro', titulo: 'Dato para recordar (ejemplo)', texto: 'Algo que vale la pena guardar en el Cerebro.', creado: desde(300) },
-      { id: 'ej-4', de: 'terrazas', para: 'noticias', tipo: 'noticias', autor: 'Nitro', titulo: 'Noticias para la pantalla (ejemplo)', texto: 'Lo que va a salir hoy en la Sala de Noticias.', creado: desde(0) },
+      { id: 'ej-4', de: 'internet', para: 'noticias', tipo: 'noticias', autor: 'Nitro', titulo: 'Noticias para la pantalla (ejemplo)', texto: 'Lo que va a salir hoy en la Sala de Noticias.', creado: desde(0) },
     ],
+    visitas: [{ id: 'ejemplo', nombre: 'Sesión con pase', area: 'biblioteca', actividad: 'Leyendo el manual', estado: 'trabajando', modelo: 'sonnet', equipo: 'Teléfono', actualizado: hace(2) }],
     avisos: [{ id: 'ejemplo', titulo: 'Aviso de ejemplo', texto: 'Aquí saldrán los cambios de la oficina.', creado: hace(120) }],
     archivos_recientes: ['src/arbol.js', 'src/pista.js', 'src/boleta.js', 'index.html', 'css/tema.css', 'notas/ideas.md', 'src/carrera.js', 'README.md', 'src/sonido.js']
       .map((nombre, i) => ({ nombre, origen: 'tableta-android', area: 'terrazas', fecha: hace(5 + i * 40), tipo: i % 3 ? 'editado' : 'creado' })),

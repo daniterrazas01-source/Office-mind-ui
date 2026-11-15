@@ -1,43 +1,66 @@
-// La red del túnel. El túnel central (el tronco) corre por en medio del gran pasillo
-// y de él salen ramales a los cuartos principales. En cada cuarto hay una estación:
-// ahí los monitos meten lo que mandan (archivos, notas, noticias) y ahí llega lo que
-// les mandan. Aquí solo va la geometría y las reglas de los envíos: funciones puras,
-// con pruebas. El dibujo está en oficina.html.
+// El periférico. Es una sola línea que recorre la oficina de arriba a abajo:
+//   Internet -> pasillo 1 -> por debajo de la Sala de Juntas -> pasillo 2 -> pasillo entre Calleros y el
+//   Cerebro -> túnel central (el tronco) -> pasillo 4 -> por debajo del cuarto libre de en medio -> Ampliación.
+// De ella salen ramales cortos a los cuartos. En cada cuarto hay una estación: ahí se mete lo que se manda
+// (archivos, notas, noticias) y ahí llega lo que mandan. Los supervisores y los monitos fijos también pueden
+// viajar por él. Aquí va la geometría (en pixeles del mapa) y las reglas de los envíos: funciones puras, con
+// pruebas. El dibujo está en oficina.html.
 
 const T = 16;
-export const TRONCO = { x: 256, y0: 656, y1: 976 };
+export const TRONCO = { x: 256, y0: 720, y1: 1040 };   // el túnel central, la parte ancha del periférico
 
-// tx, ty = casilla del mueble de la estación · lado = hacia dónde sale su tubo
+// tx, ty = casilla del mueble de la estación · lado = hacia dónde sale su tubo · pie = dónde se para quien la usa
 export const ESTACIONES = {
-  'calleros':          { tx: 12, ty: 33, lado: 'der', nombre: 'Oficina Calleros' },
-  'cerebro delta':     { tx: 17, ty: 33, lado: 'izq', nombre: 'Cerebro Delta' },
-  'terrazas':          { tx: 9,  ty: 49, lado: 'der', nombre: 'Oficina Terrazas' },
-  'centro de pensado': { tx: 22, ty: 49, lado: 'izq', nombre: 'Centro de Pensado' },
-  'noticias':          { tx: 22, ty: 56, lado: 'izq', nombre: 'Sala de Noticias' },
+  'internet':          { tx: 23, ty: 8,  lado: 'abajo', nombre: 'Internet',          pie: { tx: 24, ty: 8 } },
+  'calleros':          { tx: 12, ty: 37, lado: 'der',   nombre: 'Oficina Calleros',  pie: { tx: 11, ty: 37 } },
+  'cerebro delta':     { tx: 17, ty: 37, lado: 'izq',   nombre: 'Cerebro Delta',     pie: { tx: 18, ty: 37 } },
+  'terrazas':          { tx: 9,  ty: 53, lado: 'der',   nombre: 'Oficina Terrazas',  pie: { tx: 8, ty: 53 } },
+  'centro de pensado': { tx: 22, ty: 53, lado: 'izq',   nombre: 'Centro de Pensado', pie: { tx: 23, ty: 53 } },
+  'noticias':          { tx: 22, ty: 60, lado: 'izq',   nombre: 'Sala de Noticias',  pie: { tx: 23, ty: 60 } },
+  'ampliacion':        { tx: 17, ty: 82, lado: 'izq',   nombre: 'Ampliación',        pie: null },
 };
 
 const centro = (e) => ({ x: e.tx * T + 8, y: e.ty * T + 8 });
-// Los dos cuartos de arriba comparten la bajada por el pasillo de la ampliación hasta la boca del tronco.
-const BAJADA = [{ x: 252, y: 33 * T + 8 }, { x: 252, y: TRONCO.y0 - 8 }, { x: TRONCO.x, y: TRONCO.y0 + 6 }];
+const fila = (ty) => ty * T + 8;
 
-// Ramal de cada estación: de su mueble hasta donde entra al tronco.
-export const RAMALES = {};
-for (const [clave, e] of Object.entries(ESTACIONES)){
-  const p = centro(e);
-  RAMALES[clave] = p.y < TRONCO.y0 ? [p, ...BAJADA] : [p, { x: TRONCO.x, y: p.y }];
-}
+// Nudos del periférico. Los que se llaman como una estación son su mueble.
+export const NODOS = {
+  p1a: { x: 376, y: fila(13) },            // pasillo 1, bajo la puerta de Internet
+  p1b: { x: 200, y: fila(13) },            // pasillo 1, donde baja hacia la Sala de Juntas
+  p2a: { x: 200, y: fila(27) },            // pasillo 2, saliendo de debajo de la Sala de Juntas
+  p2b: { x: 252, y: fila(27) },            // pasillo 2, donde entra al pasillo entre Calleros y el Cerebro
+  cruce: { x: 252, y: fila(37) },          // de aquí salen los ramales a Calleros y al Cerebro
+  boca: { x: 252, y: TRONCO.y0 - 8 },      // llegando al túnel central
+  t0: { x: TRONCO.x, y: TRONCO.y0 + 6 },   // boca de arriba del tronco
+  tm: { x: TRONCO.x, y: fila(53) },        // ramales a Terrazas y al Centro de Pensado
+  tn: { x: TRONCO.x, y: fila(60) },        // ramal a la Sala de Noticias
+  t1: { x: TRONCO.x, y: TRONCO.y1 - 6 },   // boca de abajo del tronco
+  fin: { x: TRONCO.x, y: fila(82) },       // la Ampliación, pasando por debajo del cuarto libre de en medio
+};
+for (const [clave, e] of Object.entries(ESTACIONES)) NODOS[clave] = centro(e);
 
-const igual = (p, q) => p.x === q.x && p.y === q.y;
+// Tramos: la línea principal y los ramales.
+export const TRAMOS = [
+  ['internet', 'p1a'], ['p1a', 'p1b'], ['p1b', 'p2a'], ['p2a', 'p2b'], ['p2b', 'cruce'], ['cruce', 'boca'], ['boca', 't0'],
+  ['t0', 'tm'], ['tm', 'tn'], ['tn', 't1'], ['t1', 'fin'], ['fin', 'ampliacion'],
+  ['cruce', 'calleros'], ['cruce', 'cerebro delta'], ['tm', 'terrazas'], ['tm', 'centro de pensado'], ['tn', 'noticias'],
+];
+const VECINOS = {};
+for (const [a, b] of TRAMOS){ (VECINOS[a] ||= []).push(b); (VECINOS[b] ||= []).push(a); }
 
-// Por dónde viaja un paquete de una estación a otra: lista de puntos en pixeles, o null si no hay viaje.
+// Por dónde viaja algo de una estación a otra: lista de puntos en pixeles, o null si no hay viaje.
 export function rutaTunel(de, para){
-  const A = RAMALES[de], B = RAMALES[para];
-  if (!A || !B || de === para) return null;
-  let comun = 0;                                   // lo que comparten al final ya no se recorre dos veces
-  while (comun < A.length - 1 && comun < B.length - 1 && igual(A[A.length - 1 - comun], B[B.length - 1 - comun])) comun++;
-  const ida = comun ? A.slice(0, A.length - comun + 1) : A.slice();   // hasta donde se juntan (o hasta el tronco)
-  const vuelta = B.slice(0, B.length - comun).reverse();              // y de ahí a la otra estación
-  return ida.concat(vuelta);
+  if (!ESTACIONES[de] || !ESTACIONES[para] || de === para) return null;
+  const previo = { [de]: null }, cola = [de];
+  while (cola.length){
+    const n = cola.shift();
+    if (n === para) break;
+    for (const v of VECINOS[n] || []) if (!(v in previo)){ previo[v] = n; cola.push(v); }
+  }
+  if (!(para in previo)) return null;
+  const ruta = [];
+  for (let n = para; n; n = previo[n]) ruta.push({ x: NODOS[n].x, y: NODOS[n].y });
+  return ruta.reverse();
 }
 
 export function largoRuta(ruta){
@@ -69,6 +92,8 @@ export function estacionDe(texto){
   if (s.includes('terraza') || s.includes('dragtree')) return 'terrazas';
   if (s.includes('noticia') || s.includes('pantalla') || s.includes('cartelera')) return 'noticias';
   if (s.includes('pensa') || s.includes('memoria') || s.includes('almacen') || s.includes('archiv')) return 'centro de pensado';
+  if (s.includes('internet') || s === 'web') return 'internet';
+  if (s.includes('ampliacion') || s.includes('obra')) return 'ampliacion';
   return null;
 }
 

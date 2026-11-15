@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { ESTACIONES, RAMALES, TRONCO, rutaTunel, largoRuta, puntoEnRuta, estacionDe, envioLimpio, enviosLimpios } from '../src/tunel.js';
+import { ESTACIONES, NODOS, TRONCO, rutaTunel, largoRuta, puntoEnRuta, estacionDe, envioLimpio, enviosLimpios } from '../src/tunel.js';
 import { turnos, turnoDe, esDeHoy, CADA_PANTALLA } from '../src/pantalla.js';
 
 const claves = Object.keys(ESTACIONES);
@@ -9,8 +9,8 @@ test('todas las estaciones se conectan entre sí por el túnel', () => {
   for (const de of claves) for (const para of claves){
     const ruta = rutaTunel(de, para);
     if (de === para){ assert.equal(ruta, null); continue; }
-    assert.deepEqual(ruta[0], RAMALES[de][0], `${de} → ${para} sale de su estación`);
-    assert.deepEqual(ruta[ruta.length - 1], RAMALES[para][0], `${de} → ${para} llega a su estación`);
+    assert.deepEqual(ruta[0], NODOS[de], `${de} → ${para} sale de su estación`);
+    assert.deepEqual(ruta[ruta.length - 1], NODOS[para], `${de} → ${para} llega a su estación`);
     for (let i = 1; i < ruta.length; i++) assert.notDeepEqual(ruta[i], ruta[i - 1], 'sin puntos repetidos');
     assert.ok(largoRuta(ruta) > 0);
   }
@@ -19,7 +19,7 @@ test('todas las estaciones se conectan entre sí por el túnel', () => {
 test('de arriba hacia abajo se pasa por el tronco central', () => {
   const ruta = rutaTunel('calleros', 'terrazas');
   assert.ok(ruta.some((p) => p.x === TRONCO.x && p.y > TRONCO.y0), 'entra al tronco');
-  assert.ok(ruta.some((p) => p.x === TRONCO.x && p.y === 49 * 16 + 8), 'sale a la altura de Terrazas');
+  assert.ok(ruta.some((p) => p.x === TRONCO.x && p.y === 53 * 16 + 8), 'sale a la altura de Terrazas');
 });
 
 test('cuartos vecinos no dan la vuelta por el tronco', () => {
@@ -38,7 +38,20 @@ test('el paquete avanza de la salida a la llegada', () => {
   assert.deepEqual(puntoEnRuta(ruta, 0), ruta[0]);
   assert.deepEqual(puntoEnRuta(ruta, largo + 50), ruta[ruta.length - 1]);
   const medio = puntoEnRuta(ruta, largo / 2);
-  assert.ok(medio.x >= 152 && medio.x <= 360 && medio.y >= 792 && medio.y <= 904);
+  assert.ok(medio.x >= 152 && medio.x <= 360 && medio.y >= 856 && medio.y <= 968);
+});
+
+test('el periférico va de Internet a la Ampliación pasando por el túnel central', () => {
+  const ruta = rutaTunel('internet', 'ampliacion');
+  assert.ok(ruta.some((p) => p.x === 200 && p.y === 13 * 16 + 8), 'baja hacia la Sala de Juntas');
+  assert.ok(ruta.some((p) => p.x === TRONCO.x && p.y > TRONCO.y0 && p.y < TRONCO.y1), 'recorre el tronco');
+  for (let i = 1; i < ruta.length - 1; i++){                       // todos los tramos son rectos, salvo el quiebre de la boca
+    const a = ruta[i - 1], b = ruta[i];
+    assert.ok(a.x === b.x || a.y === b.y || Math.hypot(a.x - b.x, a.y - b.y) < 16, `tramo ${i} recto`);
+  }
+  const doc = rutaTunel('internet', 'noticias');                    // un documento de Internet a la pantalla
+  assert.deepEqual(doc[0], NODOS.internet);
+  assert.deepEqual(doc[doc.length - 1], NODOS.noticias);
 });
 
 test('estacionDe entiende los nombres de los cuartos', () => {
@@ -48,6 +61,8 @@ test('estacionDe entiende los nombres de los cuartos', () => {
   assert.equal(estacionDe('centro_de_pensado'), 'centro de pensado');
   assert.equal(estacionDe('Almacén'), 'centro de pensado');
   assert.equal(estacionDe('Sala de Noticias'), 'noticias');
+  assert.equal(estacionDe('Internet'), 'internet');
+  assert.equal(estacionDe('ampliación'), 'ampliacion');
   assert.equal(estacionDe('biblioteca'), null);
   assert.equal(estacionDe(''), null);
 });

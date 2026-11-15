@@ -74,3 +74,40 @@ test('saca el modelo de los detalles de una sesión', () => {
   assert.equal(modeloDeRespuesta('{"session_context":{"model":"claude-fable-5-2"}}'), 'fable');
   assert.equal(modeloDeRespuesta({ nada: 1 }), null);
 });
+
+// ---------- Sesiones con pase ----------
+import { agenteDeVisita, conVisitas } from '../src/sesiones.js';
+
+test('una sesión con pase aparece trabajando en el cuarto que dijo', () => {
+  const a = agenteDeVisita('arreglo-login', { nombre: 'Arreglo del login', area: 'biblioteca', actividad: 'Leyendo el código', estado: 'trabajando', modelo: 'claude-sonnet-5-5', equipo: 'Compu', actualizado: '2026-11-14T11:50:00Z' }, AHORA);
+  assert.equal(a.id, 'visita-arreglo-login');
+  assert.equal(a.area, 'biblioteca');
+  assert.equal(a.estado, 'trabajando');
+  assert.equal(a.modelo, 'sonnet');
+  assert.equal(a.actualizado, new Date(AHORA).toISOString());
+  assert.equal(a.ultima_actividad, '2026-11-14T11:50:00.000Z');
+});
+
+test('si lleva más de media hora sin avisar, o dijo que terminó, se va a Descanso', () => {
+  const vieja = agenteDeVisita('x', { nombre: 'Vieja', area: 'internet', estado: 'trabajando', actualizado: '2026-11-14T10:00:00Z' }, AHORA);
+  assert.equal(vieja.area, 'descanso');
+  assert.equal(vieja.estado, 'terminado');
+  const lista = agenteDeVisita('y', { nombre: 'Lista', estado: 'terminado', actualizado: '2026-11-14T11:59:00Z' }, AHORA);
+  assert.equal(lista.area, 'descanso');
+  assert.equal(agenteDeVisita('z', { nombre: 'Sin fecha' }, AHORA), null);
+});
+
+test('una visita vence a las 24 horas de su último aviso, como cualquier visitante', () => {
+  const visitas = [{ id: 'a', nombre: 'De ayer', estado: 'terminado', actualizado: '2026-11-13T11:00:00Z' }, { id: 'b', nombre: 'De hoy', estado: 'terminado', actualizado: '2026-11-14T08:00:00Z' }];
+  const { agentes } = aplicarReglas({ venceHoras: 24 }, { agentes: conVisitas([], visitas, AHORA) }, AHORA);
+  assert.deepEqual(agentes.map((a) => a.nombre), ['De hoy']);
+});
+
+test('una visita que dice de qué sesión es no se duplica', () => {
+  const base = estadoDeSesiones({ ccr: { data: lista } }, AHORA).agentes;
+  const junto = conVisitas(base, [{ id: 'motor', sesion: 'session_b', nombre: 'Motor 3D', area: 'internet', actividad: 'Buscando texturas', estado: 'trabajando', actualizado: '2026-11-14T11:58:00Z' }], AHORA);
+  assert.equal(junto.length, base.length);
+  const b = junto.find((a) => a.id === 'session_b');
+  assert.equal(b.area, 'internet');
+  assert.equal(b.actividad, 'Buscando texturas');
+});

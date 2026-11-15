@@ -61,9 +61,15 @@ Para anunciar un cambio de la oficina en la pantalla, agrega un documento a `avi
 
 La página web recibe todo esto con el **mensajero**: una segunda tarea programada (7:38 a.m.) que copia la base del Artifact a `monitos.json` en la rama `datos` (monitos, resúmenes, memoria, avisos y envíos).
 
-## El túnel central y los envíos
+## El periférico y los envíos
 
-El túnel central (el tronco) corre por en medio del gran pasillo. De él salen ramales, canales con tapa de vidrio en el piso, a los cuartos principales: **Oficina Calleros, Cerebro Delta, Oficina Terrazas, Centro de Pensado** (que también atiende al almacén) y **Sala de Noticias**. En cada cuarto hay una **estación** con buzón.
+El periférico es una sola línea que recorre la oficina de arriba a abajo: sale de **Internet**, cruza el pasillo 1, pasa por debajo de la **Sala de Juntas**, cruza el pasillo 2, baja entre la **Oficina Calleros** y el **Cerebro Delta**, sigue por el **túnel central** (su parte ancha, en el gran pasillo), cruza el pasillo 4, pasa por debajo del cuarto libre de en medio y termina en la **Ampliación**. Se ve como un canal con tapa de vidrio en el piso; debajo de los muros no se ve. De él salen ramales cortos a Calleros, Cerebro Delta, **Oficina Terrazas**, **Centro de Pensado** (que también atiende al almacén) y **Sala de Noticias**. En cada uno hay una **estación** con buzón: siete en total.
+
+Los supervisores y los monitos con tarea programada (los que nunca se van) también lo usan para moverse: cuando les queda más corto, caminan a la estación de su cuarto, viajan como cápsula y salen por la estación de destino.
+
+Los pasillos 1 y 2 son de cuatro casillas de ancho. El mapa se escribió con dos y se le agregaron filas: lo de siempre sigue escrito con sus medidas de antes y se dibuja recorrido (`FILA()`, `PY()`, `enBandas()` en `oficina.html`); el periférico y sus estaciones ya usan las medidas de ahora.
+
+La **Ampliación** es la zona grande de hasta abajo, en obra y sin cuartos.
 
 Un **envío** es algo que un monito o una sesión le manda a otro cuarto. Se escribe en uno de dos lugares:
 
@@ -75,15 +81,19 @@ Un **envío** es algo que un monito o una sesión le manda a otro cuarto. Se esc
   "titulo": "Resumen del 15 de noviembre", "texto": "…", "url": "", "creado": "2026-11-15T13:30:00Z" }
 ```
 
-- `de` y `para`: `calleros`, `cerebro delta`, `terrazas`, `centro de pensado` (o `almacen`, `memoria`) y `noticias`. Si falta `de`, sale del cuarto donde vive el `autor`.
+- `de` y `para`: `internet`, `calleros`, `cerebro delta`, `terrazas`, `centro de pensado` (o `almacen`, `memoria`), `noticias` y `ampliacion`. Si falta `de`, sale del cuarto donde vive el `autor`; los de tipo `noticias` de un resumen salen de Internet.
 - `tipo`: `archivo`, `nota`, `noticias`, `aviso` o `dato`. Cambia el dibujo del paquete.
-- Cuando el envío es nuevo (menos de 15 minutos), el paquete se ve viajar por los ramales y el tronco. Al abrir la oficina también se repite una vez el viaje de lo que llegó en el último día y sigue sin leerse.
+- Cuando el envío es nuevo (menos de 15 minutos), el paquete se ve viajar por el periférico. Al abrir la oficina también se repite una vez el viaje de lo que llegó en el último día y sigue sin leerse.
 - La estación de destino levanta su banderita y prende el foquito verde hasta que se toca y se lee el buzón. Cada tarjeta trae «▶ Ver el viaje» para repetirlo. Al tocar el tronco sale la lista de todos los envíos.
 - Un monito cuya actividad menciona el túnel o el buzón se para en la estación de su cuarto.
 
 La oficina no inventa envíos: solo muestra los que están en la base. Nitro manda cuatro al terminar su ronda (resumen al almacén, titulares a la Sala de Noticias, lo más importante a la Oficina Calleros y, si lo hay, un dato al Cerebro Delta). Cualquier sesión de Claude con la herramienta `ArtifactData` puede mandar uno suelto escribiendo en `envios`. La geometría y las reglas están en `src/tunel.js`, con pruebas.
 
-Pendiente: los envíos sueltos (colección `envios`) se ven en el Artifact, pero en la página web solo cuando el mensajero copie esa colección. `publicar.py` ya la sabe leer; falta agregarle a la tarea del mensajero el inciso `d) action "query", collection "envios", query {"order_by": {"field": "creado", "direction": "desc"}, "limit": 40}`. Eso solo se puede pedir desde la conversación del mensajero.
+Pendiente: los envíos sueltos (colección `envios`) se ven en el Artifact, pero en la página web solo cuando el mensajero copie esa colección. `publicar.py` ya la sabe leer; falta agregarle a la tarea del mensajero el inciso `d) action "query", collection "envios", query {"order_by": {"field": "creado", "direction": "desc"}, "limit": 40}` y el inciso `e) action "list", collection "visitas"` (las sesiones con pase). Eso solo se puede pedir desde la conversación del mensajero.
+
+## Sesiones con pase
+
+El Artifact muestra solas las sesiones de Claude Code en la nube y las de Remote Control. Para cualquier otra, el botón **＋ Sesión** de la oficina da un texto (el pase) que se pega como mensaje en esa sesión. La sesión se registra escribiendo un documento en la colección `visitas` de la base del Artifact (`nombre`, `area`, `actividad`, `estado`, `modelo`, `equipo`, `sesion`, `actualizado`) y lo actualiza cuando cambia de tarea. La oficina la muestra como visitante: trabajando hasta media hora después de su último aviso, y se va a las 24 horas. Si dice de qué sesión es (`sesion`) y esa ya salía sola, no se duplica. Sirve en sesiones que tengan la herramienta `ArtifactData`. Las reglas están en `src/sesiones.js` (`agenteDeVisita`, `conVisitas`), con pruebas.
 
 ## Relevo para la página web
 

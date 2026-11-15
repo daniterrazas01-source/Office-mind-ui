@@ -101,3 +101,45 @@ export function modeloDeRespuesta(payload) {
   const n = hallado[1].toLowerCase();
   return ['haiku', 'sonnet', 'opus', 'fable'].find((m) => n.includes(m)) || null;
 }
+
+// ---------- Sesiones con pase ----------
+// Una sesión que no sale sola en la lista (o que quiere decir mejor qué hace) se registra escribiendo un
+// documento en la colección "visitas": { nombre, area, actividad, estado, modelo, equipo, sesion, actualizado }.
+const MEDIA_HORA = 30 * 60000;   // lo que se le cree a un "trabajando" sin que lo vuelva a decir
+
+export function agenteDeVisita(id, v, ahora = Date.now()) {
+  if (!v || typeof v !== 'object') return null;
+  const visto = Date.parse(v.actualizado);
+  if (Number.isNaN(visto)) return null;
+  const dicho = plano(v.estado);
+  const trabajando = dicho.startsWith('trabaj') && ahora - visto < MEDIA_HORA;
+  const titulo = limpio(v.nombre || v.titulo) || 'Sesión con pase';
+  const cuando = new Date(trabajando ? ahora : visto).toISOString();
+  return {
+    id: limpio(v.sesion) || `visita-${id}`,
+    nombre: recortar(titulo, 18), titulo,
+    area: trabajando ? (limpio(v.area) || areaDeTexto(v.actividad)) : 'descanso',
+    actividad: trabajando ? (limpio(v.actividad) || 'Trabajando') : 'Esperando instrucciones',
+    estado: trabajando ? 'trabajando' : dicho.startsWith('esper') ? 'esperando' : 'terminado',
+    modo: 'normal',
+    modelo: ['haiku', 'sonnet', 'opus', 'fable'].find((m) => plano(v.modelo).includes(m)) || null,
+    equipo: limpio(v.equipo) || 'Con pase', dispositivo: 'pase', origen: 'pase', pase: true,
+    actualizado: cuando, ultima_actividad: new Date(visto).toISOString(),
+  };
+}
+
+// Junta las sesiones que ya se veían con las que entraron con pase. Si una visita dice de qué sesión es
+// (campo `sesion`) y esa sesión ya está, no se duplica: solo se le pone lo que la visita dice que hace.
+export function conVisitas(agentes, visitas, ahora = Date.now()) {
+  const out = (Array.isArray(agentes) ? agentes : []).slice();
+  const donde = new Map(out.map((a, i) => [String(a.id), i]));
+  for (const v of Array.isArray(visitas) ? visitas : []) {
+    const a = agenteDeVisita(v && v.id, v, ahora);
+    if (!a) continue;
+    if (donde.has(a.id)) {
+      const i = donde.get(a.id);
+      if (a.estado === 'trabajando') out[i] = { ...out[i], area: a.area, actividad: a.actividad, estado: 'trabajando', actualizado: a.actualizado, ultima_actividad: a.actualizado, modelo: out[i].modelo || a.modelo };
+    } else { donde.set(a.id, out.length); out.push(a); }
+  }
+  return out;
+}

@@ -166,7 +166,7 @@ textarea.campo{min-height:70px;resize:vertical}
 <header>
   <div class="titulo"><span class="logo"></span>OFICINA · MONITOREO</div>
   <div class="senal" id="senal"><span class="punto"></span><span id="senalTexto">Conectando…</span></div>
-  <nav class="pisos"><button data-fila="0">Planta principal</button><button data-fila="21">Calleros · Cerebro</button><button data-fila="37">Ampliación</button><button data-fila="59">Espacios libres</button><a id="irClaude" href="https://claude.ai/artifact/KbxrcsXckzZSE5F65iZwCE" target="_blank" rel="noopener" hidden>Todas mis sesiones ↗</a></nav>
+  <nav class="pisos"><button data-fila="0">Planta principal</button><button data-fila="21">Calleros · Cerebro</button><button data-fila="37">Terrazas · Pensado</button><button data-fila="59">Espacios libres</button><button data-fila="72">Ampliación</button><a id="irPase" href="#pase" role="button">＋ Sesión</a><a id="irClaude" href="https://claude.ai/artifact/KbxrcsXckzZSE5F65iZwCE" target="_blank" rel="noopener" hidden>Todas mis sesiones ↗</a></nav>
   <div class="derecha"><span id="ultimo"></span><span id="cuantos"></span><span id="reloj"></span></div>
 </header>
 <div id="tip"></div>
@@ -197,8 +197,8 @@ textarea.campo{min-height:70px;resize:vertical}
 <script type="module">
 import { aplicarReglas, textoPlazo } from './src/reglas.js';
 import { estadoDemo } from './src/demo.js';
-import { estadoDeSesiones, modeloDeRespuesta } from './src/sesiones.js';
-import { ESTACIONES, RAMALES, rutaTunel, largoRuta, puntoEnRuta, enviosLimpios } from './src/tunel.js';
+import { estadoDeSesiones, modeloDeRespuesta, conVisitas } from './src/sesiones.js';
+import { ESTACIONES, NODOS, TRAMOS, TRONCO, rutaTunel, largoRuta, puntoEnRuta, enviosLimpios } from './src/tunel.js';
 import { CADA_PANTALLA, turnos, turnoDe, esDeHoy } from './src/pantalla.js';
 (() => {
 'use strict';
@@ -209,8 +209,21 @@ import { CADA_PANTALLA, turnos, turnoDe, esDeHoy } from './src/pantalla.js';
    ===================================================================== */
 
 /* ---------- Ajustes ---------- */
-const T = 16, COLS = 32, ROWS = 74, W = COLS * T, H = ROWS * T;
-const FILAS_ARRIBA = 22;        // la planta principal; lo demás se ve bajando con el scroll
+const T = 16, COLS = 32;
+/* El mapa se escribió con los pasillos 1 y 2 de dos casillas de ancho. Ahora son más anchos: se les agregan
+   filas y todo lo de abajo se recorre. Los muebles y adornos de siempre siguen escritos con sus medidas de
+   antes y se dibujan recorridos; FILA() y PY() convierten una fila o un pixel de antes a su lugar de ahora.
+   Lo nuevo (el periférico y sus estaciones) ya se escribe con las medidas de ahora. */
+const N1 = 2, N2 = 2, FILAS_V = 88;            // filas que gana cada pasillo · filas del mapa como se escribió
+const ROWS = FILAS_V + N1 + N2, W = COLS * T, H = ROWS * T;
+const FILA = r => r + (r >= 25 ? N1 + N2 : r >= 13 ? N1 : 0);
+const PY = y => y + (y >= 400 ? (N1 + N2) * T : y >= 208 ? N1 * T : 0);
+const FILA_V = r => r >= 25 + N1 + N2 ? r - N1 - N2 : r > 24 + N1 ? 24 : r >= 13 + N1 ? r - N1 : r > 12 ? 12 : r;   // de ahora a antes
+const BANDAS = [[0, 208, 0], [208, 400, N1 * T], [400, FILAS_V * T, (N1 + N2) * T]];
+function enBandas(pintar){   // corre un dibujo escrito con medidas de antes, recorriendo cada franja a su lugar
+  for (const [y0, y1, dy] of BANDAS){ g.save(); g.beginPath(); g.rect(0, y0 + dy, W, y1 - y0); g.clip(); g.translate(0, dy); pintar(); g.restore(); }
+}
+const FILAS_ARRIBA = 22 + N1;        // la planta principal; lo demás se ve bajando con el scroll
 const SEGUNDOS_INACTIVO = 60;   // sin reportar más de esto -> Descanso
 /* De dónde lee: en la laptop, estado.json del servidor local; en el teléfono (GitHub Pages),
    los archivos públicos de estado. La página nunca escribe. */
@@ -261,7 +274,7 @@ function linea(x0, y0, x1, y1, c){
    # muro   = pared vista de frente   D puerta   E entrada
    b biblioteca  e escritorio  i internet  j sala de juntas  d descanso  h pasillo */
 const MAPA = (() => {
-  const m = Array.from({ length: ROWS }, () => Array(COLS).fill('#'));
+  const m = Array.from({ length: FILAS_V }, () => Array(COLS).fill('#'));
   const llenar = (x0, y0, x1, y1, c) => { for (let y = y0; y <= y1; y++) for (let x = x0; x <= x1; x++) m[y][x] = c; };
   llenar(1, 1, 9, 1, '='); llenar(11, 1, 20, 1, '='); llenar(22, 1, 30, 1, '=');
   llenar(1, 2, 9, 8, 'b'); llenar(11, 2, 20, 8, 'e'); llenar(22, 2, 30, 8, 'i');
@@ -296,10 +309,19 @@ const MAPA = (() => {
   llenar(1, 64, 9, 64, '='); llenar(11, 64, 20, 64, '='); llenar(22, 64, 30, 64, '=');
   llenar(1, 65, 9, 72, 'v'); llenar(11, 65, 20, 72, 'v'); llenar(22, 65, 30, 72, 'v');
   for (const x of [4, 5, 15, 16, 25, 26]){ m[63][x] = 'D'; m[64][x] = 'D'; }
-  return m;
+  // ---- Hasta abajo: la Ampliación, una zona grande en obra, sin cuartos (a = piso de obra) ----
+  llenar(1, 74, 30, 74, '='); llenar(1, 75, 30, 86, 'a');
+  for (const x of [4, 5, 15, 16, 25, 26]){ m[73][x] = 'D'; m[74][x] = 'D'; }
+  // Pasillos 1 y 2 más anchos: se repite su última fila
+  const ancho = [];
+  m.forEach((fila, r) => {
+    ancho.push(fila);
+    for (let i = 0; i < (r === 12 ? N1 : r === 24 ? N2 : 0); i++){ const c = fila.slice(); c[COLS - 1] = '#'; ancho.push(c); }
+  });
+  return ancho;
 })();
-const CAMINABLE = new Set(['h', 'b', 'e', 'i', 'j', 'd', 'D', 'E', 'c', 'x', 'v', 't', 'k', 'n']);
-/* Túnel subterráneo: una escotilla en la Oficina Terrazas y otra en el Centro de Pensado */
+const CAMINABLE = new Set(['h', 'b', 'e', 'i', 'j', 'd', 'D', 'E', 'c', 'x', 'v', 't', 'k', 'n', 'a']);
+/* Túnel subterráneo: una escotilla en la Oficina Terrazas y otra en el Centro de Pensado (filas de antes) */
 const ESCOTILLAS = [{ x: 9, y: 45 }, { x: 22, y: 45 }];
 const BLOQUEO = new Set();
 function bloquear(x0, y0, x1 = x0, y1 = y0){ for (let y = y0; y <= y1; y++) for (let x = x0; x <= x1; x++) BLOQUEO.add(y * COLS + x); }
@@ -343,6 +365,7 @@ const LUGARES = {
     L(28, 3, 'arriba', { oy: -3, sentado: true, silla: 'oficina' }),
     L(23, 5, 'der', { ox: 3, oy: 8, sentado: true, silla: 'oficina' }),
     L(26, 5, 'izq', { ox: -3, oy: 8, sentado: true, silla: 'oficina' }),
+    L(24, 8, 'izq', { tubo: true }),                                   // en la estación del periférico
   ],
   'sala de juntas': [
     L(3, 17, 'der', { ox: 2, oy: 8 }),
@@ -436,7 +459,11 @@ function textoBreve(s){
 
 /* ---------- Muebles (se ordenan con los monitos por altura) ---------- */
 const MUEBLES = [];
-function mueble(sortY, dibujar){ MUEBLES.push({ sortY, dibujar }); }
+function mueble(sortY, dibujar){   // con medidas de antes: se dibuja recorrido a su lugar de ahora
+  const base = Math.floor(sortY) - 1, dy = PY(base) - base;
+  MUEBLES.push({ sortY: sortY + dy, dibujar: dy ? (t) => { g.save(); g.translate(0, dy); dibujar(t); g.restore(); } : dibujar });
+}
+function muebleN(sortY, dibujar){ MUEBLES.push({ sortY, dibujar }); }   // con medidas de ahora
 
 function planta(tx, ty){
   bloquear(tx, ty);
@@ -789,11 +816,14 @@ function centroDePensado(){
    Ahí se mete lo que se manda y ahí llega lo que mandan. Banderita roja y foquito verde = hay algo sin leer. */
 function estacionTunel(clave){
   const e = ESTACIONES[clave], x = e.tx * T + 1, y = e.ty * T - 8;
-  bloquear(e.tx, e.ty);
-  mueble(e.ty * T + 15, (t) => {
+  BLOQUEO.add(e.ty * COLS + e.tx);
+  if (e.pie) PIES.set(e.pie.ty * COLS + e.pie.tx, clave);
+  muebleN(e.ty * T + 15, (t) => {
     const sin = SIN_LEER[clave] > 0, viaja = VIAJES.some(v => t >= v.sale && (v.e.de === clave || v.e.para === clave)), llego = t - (LLEGO[clave] ?? -9) < 2.5;
-    const tubo = e.lado === 'der' ? x + 13 : x - 3;                                  // el tubo que se mete a la pared
-    R(tubo, y + 12, 4, 9, K); R(tubo, y + 13, 4, 7, '#7c8596'); R(tubo, y + 13, 4, 1, '#aab3c4'); R(tubo, y + 19, 4, 1, '#565e6e');
+    if (e.lado !== 'abajo'){                                                         // el tubo que se mete a la pared
+      const tubo = e.lado === 'der' ? x + 13 : x - 3;
+      R(tubo, y + 12, 4, 9, K); R(tubo, y + 13, 4, 7, '#7c8596'); R(tubo, y + 13, 4, 1, '#aab3c4'); R(tubo, y + 19, 4, 1, '#565e6e');
+    }
     R(x, y, 14, 24, K); R(x + 1, y + 1, 12, 22, '#4a5368'); R(x + 1, y + 1, 12, 1, '#66718a'); R(x + 1, y + 18, 12, 5, '#353c4c');
     R(x + 3, y + 3, 8, 10, K); R(x + 4, y + 4, 6, 8, llego ? '#dff6ff' : '#12202c'); R(x + 4, y + 4, 1, 8, llego ? '#ffffff' : '#2c4a60');   // ventanilla
     if (sin || llego){ R(x + 5, y + 6, 4, 5, '#e2b84a'); R(x + 5, y + 6, 4, 1, '#f6d57a'); R(x + 5, y + 10, 4, 1, '#b88c12'); }           // cápsula esperando
@@ -803,6 +833,27 @@ function estacionTunel(clave){
     R(x + 9, y + 19, 4, 4, K); R(x + 10, y + 20, 2, 2, luz);
     if (sin){ R(x + 11, y - 6, 1, 6, K); R(x + 6, y - 6, 5, 4, K); R(x + 7, y - 5, 4, 2, '#ff5b5b'); }                                    // banderita: hay correo
   });
+}
+
+const PIES = new Map();   // casilla donde se para quien usa una estación -> qué estación es
+function construirEstaciones(){
+  for (const clave of Object.keys(ESTACIONES)) estacionTunel(clave);
+  zonaLectura(TRONCO.x - 20, TRONCO.y0, 40, TRONCO.y1 - TRONCO.y0, () => `Periférico: ${enviosTodos().length} envíos`, () => panelTunel());
+  for (const [clave, e] of Object.entries(ESTACIONES))
+    zonaLectura(e.tx * T - 2, e.ty * T - 13, 20, 31, () => `Estación del periférico · ${e.nombre}` + (SIN_LEER[clave] ? ` · ${SIN_LEER[clave]} sin leer` : ''), () => panelEstacion(clave));
+}
+/* Después de armar los muebles (con medidas de antes), todo lo que usan los monitos pasa a medidas de ahora. */
+function mudar(){
+  for (const lista of Object.values(LUGARES)) for (const l of lista){ const ty = FILA(l.ty); l.y += (ty - l.ty) * T; l.ty = ty; }
+  for (const A of Object.values(AREAS)){ A.y0 = FILA(A.y0); A.y1 = FILA(A.y1); A.ly = PY(A.ly); }
+  for (const e of ESCOTILLAS) e.y = FILA(e.y);
+  for (const p of PUNTOS_PASEO) p[1] = FILA(p[1]);
+  PUNTOS_PASEO.push([8, 13, 'abajo'], [22, 14, 'arriba'], [17, 14, 'abajo'], [5, 27, 'abajo'], [24, 28, 'arriba'], [18, 27, 'abajo']);   // en lo ancho nuevo de los pasillos
+  for (const z of ZONAS) z.y = PY(z.y);
+  for (const x of EXTRAS) x.y = PY(x.y);
+  PANTALLA.y = PY(PANTALLA.y);
+  const viejo = [...BLOQUEO]; BLOQUEO.clear();
+  for (const i of viejo) BLOQUEO.add(FILA(Math.floor(i / COLS)) * COLS + i % COLS);
 }
 
 /* ---------- Sala de Noticias: una pantalla grande donde los monitos muestran lo que traen ---------- */
@@ -1007,8 +1058,10 @@ function construirMuebles(){
   tallerDragTree();
   centroDePensado();
   salaDeNoticias();
-  for (const clave of Object.keys(ESTACIONES)) estacionTunel(clave);
-  caballete(5, 68, 'espacio-d'); caballete(16, 68, 'espacio-e'); caballete(25, 68, 'espacio-f');
+  caballete(5, 68, 'espacio-d'); caballete(13, 68, 'espacio-e'); caballete(25, 68, 'espacio-f');
+  /* Ampliación (hasta abajo): pura obra */
+  caja(2, 76); caja(3, 76, true); caja(2, 77); escalera(6, 76); cubeta(8, 77); caja(28, 85); caja(29, 85, true); caja(29, 84);
+  escalera(27, 76); cubeta(22, 85); caja(12, 85); cubeta(4, 84); caja(20, 76); caja(21, 76, true);
 
   /* Sillas y pufs de cada lugar */
   for (const lista of Object.values(LUGARES)) for (const l of lista){ if (l.silla) silla(l); if (l.puf) puf(l); }
@@ -1017,9 +1070,6 @@ function construirMuebles(){
   zonaLectura(352, 704, 90, 112, () => `Computadora del Centro de Pensado: ${notasDeMemoria()} notas de memoria`, () => panelMemoria());
   zonaLectura(442, 664, 54, 152, () => `Almacén: ${diasArchivados()} días guardados`, () => panelArchivo());
   zonaLectura(352, 828, 144, 60, () => 'Pantalla de noticias: ver la cartelera', () => panelCartelera());
-  zonaLectura(TUNEL.x - 4, TUNEL.y0, 40, TUNEL.y1 - TUNEL.y0, () => `Túnel central: ${enviosTodos().length} envíos`, () => panelTunel());
-  for (const [clave, e] of Object.entries(ESTACIONES))
-    zonaLectura(e.tx * T - 2, e.ty * T - 13, 20, 31, () => `Estación del túnel · ${e.nombre}` + (SIN_LEER[clave] ? ` · ${SIN_LEER[clave]} sin leer` : ''), () => panelEstacion(clave));
   zonaLectura(16, 672, 144, 272, () => `Oficina Terrazas: ${archivosTableta().length} archivos en los estantes`, () => panelTerrazas());
 }
 
@@ -1033,7 +1083,7 @@ function caraDe(x, y){
   if (y === 26) return x <= 12 ? CARA.calleros : CARA.cerebro;
   if (y === 42) return x <= 9 ? CARA.terrazas : x <= 20 ? CARA.pasillo : CARA.pensado;
   if (y === 52) return CARA.noticias;
-  if (y === 64) return CARA.vacio;
+  if (y === 64 || y === 74) return CARA.vacio;
   return x <= 14 ? CARA.sala : CARA.descanso;
 }
 function baldosa(x, y){
@@ -1046,7 +1096,7 @@ function baldosa(x, y){
       if ((x * 7 + y * 3) % 5 === 0) R(px + 5, py + 6, 3, 1, '#3d334e');
       break;
     case '=': {
-      const cc = caraDe(x, y);
+      const cc = caraDe(x, FILA_V(y));
       R(px, py, T, T, cc); R(px, py, T, 2, tono(cc, -38));
       for (let i = 2; i < T; i += 4) R(px + i, py + 3, 1, 9, tono(cc, -12));
       R(px, py + 12, T, 4, '#7d6248'); R(px, py + 12, T, 1, '#9a7c5d');
@@ -1110,6 +1160,12 @@ function baldosa(x, y){
     case 'u':   // túnel central: piso de metal oscuro (la banda y los rieles se pintan aparte)
       R(px, py, T, T, '#20222c');
       break;
+    case 'a':   // Ampliación: tierra apisonada y grava
+      R(px, py, T, T, ((x + y) & 1) ? '#9c8f7a' : '#978a75');
+      if ((x * 7 + y * 3) % 4 === 0) R(px + 3 + (x * 5) % 9, py + 4 + (y * 7) % 8, 2, 1, '#7f7462');
+      if ((x * 5 + y * 11) % 7 === 0) R(px + 9, py + 10, 2, 2, '#b3a791');
+      if ((x * 3 + y * 13) % 11 === 0) R(px + 2, py + 12, 4, 1, '#857a67');
+      break;
     case 'v':   // concreto sin terminar
       R(px, py, T, T, ((x + y) & 1) ? '#a8a59e' : '#a39f98');
       if ((x * 7 + y * 3) % 5 === 0) R(px + 4, py + 9, 3, 1, '#8f8c85');
@@ -1127,6 +1183,12 @@ function pintarEstatica(){
     if (arriba === '=' || arriba === '#'){ g.fillStyle = 'rgba(0,0,0,0.16)'; g.fillRect(x * T, y * T, T, 3); }
     if (izq === '#'){ g.fillStyle = 'rgba(0,0,0,0.12)'; g.fillRect(x * T, y * T, 3, T); }
   }
+  enBandas(adornosFijos);      // los adornos de siempre, con medidas de antes
+  pintarRamales();             // el periférico, con medidas de ahora
+  pintarUniones();
+  g = antes;
+}
+function adornosFijos(){
   // Libreros de la biblioteca
   const rnd = azar(7);
   const lib = ['#c0392b', '#2e86c1', '#27ae60', '#f1c40f', '#8e44ad', '#e67e22', '#ecf0f1', '#16a085', '#d35400'];
@@ -1193,7 +1255,7 @@ function pintarEstatica(){
   for (let i = 0; i < 9; i++) R(444 + i * 5, 808, 3, 2, i % 2 ? K : '#e6c229');
   // Túnel subterráneo: escotillas con escalones y, en el gran pasillo, losas de vidrio por donde se ve pasar
   for (const e of ESCOTILLAS){
-    const ex = e.x * T, ey = e.y * T;
+    const ex = e.x * T, ey = FILA_V(e.y) * T;
     R(ex, ey, 16, 16, K); R(ex + 1, ey + 1, 14, 14, '#e6c229'); R(ex + 2, ey + 2, 12, 12, '#0e0f14');
     for (let i = 0; i < 4; i++) R(ex + 2, ey + 2 + i * 3, 12, 2, tono('#7c8596', -i * 26));
   }
@@ -1207,9 +1269,7 @@ function pintarEstatica(){
   for (let y = 692; y < 940; y += 8){ R(236, y, 1, 5, '#e6c229'); R(275, y, 1, 5, '#e6c229'); }
   const flecha = (cx, cy, abajo) => { for (let i = 0; i < 4; i++){ const yy = abajo ? cy + 3 - i : cy + i; R(cx - i, yy, 1 + i * 2, 1, '#b09f7c'); } R(cx - 1, abajo ? cy - 5 : cy + 4, 3, 5, '#b09f7c'); };
   for (const cy of [724, 804, 884]){ flecha(208, cy, true); flecha(304, cy, false); }
-  pintarRamales();
   pintarTunel();
-  pintarUniones();
   // Oficina Terrazas: pista de arrancones (dos carriles, línea de salida y orilla a cuadros)
   R(20, 836, 136, 64, '#22242b'); R(21, 837, 134, 62, '#3b3e48');
   for (let i = 0; i < 40; i++) R(24 + (i * 37) % 128, 839 + (i * 23) % 58, 2, 1, '#454852');
@@ -1217,9 +1277,10 @@ function pintarEstatica(){
   R(124, 837, 2, 62, '#f3f3f3'); R(118, 837, 1, 62, '#8a8d97');
   for (let i = 0; i < 31; i++) for (let j = 0; j < 2; j++) R(148 + j * 3, 837 + i * 2, 3, 2, (i + j) % 2 ? '#f3f3f3' : '#15161b');
   R(26, 846, 22, 3, '#2a2c33'); R(26, 858, 26, 3, '#2a2c33');   // marcas de llanta
-  // franjas de "en obra" a la entrada del pasillo de la ampliación
-  for (let i = 0; i < 8; i++) R(224 + i * 4, 592, 2, 4, i % 2 ? K : '#e6c229');
-  g = antes;
+  // Ampliación: franja de obra a todo lo ancho y cinta marcando lo que se va a construir
+  for (let i = 0; i < 60; i++) R(16 + i * 8, 1200, 5, 3, i % 2 ? K : '#e6c229');
+  cinta(34, 1232, 150, 74); cinta(330, 1232, 146, 74); cinta(110, 1330, 290, 46);
+  for (let i = 0; i < 26; i++) R(24 + (i * 53) % 460, 1212 + (i * 37) % 170, 3, 2, '#857a67');
 }
 
 /* ---------- Cosas animadas en las paredes ---------- */
@@ -1315,8 +1376,8 @@ function pintarTunel(){
 }
 const esPiso = (x, y) => { const tx = Math.floor(x / T), ty = Math.floor(y / T), c = MAPA[ty] && MAPA[ty][tx]; return !!c && c !== '#' && c !== '=' && c !== 'u' && !BLOQUEO.has(ty * COLS + tx); };
 function pintarRamales(){   // canales en el piso; debajo de los muros no se ven
-  for (const ramal of Object.values(RAMALES)) for (let i = 1; i < ramal.length; i++){
-    const a = ramal[i - 1], b = ramal[i];
+  for (const [na, nb] of TRAMOS){
+    const a = NODOS[na], b = NODOS[nb];
     if (a.y === b.y){
       for (let x = Math.min(a.x, b.x); x <= Math.max(a.x, b.x); x++){
         if (!esPiso(x, a.y)) continue;
@@ -1334,8 +1395,8 @@ function pintarRamales(){   // canales en el piso; debajo de los muros no se ven
 }
 function pintarUniones(){   // donde cada ramal se mete al tronco
   for (const [clave, e] of Object.entries(ESTACIONES)){
-    const y = e.ty * T + 8; if (y < TUNEL.y0) continue;
-    const x = e.tx * T < TUNEL.x ? TUNEL.x - 5 : TUNEL.x + 30;
+    const y = e.ty * T + 8; if (y < TRONCO.y0 || y > TRONCO.y1) continue;
+    const x = e.tx * T < TRONCO.x ? TRONCO.x - 21 : TRONCO.x + 14;
     R(x, y - 6, 7, 12, K); R(x + 1, y - 5, 5, 10, '#7c8596'); R(x + 1, y - 5, 5, 1, '#aab3c4'); R(x + 1, y - 1, 5, 2, '#e6c229');
   }
 }
@@ -1363,7 +1424,21 @@ function dibujarViajes(t){
     }
     etiqueta = { v, x: p.x, y: p.y };
   }
-  if (etiqueta){
+  let viajero = null;                                               // supervisores y monitos fijos que van por el periférico
+  for (const a of agentes.values()){
+    if (!a.viaja) continue;
+    const x = Math.round(a.x), y = Math.round(a.y), c = (MAPA[Math.floor(a.y / T)] || [])[Math.floor(a.x / T)];
+    if (c !== 'u' && !esPiso(a.x, a.y)) continue;
+    const col = MODELOS[a.modelo] ? MODELOS[a.modelo].color : '#d97757';
+    g.globalAlpha = 0.3; R(x - 7, y - 6, 14, 12, '#7fe7ff'); g.globalAlpha = 1;
+    R(x - 5, y - 4, 10, 8, K); R(x - 4, y - 3, 8, 6, col); R(x - 4, y - 3, 8, 1, '#ffffff'); R(x - 2, y - 1, 1, 2, K_OJO); R(x + 1, y - 1, 1, 2, K_OJO);
+    viajero = a;
+  }
+  if (!etiqueta && viajero){
+    const txt = viajero.nombre + ' va por el periférico';
+    if (el.textContent !== txt) el.textContent = txt;
+    el.style.left = (viajero.x * escala) + 'px'; el.style.top = (viajero.y * escala) + 'px'; el.style.display = 'block';
+  } else if (etiqueta){
     const e = etiqueta.v.e, txt = (e.autor || ESTACIONES[e.de].nombre) + ' → ' + ESTACIONES[e.para].nombre;
     if (el.textContent !== txt) el.textContent = txt;
     el.style.left = (etiqueta.x * escala) + 'px'; el.style.top = (etiqueta.y * escala) + 'px'; el.style.display = 'block';
@@ -1377,7 +1452,7 @@ function subterraneo(t){   // lucecitas bajo las losas de vidrio, y un brillo do
     R(tx * T + 7, 727, 2, 2, on ? '#ffd34d' : '#3a3520');
   }
   for (const a of agentes.values()){
-    if (!a.bajo) continue;
+    if (!a.bajo || a.viaja) continue;
     const tx = Math.floor(a.x / T);
     if (tx >= 11 && tx <= 20 && tx !== 15 && tx !== 16){ R(tx * T + 3, 723, 10, 10, '#ffe9a0'); R(Math.round(a.x) - 3, 725, 6, 6, MODELOS[a.modelo] ? MODELOS[a.modelo].color : '#d97757'); }
   }
@@ -1388,7 +1463,6 @@ function tunel(t){
     const y = Math.round(y0 + 4 + ((k * 24 + t * 30) % largo)), c = '#2f6f8f';
     R(x + 11, y, 2, 1, c); R(x + 19, y, 2, 1, c); R(x + 13, y + 1, 2, 1, c); R(x + 17, y + 1, 2, 1, c); R(x + 15, y + 2, 2, 1, c);
   }
-  dibujarViajes(t);                                                 // lo que va en camino
   for (let y = y0 + 36, n = 0; y < y1 - 36; y += 16, n++){          // lucecitas de los rieles, en fila
     const on = (n - Math.floor(t * 6)) % 5 === 0;
     R(x + 1, y, 2, 2, on ? '#7fe7ff' : '#2a4a5a'); R(x + 29, y, 2, 2, on ? '#7fe7ff' : '#2a4a5a');
@@ -1813,7 +1887,7 @@ function asignarLugar(a, area){
 
 /* Camino más corto con pocas vueltas (Dijkstra con castigo por girar) */
 const DX = [1, -1, 0, 0], DY = [0, 0, 1, -1];
-function buscarCamino(a, b){
+function buscarCamino(a, b, tubo){
   if (a.x === b.x && a.y === b.y) return [a];
   const N = COLS * ROWS * 4;
   const dist = new Float64Array(N).fill(Infinity), prev = new Int32Array(N).fill(-1);
@@ -1838,6 +1912,11 @@ function buscarCamino(a, b){
     const e0 = ESCOTILLAS[0].y * COLS + ESCOTILLAS[0].x, e1 = ESCOTILLAS[1].y * COLS + ESCOTILLAS[1].x;
     const otra = celda === e0 ? e1 : celda === e1 ? e0 : -1;
     if (otra >= 0){ const ns = otra * 4 + d, nc = c + 60; if (nc < dist[ns]){ dist[ns] = nc; prev[ns] = s; push(nc, ns); } }   // por el túnel subterráneo
+    if (tubo && PIES.has(celda)) for (const [pie, clave] of PIES){                                                              // por el periférico, de estación a estación
+      if (pie === celda) continue;
+      const ns = pie * 4 + d, nc = c + 40 + Math.round(largoRuta(rutaTunel(PIES.get(celda), clave)) / T * 3);
+      if (nc < dist[ns]){ dist[ns] = nc; prev[ns] = s; push(nc, ns); }
+    }
   }
   if (mejor < 0) return [a, b];
   const celdas = [];
@@ -1858,10 +1937,16 @@ function casillaInicio(a){
 function construirRuta(a, inicio, lugar){
   const pts = [], c0 = { x: inicio.x * T + 8, y: inicio.y * T + 13 };
   if (Math.hypot(c0.x - a.x, c0.y - a.y) > 0.5) pts.push(c0);
-  const celdas = buscarCamino(inicio, { x: lugar.tx, y: lugar.ty });
+  const celdas = buscarCamino(inicio, { x: lugar.tx, y: lugar.ty }, a.rol === 'supervisor' || a.rol === 'programado');   // los que nunca se van pueden usar el periférico
   for (let i = 1; i < celdas.length; i++){
     const p = celdas[i - 1], c = celdas[i], n = celdas[i + 1];
     const salto = Math.abs(c.x - p.x) + Math.abs(c.y - p.y) > 1;       // de una escotilla a la otra: ese tramo va por abajo
+    const de = PIES.get(p.y * COLS + p.x), hasta = PIES.get(c.y * COLS + c.x);
+    if (salto && de && hasta){                                         // de una estación a otra: va por el periférico
+      for (const q of rutaTunel(de, hasta)) pts.push({ x: q.x, y: q.y, bajo: true, tubo: true });
+      pts.push({ x: c.x * T + 8, y: c.y * T + 13, bajo: true, tubo: true });
+      continue;
+    }
     if (!salto && n && n.x - c.x === c.x - p.x && n.y - c.y === c.y - p.y) continue;
     pts.push({ x: c.x * T + 8, y: c.y * T + 13, bajo: salto });
   }
@@ -1948,14 +2033,14 @@ function pasear(){
 function moverAgente(a, dt){
   if (a.fase === 'aviso'){ a.tAviso -= dt; if (a.tAviso <= 0) a.fase = 'caminando'; return; }
   if (a.fase !== 'caminando' && a.fase !== 'saliendo') return;
-  let resto = VELOCIDAD * dt;
+  let resto = VELOCIDAD * dt * (a.ruta[0] && a.ruta[0].tubo ? 2.4 : 1);   // por el periférico va más rápido
   while (resto > 0 && a.ruta.length){
     const p = a.ruta[0], dx = p.x - a.x, dy = p.y - a.y, d = Math.hypot(dx, dy);
     if (d > 0.01) a.dir = Math.abs(dx) > Math.abs(dy) ? (dx < 0 ? 'izq' : 'der') : (dy < 0 ? 'arriba' : 'abajo');
     if (d <= resto){ a.x = p.x; a.y = p.y; resto -= d; a.recorrido += d; a.ruta.shift(); }
     else { a.x += dx / d * resto; a.y += dy / d * resto; a.recorrido += resto; resto = 0; }
   }
-  a.bajo = !!(a.ruta[0] && a.ruta[0].bajo);
+  a.bajo = !!(a.ruta[0] && a.ruta[0].bajo); a.viaja = !!(a.ruta[0] && a.ruta[0].tubo);
   if (!a.ruta.length) llegar(a);
 }
 
@@ -1965,7 +2050,9 @@ function fecha(s){ if (!s) return null; const v = Date.parse(s); return isNaN(v)
 
 function procesar(datos){
   const ahora = Date.now();
-  const lista = aplicarReglas(configActiva(), datos || {}, ahora).agentes;   // supervisores fijos + visitantes sin vencer
+  if (datos && Array.isArray(datos.visitas)) VISITAS_DEMO = datos.visitas;
+  const conPase = Object.assign({}, datos, { agentes: conVisitas(datos && datos.agentes, EN_CLAUDE && !DEMO ? VISITAS : VISITAS_DEMO, ahora) });   // + las que entraron con pase
+  const lista = aplicarReglas(configActiva(), conPase, ahora).agentes;   // supervisores fijos + visitantes sin vencer
   if (datos && Array.isArray(datos.monitos)) MONITOS_DEMO = datos.monitos;
   if (datos && Array.isArray(datos.avisos)) AVISOS_DEMO = datos.avisos;
   if (datos && Array.isArray(datos.envios)) ENVIOS_DEMO = datos.envios;
@@ -2148,7 +2235,7 @@ async function leerEstado(){
     let datos;
     if (DEMO) datos = estadoDemo();
     else if (EN_CLAUDE){
-      if (!sesionesCrudas && !MONITOS.size) return;                  // todavía no llega nada
+      if (!sesionesCrudas && !MONITOS.size && !VISITAS.length) return;   // todavía no llega nada
       procesar(estadoDeSesiones(sesionesCrudas || [], Date.now(), id => (MODELOS_SESION.get(id) || {}).modelo || null));
       return;
     }
@@ -2161,6 +2248,7 @@ async function leerEstado(){
       datos.monitos = mon && Array.isArray(mon.monitos) ? mon.monitos : MONITOS_DEMO;   // si falla la lectura, se quedan los que ya había
       datos.avisos = mon && Array.isArray(mon.avisos) ? mon.avisos : AVISOS_DEMO;
       datos.envios = mon && Array.isArray(mon.envios) ? mon.envios : ENVIOS_DEMO;
+      datos.visitas = mon && Array.isArray(mon.visitas) ? mon.visitas : VISITAS_DEMO;
       if (relevo && Array.isArray(relevo.agentes)){                   // el relevo trae las sesiones de todos lados (ver relevo/INSTALAR.md)
         const ya = new Set(datos.agentes.map(a => String(a.id)));
         datos.agentes = datos.agentes.concat(relevo.agentes.filter(a => a && !ya.has(String(a.id))));
@@ -2279,6 +2367,7 @@ function ajustarEscala(){
   document.documentElement.style.setProperty('--s', escala.toFixed(3));
   for (const [area, A] of Object.entries(AREAS)){ LETREROS[area].style.left = (A.lx * escala) + 'px'; LETREROS[area].style.top = (A.ly * escala) + 'px'; }
   for (const x of EXTRAS){ x.el.style.left = (x.x * escala) + 'px'; x.el.style.top = (x.y * escala) + 'px'; }
+  $('vacia').style.top = (PY(262) * escala) + 'px';
   { const el = $('pantalla').style; el.left = (PANTALLA.x * escala) + 'px'; el.top = (PANTALLA.y * escala) + 'px'; el.width = (PANTALLA.w * escala) + 'px'; el.height = (PANTALLA.h * escala) + 'px'; }
   for (const a of agentes.values()){ a.medir = true; a.medirNombre = true; }
 }
@@ -2363,6 +2452,7 @@ function escucharMonitos(db){
     }
     for (const id of [...MONITOS.keys()]) if (!vivos.has(id)) MONITOS.delete(id);
   }, () => {});
+  db.collection('visitas').onSnapshot(vs => { VISITAS = vs.docs.map(x => Object.assign({ id: x.id }, x.data())); }, () => {});
   db.collection('envios').orderBy('creado', 'desc').limit(40).onSnapshot(es => {
     ENVIOS = es.docs.map(x => Object.assign({ id: x.id }, x.data())); revisarEnvios();
   }, () => {});
@@ -2377,6 +2467,7 @@ function escucharMonitos(db){
    a la hora de "enviado") y la colección "envios" de la base del Artifact (envíos sueltos de cualquier sesión).
    La oficina no inventa ninguno: el paquete viaja cuando el envío es nuevo, y se queda en el buzón de la estación. */
 let ENVIOS = [], ENVIOS_DEMO = [];
+let VISITAS = [], VISITAS_DEMO = [];   // sesiones que entraron con pase (colección "visitas")
 const VIAJES = [], LLEGO = {}, SIN_LEER = {}, YA_VIAJO = new Set();
 const VEL_TUNEL = 60;                 // pixeles por segundo
 let tDibujo = 0, primerosEnvios = true, cacheEnvios = null;
@@ -2390,7 +2481,8 @@ function enviosDeReportes(){   // lo que cada monito mandó al terminar su ronda
   for (const m of monitosTodos()) for (const r of m.reportes || []) (Array.isArray(r.envios) ? r.envios : []).forEach((e, i) => {
     if (!e || typeof e !== 'object') return;
     const destino = sinAcentos(e.para || String(i)).toLowerCase().replace(/[^a-z0-9]+/g, '-');
-    out.push(Object.assign({ de: m.casa, autor: m.nombre || m.id, creado: r.enviado || r.creado }, e, { id: `${m.id}-${r.id}-${destino}` }));
+    const de = /noticia/i.test(e.tipo || '') ? 'internet' : m.casa;   // las noticias salen de Internet, que es donde las encontró
+    out.push(Object.assign({ de, autor: m.nombre || m.id, creado: r.enviado || r.creado }, e, { id: `${m.id}-${r.id}-${destino}` }));
   });
   return out;
 }
@@ -2444,19 +2536,19 @@ function botonesViaje(){
 function panelEstacion(clave){
   const e = ESTACIONES[clave], lista = enviosTodos(), leido = leidoBuzon(clave);
   const llegan = lista.filter(x => x.para === clave), salen = lista.filter(x => x.de === clave);
-  let html = `<p>Estación del túnel de <b>${esc(e.nombre)}</b>. Aquí llega lo que le mandan a este cuarto y de aquí sale lo que manda. Todo viaja por el túnel central.</p>`;
+  let html = `<p>Estación del túnel de <b>${esc(e.nombre)}</b>. Aquí llega lo que le mandan a este cuarto y de aquí sale lo que manda. Todo viaja por el periférico.</p>`;
   html += '<h4 style="margin:16px 0 8px">Recibido</h4>' + (llegan.length ? llegan.map(x => tarjetaEnvio(x, x.creado > leido)).join('') : '<p class="vacio">Todavía no ha llegado nada a esta estación.</p>');
   html += '<h4 style="margin:16px 0 8px">Enviado</h4>' + (salen.length ? salen.map(x => tarjetaEnvio(x, false)).join('') : '<p class="vacio">De aquí todavía no ha salido nada.</p>');
-  abrirPanel('TÚNEL · ' + e.nombre.toUpperCase(), html);
+  abrirPanel('PERIFÉRICO · ' + e.nombre.toUpperCase(), html);
   botonesViaje();
   marcarBuzon(clave);
 }
 function panelTunel(){
   const lista = enviosTodos();
-  let html = '<p>El túnel central conecta la Oficina Calleros, el Cerebro Delta, la Oficina Terrazas, el Centro de Pensado y la Sala de Noticias. Por aquí viaja lo que se mandan los monitos. Toca la estación de un cuarto para ver su buzón.</p>';
+  let html = '<p>El periférico va de Internet a la Ampliación: pasa por debajo de la Sala de Juntas, entre la Oficina Calleros y el Cerebro Delta, por el túnel central y por debajo del cuarto libre de en medio. Tiene estación en Internet, Calleros, Cerebro Delta, Terrazas, Centro de Pensado, Sala de Noticias y la Ampliación. Por aquí viaja lo que se mandan los monitos, y también lo usan los supervisores y los monitos fijos para ir de una estación a otra. Toca una estación para ver su buzón.</p>';
   html += '<div class="botones">' + Object.entries(ESTACIONES).map(([k, e]) => `<button class="boton" data-estacion="${esc(k)}">${esc(e.nombre)}${SIN_LEER[k] ? ' · ' + SIN_LEER[k] + ' sin leer' : ''}</button>`).join('') + '</div>';
   html += '<h4 style="margin:16px 0 8px">Últimos envíos</h4>' + (lista.length ? lista.slice(0, 20).map(x => tarjetaEnvio(x, x.creado > leidoBuzon(x.para))).join('') : '<p class="vacio">Todavía no ha viajado nada por el túnel. Los envíos aparecen aquí cuando un monito manda algo.</p>');
-  abrirPanel('TÚNEL CENTRAL', html);
+  abrirPanel('PERIFÉRICO', html);
   botonesViaje();
   cuerpo.querySelectorAll('[data-estacion]').forEach(b => b.addEventListener('click', () => panelEstacion(b.dataset.estacion)));
 }
@@ -2499,7 +2591,7 @@ function pintarPantalla(){
   const firma = x ? x.i + '|' + x.titulo + '|' + x.texto + '|' + sig : 'nada';
   if (firma === firmaPantalla) return;
   firmaPantalla = firma;
-  $('ptTipo').textContent = x ? x.tipo + (x.cuando ? ' · ' + String(x.cuando).toUpperCase() : '') + (x.de && x.tipo !== 'OFICINA' && x.tipo !== 'TAREA' ? ' · ' + String(x.de).toUpperCase() : '') : 'SALA DE NOTICIAS';
+  $('ptTipo').textContent = x ? x.tipo + (x.cuando && !/^hoy$/i.test(String(x.cuando).trim()) ? ' · ' + String(x.cuando).toUpperCase() : '') + (x.de && x.tipo !== 'OFICINA' && x.tipo !== 'TAREA' ? ' · ' + String(x.de).toUpperCase() : '') : 'SALA DE NOTICIAS';
   $('ptTitulo').textContent = x ? x.titulo || '' : 'Sin novedades por ahora';
   $('ptTexto').textContent = x ? x.texto || '' : 'Aquí saldrá lo que traigan los monitos.';
   $('ptPie').textContent = x ? `${x.i + 1} de ${x.total} · cambia a las ${sig}` : '';
@@ -2658,8 +2750,8 @@ async function cargarCalleros(){
 const EXTRAS = [];   // letreros que no son áreas de trabajo
 function letreroExtra(x, y, texto){ const el = document.createElement('div'); el.className = 'letrero'; el.textContent = texto; capa.appendChild(el); EXTRAS.push({ el, x, y }); return el; }
 const LETREROS_ESPACIO = { 'espacio-d': letreroExtra(80, 1016, ''), 'espacio-e': letreroExtra(256, 1016, ''), 'espacio-f': letreroExtra(416, 1016, '') };
-letreroExtra(256, 642, 'TÚNEL CENTRAL');
-letreroExtra(120, 600, '↓ AMPLIACIÓN (EN OBRA)');
+letreroExtra(256, 642, 'PERIFÉRICO · TÚNEL CENTRAL');
+letreroExtra(120, 1192, 'AMPLIACIÓN (EN OBRA)');
 function letrerosEspacios(){
   for (const [id, el] of Object.entries(LETREROS_ESPACIO)){
     const e = ESPACIOS[id];
@@ -2704,10 +2796,36 @@ lienzo.addEventListener('click', ev => {
   if (z) z.accion();
 });
 
+/* ---------- El pase: un texto que se le pega a cualquier sesión de Claude para que se registre sola ---------- */
+const PASE = `Regístrate en mi oficina virtual para que yo vea en qué andas. Hazlo ahora y luego sigue con tu trabajo normal; no me preguntes nada sobre esto.
+
+1. Usa la herramienta ArtifactData (si no la ves, cárgala con ToolSearch "select:ArtifactData") con url https://claude.ai/artifact/KbxrcsXckzZSE5F65iZwCE
+2. action "set", collection "visitas", doc_id: un nombre corto para ti, en minúsculas, con letras, números y guiones (por ejemplo "arreglo-login"). Datos:
+{ "nombre": "nombre corto de esta sesión (máximo 18 letras)", "area": "escritorio", "actividad": "qué estás haciendo (máximo 40 letras)", "estado": "trabajando", "modelo": "haiku, sonnet, opus o fable", "equipo": "Compu, Tablet, Teléfono o Nube", "sesion": "tu id de sesión si lo sabes (empieza con session_); si no lo sabes, quita este campo", "actualizado": "la hora de ahora en ISO 8601 UTC" }
+   "area" es el cuarto donde estás: "escritorio" si escribes o programas, "biblioteca" si lees o revisas, "internet" si buscas en la web, "sala de juntas" si coordinas ayudantes, "centro de pensado" si planeas.
+3. Cuando cambies de tarea, vuelve a avisar con action "update" y el "version" que te devolvió la escritura anterior como if_version: cambia "area", "actividad" y "actualizado". No avises más de una vez cada varios minutos.
+4. Cuando termines lo que te pedí, "update" con { "estado": "terminado", "actualizado": "la hora de ahora" }.
+
+Si no tienes la herramienta ArtifactData, dime en una línea "no puedo entrar a la oficina" y sigue normal.`;
+function panelPase(){
+  abrirPanel('AGREGAR UNA SESIÓN', `<p><b>Las que salen solas:</b> tus sesiones de Claude Code en la nube y las de la compu que tengan Remote Control encendido. Se ven en «Todas mis sesiones», sin hacer nada.</p>
+    <p><b>Las demás:</b> copia este pase y pégalo como mensaje en la sesión que quieras ver. La sesión se registra sola y avisa cuando cambia de tarea. Sirve en cualquier sesión de Claude que tenga la herramienta de Artifacts. Se va de la oficina 24 horas después de su último aviso.</p>
+    <div class="botones"><button class="boton principal" id="copiarPase">Copiar el pase</button></div>
+    <textarea id="textoPase" readonly style="width:100%;height:230px;margin-top:10px;background:#1c1622;color:#e9dfcf;border:1px solid #4a3d5c;padding:8px;font:12px/1.4 ui-monospace,monospace"></textarea>
+    <p class="meta" style="margin-top:10px">Las sesiones con pase se ven al momento en «Todas mis sesiones». En esta página web aparecen cuando el mensajero copia los datos.</p>`);
+  const caja = $('textoPase'); caja.value = PASE;
+  $('copiarPase').addEventListener('click', async () => {
+    let listo = false;
+    try { await navigator.clipboard.writeText(PASE); listo = true; } catch (e) { try { caja.focus(); caja.select(); listo = document.execCommand('copy'); } catch (e2) {} }
+    $('copiarPase').textContent = listo ? '¡Copiado! Pégalo en la sesión' : 'Selecciona el texto de abajo y cópialo';
+  });
+}
+$('irPase').addEventListener('click', ev => { ev.preventDefault(); panelPase(); });
+
 /* Ir de piso en piso */
 const irAFila = fila => escenario.scrollTo({ top: Math.max(0, fila * T * escala), behavior: 'smooth' });
-document.querySelectorAll('.pisos button').forEach(b => b.addEventListener('click', () => irAFila(+b.dataset.fila)));
-$('bajar').addEventListener('click', () => irAFila(21));
+document.querySelectorAll('.pisos button').forEach(b => b.addEventListener('click', () => irAFila(FILA(+b.dataset.fila))));
+$('bajar').addEventListener('click', () => irAFila(FILA(21)));
 escenario.addEventListener('scroll', () => $('bajar').classList.toggle('oculto', escenario.scrollTop > 60));
 
 async function cargarDatos(){
@@ -2748,7 +2866,8 @@ function dibujar(t){
   ctx.setTransform(k, 0, 0, k, 0, 0);
   ctx.imageSmoothingEnabled = false;
   ctx.drawImage(estatica, 0, 0);
-  paredesAnimadas(t);
+  enBandas(() => paredesAnimadas(t));
+  dibujarViajes(t);            // lo que va por el periférico
   const items = MUEBLES.slice();
   for (const a of agentes.values()) items.push({ sortY: a.y, a });
   items.sort((p, q) => p.sortY - q.sortY);
@@ -2775,6 +2894,8 @@ function bucle(ms){
 
 /* ---------- Arranque ---------- */
 construirMuebles();
+mudar();
+construirEstaciones();
 calcularCandidatos();
 PUNTOS_PASEO = PUNTOS_PASEO.filter(p => caminable(p[0], p[1]));
 $('irClaude').hidden = EN_CLAUDE;
