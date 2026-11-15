@@ -6,10 +6,12 @@ La página web de la oficina lee este archivo; por eso todo lo que hay aquí es 
 
   python3 publicar.py estado <id> trabajando <area> "<actividad>"
   python3 publicar.py estado <id> listo
-  python3 publicar.py reporte <id> <archivo.json>     (el resumen; se guardan los 10 más nuevos)
+  python3 publicar.py reporte <id> <archivo.json>     (el resumen; se guardan los 30 más nuevos)
   python3 publicar.py sincronizar <carpeta>           (copia lo que ArtifactData guardó con out_dir:
                                                        <carpeta>/monitos/<id>.json y
-                                                       <carpeta>/monitos/<id>/reportes/<fecha>.json)
+                                                       <carpeta>/monitos/<id>/reportes/<fecha>.json,
+                                                       <carpeta>/monitos/<id>/memoria/<nota>.json y
+                                                       <carpeta>/avisos/<id>.json)
 """
 import json
 import subprocess
@@ -63,6 +65,7 @@ def sincronizar(carpeta):
             m = {"id": mid, "reportes": []}
             datos["monitos"].append(m)
         viejos = {r.get("id"): r for r in m.get("reportes", [])}
+        viejo_m = dict(m)
         m.clear()
         m.update(ficha)
         m["id"] = mid
@@ -70,7 +73,20 @@ def sincronizar(carpeta):
             r = documento(rr)
             r["id"] = os.path.basename(rr)[:-5]
             viejos[r["id"]] = r
-        m["reportes"] = sorted(viejos.values(), key=lambda r: str(r.get("creado") or r.get("id")), reverse=True)[:10]
+        m["reportes"] = sorted(viejos.values(), key=lambda r: str(r.get("creado") or r.get("id")), reverse=True)[:30]
+        notas = []                                         # su memoria: se copia completa, tal como está en la base
+        for rr in sorted(glob.glob(os.path.join(carpeta, "monitos", mid, "memoria", "*.json"))):
+            n = documento(rr)
+            n["id"] = os.path.basename(rr)[:-5]
+            notas.append(n)
+        m["memoria"] = notas if notas else viejo_m.get("memoria", [])   # si no llegó ninguna, se queda la que había
+    avisos = []                                            # avisos de la oficina (cambios, novedades)
+    for rr in glob.glob(os.path.join(carpeta, "avisos", "*.json")):
+        a = documento(rr)
+        a["id"] = os.path.basename(rr)[:-5]
+        avisos.append(a)
+    if avisos:
+        datos["avisos"] = sorted(avisos, key=lambda a: str(a.get("creado") or a.get("id")), reverse=True)[:20]
     if json.dumps(datos, sort_keys=True, ensure_ascii=False) == antes:
         print("sin cambios")
         return
@@ -104,7 +120,7 @@ def main():
         if not r.get("id"):
             sys.exit("El resumen necesita un campo id (la fecha, AAAA-MM-DD)")
         m["reportes"] = [r] + [x for x in m.get("reportes", []) if x.get("id") != r["id"]]
-        del m["reportes"][10:]
+        del m["reportes"][30:]
     m["actualizado"] = datos["actualizado"] = ahora
     with open(ARCHIVO, "w", encoding="utf-8") as f:
         json.dump(datos, f, ensure_ascii=False, indent=2)
