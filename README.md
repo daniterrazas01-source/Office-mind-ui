@@ -49,6 +49,18 @@ Para agregar otro, desde cualquier sesión de Claude Code en la nube:
 1. Crear su ficha en la base del Artifact, colección `monitos`, con `ArtifactData`: `nombre`, `descripcion`, `casa` (cuarto donde vive: `terrazas`, `descanso`, `calleros`…), `aspecto` (`gorra_roja`, `lentes`, `audifonos`, `bufanda`, `moño`…), `modelo`, `horario` (texto para leer), `frases` (lo que dice de vez en cuando), `estado: "listo"`.
 2. Crear la tarea programada (`create_trigger`, sesión nueva en cada corrida) con un mensaje como el de Nitro: avisar `estado: "trabajando"` con su `area` y `actividad`, hacer el trabajo, guardar el resumen en `monitos/<id>/reportes/<AAAA-MM-DD>` (`titulo`, `fecha`, `intro`, `puntos[]` con `titulo`, `resumen`, `fuente`, `url`, `cierre`, `creado`) y terminar con `estado: "listo"`.
 
+## Memoria, archivo y pantalla
+
+Tres cuartos trabajan con lo que dejan los monitos programados. Los tres se pueden tocar:
+
+- **Centro de Pensado (memoria).** La computadora guarda las notas de `monitos/<id>/memoria` (`pendientes`, `ya-contado`, `fuentes`). El monito las lee al empezar su tarea y las actualiza al terminar; así recuerda de un día para otro aunque cada corrida sea una sesión nueva.
+- **Almacén (archivo).** Guarda los resúmenes de cada día (`monitos/<id>/reportes/<AAAA-MM-DD>`). En los anaqueles hay una caja por día guardado.
+- **Sala de Noticias (pantalla).** Muestra una cosa distinta cada media hora, tomada de la cartelera: noticias y cápsulas del último resumen, tareas y pendientes de cada monito, y avisos de la oficina (colección `avisos`: `titulo`, `texto`, `creado`). Los primeros minutos de cada media hora, el monito que trae esa nota la presenta junto a la pantalla.
+
+Para anunciar un cambio de la oficina en la pantalla, agrega un documento a `avisos` con `ArtifactData`.
+
+La página web recibe todo esto con el **mensajero**: una segunda tarea programada (7:38 a.m.) que copia la base del Artifact a `monitos.json` en la rama `datos`.
+
 ## Relevo para la página web
 
 `relevo/` trae armado, sin instalar, el servicio de Cloudflare que deja que la página web vea todas las sesiones. Los pasos están en `relevo/INSTALAR.md`.

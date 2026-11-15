@@ -71,6 +71,13 @@ header{position:fixed;top:0;left:0;right:0;height:46px;display:flex;align-items:
 .nombre i{font-style:normal;font-weight:700;margin-left:calc(var(--s)*1.5px)}
 .nombre .jefe{color:#ffd34d;margin-right:calc(var(--s)*1px)}
 .nombre .reloj{color:#7fe7ff;margin-right:calc(var(--s)*1px)}
+.pantalla{position:absolute;overflow:hidden;color:#d7f3ff;pointer-events:none;z-index:1;display:flex;flex-direction:column;gap:calc(var(--s)*.5px);
+  padding:calc(var(--s)*1.5px) calc(var(--s)*2px);font-size:max(6px,calc(var(--s)*4px));line-height:1.12;font-family:-apple-system,system-ui,"Segoe UI",sans-serif}
+.pantalla b{color:#ffd34d;font-size:.8em;letter-spacing:.1em}
+.pantalla #ptTitulo{font-weight:700;color:#fff;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.pantalla #ptTexto{color:#9fc7dd;font-size:.9em;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;flex:1}
+.pantalla small{color:#6f8fa5;font-size:.72em}
+.tarjeta i.tipo{display:block;font-size:11px;letter-spacing:.08em;color:#ffd34d}
 .reporte h4{margin:14px 0 2px;font-size:16px}
 .reporte p{margin:6px 0}
 .reporte .tarjeta a{color:#c9a6ff;word-break:break-all}
@@ -170,7 +177,7 @@ textarea.campo{min-height:70px;resize:vertical}
 <div id="escenario">
   <div id="mundo">
     <canvas id="lienzo"></canvas>
-    <div id="capa"><div class="vacia" id="vacia">Nadie trabajando por ahora</div></div>
+    <div id="capa"><div class="vacia" id="vacia">Nadie trabajando por ahora</div><div class="pantalla" id="pantalla"><b id="ptTipo"></b><div id="ptTitulo"></div><div id="ptTexto"></div><small id="ptPie"></small></div></div>
   </div>
 </div>
 <div class="aviso" id="aviso"><div id="avisoTexto">
@@ -275,7 +282,7 @@ const MAPA = (() => {
   llenar(1, 43, 9, 58, 't');                                  // t = Oficina Terrazas (larga)
   llenar(11, 43, 20, 58, 'h');                                // gran pasillo, con el túnel en medio
   llenar(22, 43, 30, 50, 'k');                                // k = Centro de Pensado y almacén
-  llenar(22, 52, 30, 52, '='); llenar(22, 53, 30, 58, 'v');   // otro espacio libre debajo
+  llenar(22, 52, 30, 52, '='); llenar(22, 53, 30, 58, 'n');   // n = Sala de Noticias (la pantalla)
   for (const x of [4, 5, 25, 26]){ m[41][x] = 'D'; m[42][x] = 'D'; }
   // ---- Planta de hasta abajo: pasillo 4 y tres cuartos libres más ----
   llenar(1, 60, 30, 60, '='); llenar(1, 61, 30, 62, 'h');
@@ -287,7 +294,7 @@ const MAPA = (() => {
   for (const x of [4, 5, 15, 16, 25, 26]){ m[63][x] = 'D'; m[64][x] = 'D'; }
   return m;
 })();
-const CAMINABLE = new Set(['h', 'b', 'e', 'i', 'j', 'd', 'D', 'E', 'c', 'x', 'v', 't', 'k']);
+const CAMINABLE = new Set(['h', 'b', 'e', 'i', 'j', 'd', 'D', 'E', 'c', 'x', 'v', 't', 'k', 'n']);
 /* Túnel subterráneo: una escotilla en la Oficina Terrazas y otra en el Centro de Pensado */
 const ESCOTILLAS = [{ x: 9, y: 45 }, { x: 22, y: 45 }];
 const BLOQUEO = new Set();
@@ -304,7 +311,9 @@ const AREAS = {
   'calleros':       { letrero: 'OFICINA CALLEROS', x0: 1, y0: 27, x1: 12, y1: 36, lx: 56,  ly: 408, pose: 'teclear' },
   'cerebro delta':  { letrero: 'CEREBRO DELTA',  x0: 17, y0: 27, x1: 30, y1: 36, lx: 316, ly: 408, pose: 'leer' },
   'terrazas':       { letrero: 'OFICINA TERRAZAS', x0: 1, y0: 43, x1: 9, y1: 58, lx: 80, ly: 664, pose: 'teclear' },
-  'centro de pensado': { letrero: 'CENTRO DE PENSADO', x0: 22, y0: 43, x1: 30, y1: 50, lx: 400, ly: 664, pose: 'leer' },
+  'centro de pensado': { letrero: 'CENTRO DE PENSADO', x0: 22, y0: 43, x1: 27, y1: 50, lx: 394, ly: 664, pose: 'leer' },
+  'almacen':        { letrero: 'ALMACÉN',        x0: 28, y0: 44, x1: 30, y1: 50, lx: 472, ly: 659, pose: 'leer' },
+  'noticias':       { letrero: 'NOTICIAS',       x0: 22, y0: 55, x1: 30, y1: 58, lx: 416, ly: 823, pose: 'leer' },
 };
 const L = (tx, ty, dir, extra = {}) => Object.assign({ tx, ty, ox: 0, oy: 0, dir, sentado: false, silla: null }, extra);
 const LUGARES = {
@@ -364,10 +373,20 @@ const LUGARES = {
     L(29, 28, 'arriba'),
   ],
   'centro de pensado': [
+    L(27, 50, 'arriba', { ox: 8, oy: -3, sentado: true, silla: 'oficina' }),   // en la computadora de la memoria
     L(24, 48, 'arriba'),                                               // frente al foco de ideas
-    L(27, 50, 'arriba', { ox: 8, oy: -3, sentado: true, silla: 'oficina' }),
     L(27, 46, 'izq'),
-    L(29, 44, 'arriba'),                                               // en los anaqueles del almacén
+  ],
+  'almacen': [
+    L(29, 44, 'arriba'),                                               // guardando en los anaqueles
+    L(28, 46, 'der'),
+  ],
+  'noticias': [
+    L(23, 55, 'abajo'),                                                // quien presenta, junto a la pantalla
+    L(25, 57, 'arriba', { sentado: true, puf: '#2bb3a3' }),
+    L(27, 57, 'arriba', { sentado: true, puf: '#f2c230' }),
+    L(29, 57, 'arriba', { sentado: true, puf: '#d97757' }),
+    L(30, 55, 'izq'),
   ],
   'terrazas': [                                                        // equipo DragTree
     L(6, 47, 'arriba', { oy: -3, sentado: true, silla: 'oficina' }),
@@ -386,7 +405,9 @@ function normalizarArea(a){
   if (s.includes('calleros')) return 'calleros';
   if (s.includes('cerebro')) return 'cerebro delta';
   if (s.includes('terraza')) return 'terrazas';
-  if (s.includes('pensado') || s.includes('pensar') || s.includes('pensamiento')) return 'centro de pensado';
+  if (s.includes('pensado') || s.includes('pensar') || s.includes('pensamiento') || s.includes('memoria')) return 'centro de pensado';
+  if (s.includes('almacen') || s.includes('archivero') || s.includes('archivo')) return 'almacen';
+  if (s.includes('noticia') || s.includes('pantalla') || s.includes('cartelera')) return 'noticias';
   if (s.includes('junta') || s === 'sala' || s.includes('reunion')) return 'sala de juntas';
   if (s.startsWith('escritorio') || s === 'computadora') return 'escritorio';
   if (s.startsWith('biblio')) return 'biblioteca';
@@ -728,19 +749,21 @@ function centroDePensado(){
     }
     g.globalAlpha = 1;
   });
-  escritorioMueble(27, 49, 1, 'centro de pensado');
-  /* Almacén: anaqueles con cajas y discos, y bultos en el piso */
+  escritorioMueble(27, 49, 0, 'centro de pensado');   // la computadora de la memoria: prende cuando alguien la usa
+  /* Almacén: en los anaqueles hay una caja por cada día guardado; la de hoy trae foquito */
   bloquear(28, 43, 30, 43);
   mueble(702, (t) => {
-    const x0 = 450, y0 = 664, w = 44, h = 38;
+    const x0 = 450, y0 = 664, w = 44, h = 38, dias = diasArchivados();
     R(x0, y0, w, h, K); R(x0 + 1, y0 + 1, w - 2, h - 2, '#4a5568'); R(x0 + 1, y0 + 1, w - 2, 1, '#6b7890');
     for (let rep = 0; rep < 3; rep++){
       const fy = y0 + 2 + rep * 12;
       R(x0 + 2, fy, w - 4, 10, '#1c232e');
       for (let i = 0; i < 4; i++){
-        const bx = x0 + 3 + i * 10;
-        if ((rep + i) % 3 === 0){ R(bx, fy + 2, 8, 8, '#c79a5b'); R(bx, fy + 2, 8, 2, '#dab06f'); R(bx + 3, fy + 2, 2, 8, '#ead9ab'); }       // caja
-        else { R(bx, fy + 3, 8, 7, '#2f3a4c'); R(bx, fy + 3, 8, 1, '#4d5c75'); R(bx + 1, fy + 7, 2, 1, (Math.floor(t * 3 + rep * 2 + i) % 3) ? '#5dff7a' : '#1f5a2a'); R(bx + 4, fy + 7, 3, 1, '#8a92a8'); }   // disco
+        const bx = x0 + 3 + i * 10, k = rep * 4 + i;
+        if (k < dias){                                               // un día guardado
+          R(bx, fy + 2, 8, 8, '#c79a5b'); R(bx, fy + 2, 8, 2, '#dab06f'); R(bx + 3, fy + 2, 2, 8, '#ead9ab');
+          if (k === dias - 1) R(bx + 6, fy + 3, 1, 1, Math.floor(t * 2) % 2 ? '#5dff7a' : '#1f5a2a');
+        } else { R(bx, fy + 8, 8, 2, '#2f3a4c'); }                   // lugar vacío
       }
       R(x0 + 1, fy + 10, w - 2, 2, '#6b7890');
     }
@@ -751,6 +774,19 @@ function centroDePensado(){
     R(450, 782, 12, 17, K); R(451, 783, 10, 15, '#3f6f9c'); R(451, 786, 10, 1, '#2a4d70'); R(451, 793, 10, 1, '#2a4d70'); R(452, 783, 3, 15, '#5a8fc0');
   });
   planta(22, 50); planta(22, 43);
+}
+
+/* ---------- Sala de Noticias: una pantalla grande donde los monitos muestran lo que traen ---------- */
+const PANTALLA = { x: 364, y: 832, w: 120, h: 48 };
+function salaDeNoticias(){
+  bloquear(23, 53, 29, 54);
+  mueble(884, (t) => {
+    R(360, 828, 128, 56, K); R(361, 829, 126, 54, '#2b2f3a'); R(361, 829, 126, 1, '#4a5368'); R(363, 831, 122, 50, '#0b1220');
+    for (const bx of [353, 489]){ R(bx - 1, 836, 7, 34, K); R(bx, 837, 5, 32, '#3a3f4d'); for (let i = 0; i < 4; i++) R(bx + 1, 840 + i * 8, 3, 3, '#1c1e26'); }
+    R(480, 880, 2, 2, Math.floor(t * 2) % 2 ? '#ff5b5b' : '#5a1e1e');                      // foquito de "al aire"
+    g.globalAlpha = 0.10 + 0.05 * Math.sin(t * 2); R(366, 884, 116, 5, '#7fd0ff'); g.globalAlpha = 1;   // reflejo en el piso
+  });
+  planta(22, 58); planta(30, 58);
 }
 
 function construirMuebles(){
@@ -919,7 +955,6 @@ function construirMuebles(){
   /* ===== Pasillos y ampliación (la mudanza) ===== */
   planta(1, 23); caja(30, 23); caja(30, 24, true); caja(29, 23);
   caja(1, 39); caja(2, 39, true); escalera(30, 39); cubeta(30, 40);
-  escalera(28, 54); caja(29, 57); caja(23, 56, true);
   planta(11, 43); planta(20, 43); planta(11, 58); planta(20, 58);                      // gran pasillo
   planta(1, 61); caja(30, 61); caja(30, 62, true); caja(29, 61);                        // pasillo 4
   caja(2, 71); caja(3, 71, true); cubeta(8, 66); escalera(19, 66); caja(12, 71); cubeta(13, 70);
@@ -941,27 +976,31 @@ function construirMuebles(){
   });
   planta(1, 50); planta(9, 43); planta(9, 58); planta(1, 58);
   tallerDragTree();
-  caballete(25, 55, 'espacio-b');
   centroDePensado();
+  salaDeNoticias();
   caballete(5, 68, 'espacio-d'); caballete(16, 68, 'espacio-e'); caballete(25, 68, 'espacio-f');
 
   /* Sillas y pufs de cada lugar */
   for (const lista of Object.values(LUGARES)) for (const l of lista){ if (l.silla) silla(l); if (l.puf) puf(l); }
 
   /* Lo único que se puede tocar (solo para leer) */
+  zonaLectura(352, 704, 90, 112, () => `Computadora del Centro de Pensado: ${notasDeMemoria()} notas de memoria`, () => panelMemoria());
+  zonaLectura(442, 664, 54, 152, () => `Almacén: ${diasArchivados()} días guardados`, () => panelArchivo());
+  zonaLectura(352, 828, 144, 60, () => 'Pantalla de noticias: ver la cartelera', () => panelCartelera());
   zonaLectura(16, 672, 144, 272, () => `Oficina Terrazas: ${archivosTableta().length} archivos en los estantes`, () => panelTerrazas());
 }
 
 /* ---------- Capa fija: pisos, paredes y adornos que no se mueven ---------- */
 const estatica = document.createElement('canvas'); estatica.width = W; estatica.height = H;
 const CARA = { biblioteca: '#d4c3a0', escritorio: '#e2d4b4', internet: '#b8c3d4', pasillo: '#dccfb2', sala: '#ccd2dc', descanso: '#ead3ae',
-               calleros: '#d8c39b', cerebro: '#3a3157', vacio: '#cfcbc2', terrazas: '#e9d9bd', pensado: '#3b5166' };
+               calleros: '#d8c39b', cerebro: '#3a3157', vacio: '#cfcbc2', terrazas: '#e9d9bd', pensado: '#3b5166', noticias: '#4a4f66' };
 function caraDe(x, y){
   if (y === 1) return x <= 9 ? CARA.biblioteca : x <= 20 ? CARA.escritorio : CARA.internet;
   if (y === 10 || y === 22 || y === 38 || y === 60) return CARA.pasillo;
   if (y === 26) return x <= 12 ? CARA.calleros : CARA.cerebro;
   if (y === 42) return x <= 9 ? CARA.terrazas : x <= 20 ? CARA.pasillo : CARA.pensado;
-  if (y === 52 || y === 64) return CARA.vacio;
+  if (y === 52) return CARA.noticias;
+  if (y === 64) return CARA.vacio;
   return x <= 14 ? CARA.sala : CARA.descanso;
 }
 function baldosa(x, y){
@@ -1027,6 +1066,9 @@ function baldosa(x, y){
         if ((x + fila * 3) % 4 === 0) R(px + ((fila * 5) % 12), yy + 1, 1, 6, '#a57a43');          // junta entre tablas
         if ((x * 7 + fila * 5) % 11 === 0){ R(px + 6, yy + 3, 3, 2, '#b3864c'); R(px + 7, yy + 3, 1, 1, '#8f6836'); }   // nudo
       }
+      break;
+    case 'n':   // Sala de Noticias: alfombra oscura
+      R(px, py, T, T, ((x + y) & 1) ? '#2e3346' : '#2a2f41'); R(px + 3, py + 4, 1, 1, '#3d445c'); R(px + 11, py + 11, 1, 1, '#3d445c');
       break;
     case 'k':   // Centro de Pensado: piso azul profundo con cuadrícula y nodos ámbar
       R(px, py, T, T, '#1b2b3d'); R(px, py, T, 1, '#24384d'); R(px, py, 1, T, '#24384d');
@@ -1111,7 +1153,6 @@ function pintarEstatica(){
   // Oficina Terrazas: tapete verde tipo pasto
   R(40, 770, 96, 34, '#4f6d3c'); R(42, 772, 92, 30, '#6a8f50');
   for (let i = 0; i < 22; i++) R(46 + (i * 13) % 86, 775 + (i * 7) % 24, 1, 2, '#83a96a');
-  cinta(366, 860, 70, 56);
   // Centro de Pensado: cables del foco de ideas hacia la consola, la escotilla y el almacén; zona del almacén marcada en el piso
   const cable = (x0, y0, x1, y1) => { const pasos = Math.max(Math.abs(x1 - x0), Math.abs(y1 - y0)); for (let i = 0; i <= pasos; i += 3) R(Math.round(x0 + (x1 - x0) * i / pasos), Math.round(y0 + (y1 - y0) * i / pasos), 1, 1, '#d9a441'); };
   cable(392, 770, 440, 790); cable(380, 760, 362, 732); cable(404, 760, 446, 730); cable(392, 772, 392, 812);
@@ -1836,6 +1877,7 @@ function procesar(datos){
   const ahora = Date.now();
   const lista = aplicarReglas(configActiva(), datos || {}, ahora).agentes;   // supervisores fijos + visitantes sin vencer
   if (datos && Array.isArray(datos.monitos)) MONITOS_DEMO = datos.monitos;
+  if (datos && Array.isArray(datos.avisos)) AVISOS_DEMO = datos.avisos;
   for (const m of monitosTodos()) lista.push(registroProgramado(m, ahora));   // monitos con tarea programada: siempre están
   const raizTs = fecha(datos && datos.actualizado);
   ARCHIVOS = Array.isArray(datos && datos.archivos_recientes) ? datos.archivos_recientes.filter(f => f && f.nombre) : [];
@@ -2023,6 +2065,7 @@ async function leerEstado(){
         nube.relevo ? leerJSON(String(nube.relevo).replace(/\/$/, '') + '/estado').catch(() => null) : null]);
       datos = juntar(base, terr);
       datos.monitos = mon && Array.isArray(mon.monitos) ? mon.monitos : MONITOS_DEMO;   // si falla la lectura, se quedan los que ya había
+      datos.avisos = mon && Array.isArray(mon.avisos) ? mon.avisos : AVISOS_DEMO;
       if (relevo && Array.isArray(relevo.agentes)){                   // el relevo trae las sesiones de todos lados (ver relevo/INSTALAR.md)
         const ya = new Set(datos.agentes.map(a => String(a.id)));
         datos.agentes = datos.agentes.concat(relevo.agentes.filter(a => a && !ya.has(String(a.id))));
@@ -2141,12 +2184,14 @@ function ajustarEscala(){
   document.documentElement.style.setProperty('--s', escala.toFixed(3));
   for (const [area, A] of Object.entries(AREAS)){ LETREROS[area].style.left = (A.lx * escala) + 'px'; LETREROS[area].style.top = (A.ly * escala) + 'px'; }
   for (const x of EXTRAS){ x.el.style.left = (x.x * escala) + 'px'; x.el.style.top = (x.y * escala) + 'px'; }
+  { const el = $('pantalla').style; el.left = (PANTALLA.x * escala) + 'px'; el.top = (PANTALLA.y * escala) + 'px'; el.width = (PANTALLA.w * escala) + 'px'; el.height = (PANTALLA.h * escala) + 'px'; }
   for (const a of agentes.values()){ a.medir = true; a.medirNombre = true; }
 }
 
 /* ---------- Barra de arriba ---------- */
 const $ = id => document.getElementById(id);
 function barra(){
+  pintarPantalla();
   $('reloj').textContent = new Date().toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
   const n = [...agentes.values()].filter(a => a.fase !== 'saliendo').length;
   $('cuantos').textContent = n === 0 ? 'sin agentes' : n === 1 ? '1 agente' : n + ' agentes';
@@ -2182,7 +2227,7 @@ function obsidianURL(boveda, ruta){ return 'obsidian://open?vault=' + encodeURIC
 
 /* Ficha de un monito (solo lectura) */
 const NOMBRE_AREA = { escritorio: 'Escritorio', biblioteca: 'Biblioteca', internet: 'Internet', 'sala de juntas': 'Sala de juntas',
-                      descanso: 'Descanso', calleros: 'Oficina Calleros', 'cerebro delta': 'Cerebro Delta', terrazas: 'Oficina Terrazas', 'centro de pensado': 'Centro de Pensado' };
+                      descanso: 'Descanso', calleros: 'Oficina Calleros', 'cerebro delta': 'Cerebro Delta', terrazas: 'Oficina Terrazas', 'centro de pensado': 'Centro de Pensado', almacen: 'Almacén', noticias: 'Sala de Noticias' };
 function fechaCorta(s){
   const v = typeof s === 'number' ? s * (s < 1e12 ? 1000 : 1) : Date.parse(s);
   if (!v || isNaN(v)) return '—';
@@ -2211,14 +2256,99 @@ function escucharMonitos(db){
       let m = MONITOS.get(d.id);
       if (!m){
         m = { id: d.id, reportes: [] }; MONITOS.set(d.id, m);
-        db.collection('monitos/' + d.id + '/reportes').orderBy('creado', 'desc').limit(10).onSnapshot(rs => {
+        db.collection('monitos/' + d.id + '/reportes').orderBy('creado', 'desc').limit(30).onSnapshot(rs => {
           m.reportes = rs.docs.map(x => Object.assign({ id: x.id }, x.data()));
+        }, () => {});
+        db.collection('monitos/' + d.id + '/memoria').onSnapshot(ms => {
+          m.memoria = ms.docs.map(x => Object.assign({ id: x.id }, x.data()));
         }, () => {});
       }
       Object.assign(m, d.data(), { id: d.id });
     }
     for (const id of [...MONITOS.keys()]) if (!vivos.has(id)) MONITOS.delete(id);
   }, () => {});
+  db.collection('avisos').onSnapshot(as => {
+    AVISOS = as.docs.map(x => Object.assign({ id: x.id }, x.data())).sort((p, q) => String(q.creado || '').localeCompare(String(p.creado || '')));
+  }, () => {});
+}
+
+/* ---------- Memoria, archivo y cartelera ----------
+   Memoria (Centro de Pensado): notas que cada monito lee al empezar su tarea y actualiza al terminar.
+   Archivo (Almacén): los resúmenes de cada día.
+   Cartelera (Sala de Noticias): todo lo que hay para mostrar; la pantalla cambia cada media hora. */
+let AVISOS = [], AVISOS_DEMO = [];
+const avisosTodos = () => EN_CLAUDE && !DEMO ? AVISOS : AVISOS_DEMO;
+const notasDeMemoria = () => monitosTodos().reduce((n, m) => n + (m.memoria || []).length, 0);
+const diasArchivados = () => monitosTodos().reduce((n, m) => n + (m.reportes || []).length, 0);
+const MEDIA_HORA = 30 * 60000;
+function cartelera(){
+  const noticias = [], capsulas = [], tareas = [], oficina = [];
+  for (const m of monitosTodos()){
+    const de = m.nombre || m.id, r = (m.reportes || [])[0];
+    if (r){
+      for (const p of Array.isArray(r.puntos) ? r.puntos : []) noticias.push({ tipo: 'NOTICIA', titulo: p.titulo, texto: p.resumen, fuente: p.fuente, url: p.url, de });
+      for (const c of Array.isArray(r.capsulas) ? r.capsulas : []) capsulas.push({ tipo: String(c.tipo || 'cápsula').toUpperCase(), titulo: c.titulo, texto: c.texto, fuente: c.fuente, url: c.url, de });
+    }
+    const pend = (m.memoria || []).find(x => x.id === 'pendientes');
+    tareas.push({ tipo: 'TAREA', titulo: de + ': ' + (m.horario || 'tarea programada'), texto: pend && pend.texto ? 'Pendientes: ' + pend.texto : (m.descripcion || ''), de });
+  }
+  for (const a of avisosTodos().slice(0, 6)) oficina.push({ tipo: 'OFICINA', titulo: a.titulo, texto: a.texto, de: 'Oficina' });
+  const out = [];                                                    // se van turnando: noticia, cápsula, tarea, aviso…
+  for (let i = 0; noticias[i] || capsulas[i] || tareas[i] || oficina[i]; i++) for (const l of [noticias, capsulas, tareas, oficina]) if (l[i]) out.push(l[i]);
+  return out;
+}
+function enPantalla(ahora){
+  const items = cartelera(); if (!items.length) return null;
+  const i = Math.floor(ahora / MEDIA_HORA) % items.length;
+  return Object.assign({ i, total: items.length }, items[i]);
+}
+let firmaPantalla = '';
+function pintarPantalla(){
+  const ahora = Date.now(), x = enPantalla(ahora);
+  const sig = new Date((Math.floor(ahora / MEDIA_HORA) + 1) * MEDIA_HORA).toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' });
+  const firma = x ? x.i + '|' + x.titulo + '|' + x.texto + '|' + sig : 'nada';
+  if (firma === firmaPantalla) return;
+  firmaPantalla = firma;
+  $('ptTipo').textContent = x ? x.tipo + (x.de && x.tipo !== 'OFICINA' && x.tipo !== 'TAREA' ? ' · ' + String(x.de).toUpperCase() : '') : 'SALA DE NOTICIAS';
+  $('ptTitulo').textContent = x ? x.titulo || '' : 'Sin novedades por ahora';
+  $('ptTexto').textContent = x ? x.texto || '' : 'Aquí saldrá lo que traigan los monitos.';
+  $('ptPie').textContent = x ? `${x.i + 1} de ${x.total} · cambia a las ${sig}` : '';
+}
+function tarjetaCartelera(x, ahora){
+  const u = enlaceSeguro(x.url), color = { NOTICIA: '#d97757', TAREA: '#7fe7ff', OFICINA: '#6fd36f' }[x.tipo] || '#ffd34d';
+  return `<div class="tarjeta" style="border-left-color:${color}${ahora ? ';background:#352b42' : ''}"><i class="tipo">${esc(x.tipo)}${ahora ? ' · EN PANTALLA AHORA' : ''}</i><b>${esc(x.titulo || '')}</b><div>${esc(x.texto || '')}</div>` +
+    (x.fuente || u ? `<div><i>Fuente: </i>${u ? `<a class="enlace" href="${esc(u)}" target="_blank" rel="noopener">${esc(x.fuente || u)}</a>` : esc(x.fuente)}</div>` : '') + '</div>';
+}
+function panelCartelera(){
+  const items = cartelera(), x = enPantalla(Date.now());
+  abrirPanel('SALA DE NOTICIAS · CARTELERA', items.length
+    ? '<p>La pantalla cambia cada media hora. Esto es todo lo que hay para mostrar hoy.</p>' + items.map((it, i) => tarjetaCartelera(it, x && i === x.i)).join('')
+    : '<p class="vacio">Todavía no hay nada que mostrar. Aquí saldrán las noticias de los monitos, sus tareas y los cambios de la oficina.</p>');
+}
+function panelMemoria(){
+  let html = '<p>Aquí guardan los monitos lo que necesitan recordar de un día para otro. Lo leen en la computadora al empezar su tarea y lo actualizan al terminar.</p>', n = 0;
+  for (const m of monitosTodos()){
+    const notas = m.memoria || [];
+    if (!notas.length) continue;
+    html += `<h4 style="margin:16px 0 8px">${esc(m.nombre || m.id)}</h4>` + notas.map(x => { n++; return `<div class="tarjeta" style="border-left-color:#ffd76a"><b>${esc(x.titulo || x.id)}</b><div class="nota" style="margin-top:6px">${esc(x.texto || '')}</div>${x.actualizado ? `<div><i>Actualizado: ${esc(fechaCorta(x.actualizado))}</i></div>` : ''}</div>`; }).join('');
+  }
+  if (!n) html += '<p class="vacio">Todavía no hay notas de memoria. Los monitos las escriben al terminar su tarea.</p>';
+  abrirPanel('CENTRO DE PENSADO · MEMORIA', html);
+}
+function panelArchivo(){
+  let html = '<p>Lo que cada monito dejó guardado, día por día. Toca un día para verlo completo.</p>', n = 0;
+  for (const m of monitosTodos()) for (const r of m.reportes || []){
+    n++;
+    html += `<button class="item" data-m="${esc(m.id)}" data-r="${esc(r.id)}">${esc(r.titulo || 'Resumen')}<small>${esc(m.nombre || m.id)} · ${esc(r.fecha || r.id)} · ${(r.puntos || []).length} noticias${(r.capsulas || []).length ? ' · ' + r.capsulas.length + ' cápsulas' : ''}</small></button>`;
+  }
+  if (!n) html += '<p class="vacio">El archivo está vacío. Se llena cuando los monitos terminan su tarea del día.</p>';
+  abrirPanel('ALMACÉN · ARCHIVO', html);
+  cuerpo.querySelectorAll('[data-r]').forEach(b => b.addEventListener('click', () => {
+    const m = monitoPorId(b.dataset.m), r = m && (m.reportes || []).find(x => x.id === b.dataset.r);
+    if (!r) return;
+    abrirPanel((m.nombre || m.id) + ' · ' + (r.fecha || r.id), '<div class="botones"><button class="boton" id="volverArchivo">← Volver al archivo</button></div>' + htmlReporte(r));
+    $('volverArchivo').addEventListener('click', panelArchivo);
+  }));
 }
 function leidoDe(id){ try { return localStorage.getItem('oficina.leido.' + id) || ''; } catch (e) { return ''; } }
 function marcarLeido(id, reporte){ try { localStorage.setItem('oficina.leido.' + id, reporte); } catch (e) {} }
@@ -2229,6 +2359,9 @@ const RATO_MIN = 4;
 function ratoLibre(m, ahora){
   const propia = (Array.isArray(m.rutina) ? m.rutina : []).filter(x => x && x.area);
   const planes = propia.concat(propia, [{ area: m.casa || 'descanso', actividad: '' }, { area: 'descanso', actividad: 'Descansando un rato' }, { area: 'descanso', actividad: 'Descansando un rato' }]);
+  const x = enPantalla(ahora);                                       // los primeros minutos de cada media hora presenta lo que salió en pantalla
+  if (x && ahora % MEDIA_HORA < 5 * 60000 && (x.de === (m.nombre || m.id) || (x.de === 'Oficina' && monitosTodos()[0] === m)))
+    return { area: 'noticias', actividad: '', plan: 'Presentando en la pantalla: ' + (x.titulo || '') };   // sin viñeta: la pantalla ya lo dice
   const turno = Math.floor(ahora / (RATO_MIN * 60000));
   return planes[Math.floor(azar(Math.floor(hashTexto(m.id) * 1e9) + turno * 7919)() * planes.length)];   // azar() revuelve bien turnos seguidos
 }
@@ -2242,9 +2375,9 @@ function registroProgramado(m, ahora){
   return {
     id: 'monito-' + m.id, monito: m.id, nombre: m.nombre || m.id, rol: 'programado', fijo: true,
     area: trabajando ? (m.area || 'internet') : libre.area,
-    actividad: trabajando ? (m.actividad || 'Trabajando') : nuevo ? '¡Traigo resumen nuevo!' : (frase || libre.actividad || ''),
-    estado: trabajando ? 'trabajando' : libre.area === 'descanso' ? 'esperando' : libre.actividad ? 'por su cuenta' : nuevo ? 'terminado' : 'esperando',
-    tarea: trabajando, plan: trabajando ? '' : (libre.actividad || 'En su lugar'),
+    actividad: trabajando ? (m.actividad || 'Trabajando') : libre.plan ? '' : nuevo ? '¡Traigo resumen nuevo!' : (frase || libre.actividad || ''),
+    estado: trabajando ? 'trabajando' : libre.area === 'descanso' ? 'esperando' : (libre.actividad || libre.plan) ? 'por su cuenta' : nuevo ? 'terminado' : 'esperando',
+    tarea: trabajando, plan: trabajando ? '' : (libre.plan || libre.actividad || 'En su lugar'),
     modelo: m.modelo, aspecto: m.aspecto, equipo: m.horario || 'Tarea programada',
     actualizado: new Date(ahora).toISOString(), ultima_actividad: m.actualizado,
   };
@@ -2258,6 +2391,11 @@ function htmlReporte(r){
     h += `<div class="tarjeta"><b>${esc(p.titulo || '')}</b><div>${esc(p.resumen || '')}</div>` +
          (p.fuente || u ? `<div><i>Fuente: </i>${u ? `<a href="${esc(u)}" target="_blank" rel="noopener">${esc(p.fuente || u)}</a>` : esc(p.fuente)}</div>` : '') + '</div>';
   }
+  for (const c of Array.isArray(r.capsulas) ? r.capsulas : []){
+    const u = enlaceSeguro(c.url);
+    h += `<div class="tarjeta" style="border-left-color:#ffd34d"><i class="tipo">${esc(String(c.tipo || 'cápsula').toUpperCase())}</i><b>${esc(c.titulo || '')}</b><div>${esc(c.texto || '')}</div>` +
+         (c.fuente || u ? `<div><i>Fuente: </i>${u ? `<a href="${esc(u)}" target="_blank" rel="noopener">${esc(c.fuente || u)}</a>` : esc(c.fuente)}</div>` : '') + '</div>';
+  }
   if (r.cierre) h += `<p>${esc(r.cierre)}</p>`;
   return h + '</div>';
 }
@@ -2267,7 +2405,8 @@ function fichaMonito(a, cual){
   let html = (m.descripcion ? `<p>${esc(m.descripcion)}</p>` : '') +
     [['Rol', '◆ Tarea programada (no se va)'], ['Cuándo trabaja', m.horario || '—'], ['Vive en', NOMBRE_AREA[m.casa] || 'Descanso'],
      ['Ahora', a.enTarea ? 'En su tarea: ' + (a.textoPendiente || 'trabajando') : a.plan + ' (por su cuenta)'],
-     ['Último resumen', reportes[0] ? (reportes[0].fecha || reportes[0].id) : 'todavía ninguno']]
+     ['Último resumen', reportes[0] ? (reportes[0].fecha || reportes[0].id) : 'todavía ninguno'],
+     ['Memoria', (m.memoria || []).length + ' notas en el Centro de Pensado']]
       .map(([k, v]) => `<div class="fila"><span>${esc(k)}</span><span>${esc(v)}</span></div>`).join('');
   html += r ? htmlReporte(r) : '<p class="vacio" style="margin-top:14px">Todavía no trae ningún resumen. Aparecerá aquí cuando corra su tarea.</p>';
   if (reportes.length > 1) html += '<h4 style="margin:16px 0 8px">Resúmenes anteriores</h4>' +
@@ -2324,9 +2463,7 @@ async function cargarCalleros(){
 
 const EXTRAS = [];   // letreros que no son áreas de trabajo
 function letreroExtra(x, y, texto){ const el = document.createElement('div'); el.className = 'letrero'; el.textContent = texto; capa.appendChild(el); EXTRAS.push({ el, x, y }); return el; }
-letreroExtra(468, 823, 'ALMACÉN');
-const LETREROS_ESPACIO = { 'espacio-b': letreroExtra(416, 840, ''),
-                           'espacio-d': letreroExtra(80, 1016, ''), 'espacio-e': letreroExtra(256, 1016, ''), 'espacio-f': letreroExtra(416, 1016, '') };
+const LETREROS_ESPACIO = { 'espacio-d': letreroExtra(80, 1016, ''), 'espacio-e': letreroExtra(256, 1016, ''), 'espacio-f': letreroExtra(416, 1016, '') };
 letreroExtra(256, 642, 'TÚNEL CENTRAL');
 letreroExtra(120, 600, '↓ AMPLIACIÓN (EN OBRA)');
 function letrerosEspacios(){

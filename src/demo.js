@@ -31,8 +31,11 @@ export function estadoDemo() {
       rutina: [{ area: 'terrazas', actividad: 'Revisando el carro' }, { area: 'biblioteca', actividad: 'Leyendo el reglamento' }, { area: 'centro de pensado', actividad: 'Pensando la nota de mañana' }],
       estado: 'listo', area: 'centro de pensado', actividad: 'Armando el resumen', actualizado: hace(0),
       reportes: [{ id: 'ejemplo', fecha: 'Ejemplo', titulo: 'Así se verá un resumen', intro: 'Esto es un resumen de muestra, no son noticias reales.',
-        puntos: [{ titulo: 'Primer tema', resumen: 'Aquí va lo más importante en dos o tres líneas.', fuente: 'Nombre de la fuente' }], cierre: '¡Luz verde!' }],
+        puntos: [{ titulo: 'Primer tema de ejemplo', resumen: 'Aquí va lo más importante en dos o tres líneas.', fuente: 'Nombre de la fuente' }],
+        capsulas: [{ tipo: 'cómo funciona', titulo: 'Cápsula de ejemplo', texto: 'Un dato corto para la pantalla.' }], cierre: '¡Luz verde!' }],
+      memoria: [{ id: 'pendientes', titulo: 'Pendientes', texto: '- Ejemplo: dar seguimiento a la final.', actualizado: hace(60) }],
     }],
+    avisos: [{ id: 'ejemplo', titulo: 'Aviso de ejemplo', texto: 'Aquí saldrán los cambios de la oficina.', creado: hace(120) }],
     archivos_recientes: ['src/arbol.js', 'src/pista.js', 'src/boleta.js', 'index.html', 'css/tema.css', 'notas/ideas.md', 'src/carrera.js', 'README.md', 'src/sonido.js']
       .map((nombre, i) => ({ nombre, origen: 'tableta-android', area: 'terrazas', fecha: hace(5 + i * 40), tipo: i % 3 ? 'editado' : 'creado' })),
   };
