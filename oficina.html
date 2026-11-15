@@ -2373,22 +2373,29 @@ function escucharMonitos(db){
 
 /* ---------- Envíos por el túnel ----------
    Un envío = algo que un monito o una sesión le manda a otro cuarto: { de, para, tipo, titulo, texto, autor, creado }.
-   Viven en la base del Artifact (colección "envios") y en el archivo público de la página web. La oficina no
-   inventa ninguno: el paquete viaja cuando el envío es nuevo, y se queda en el buzón de la estación. */
+   Hay dos lugares donde se escriben: el campo "envios" del resumen del día de un monito (salen de su cuarto,
+   a la hora de "enviado") y la colección "envios" de la base del Artifact (envíos sueltos de cualquier sesión).
+   La oficina no inventa ninguno: el paquete viaja cuando el envío es nuevo, y se queda en el buzón de la estación. */
 let ENVIOS = [], ENVIOS_DEMO = [];
 const VIAJES = [], LLEGO = {}, SIN_LEER = {}, YA_VIAJO = new Set();
 const VEL_TUNEL = 60;                 // pixeles por segundo
-let tDibujo = 0, primerosEnvios = true, cacheEnvios = { de: null, n: -1, lista: [] };
+let tDibujo = 0, primerosEnvios = true, cacheEnvios = null;
 function casaDeMonito(quien){
   const q = sinAcentos(quien).toLowerCase().trim();
   const m = q && monitosTodos().find(m => m.id === q || sinAcentos(m.nombre).toLowerCase() === q);
   return m ? m.casa : null;
 }
-function enviosTodos(){
-  const crudos = EN_CLAUDE && !DEMO ? ENVIOS : ENVIOS_DEMO, n = monitosTodos().length;
-  if (cacheEnvios.de !== crudos || cacheEnvios.n !== n) cacheEnvios = { de: crudos, n, lista: enviosLimpios(crudos, casaDeMonito) };
-  return cacheEnvios.lista;
+function enviosDeReportes(){   // lo que cada monito mandó al terminar su ronda
+  const out = [];
+  for (const m of monitosTodos()) for (const r of m.reportes || []) (Array.isArray(r.envios) ? r.envios : []).forEach((e, i) => {
+    if (!e || typeof e !== 'object') return;
+    const destino = sinAcentos(e.para || String(i)).toLowerCase().replace(/[^a-z0-9]+/g, '-');
+    out.push(Object.assign({ de: m.casa, autor: m.nombre || m.id, creado: r.enviado || r.creado }, e, { id: `${m.id}-${r.id}-${destino}` }));
+  });
+  return out;
 }
+function juntarEnvios(){ cacheEnvios = enviosLimpios((EN_CLAUDE && !DEMO ? ENVIOS : ENVIOS_DEMO).concat(enviosDeReportes()), casaDeMonito); return cacheEnvios; }
+const enviosTodos = () => cacheEnvios || juntarEnvios();   // se vuelve a juntar cada segundo, en revisarEnvios
 const BUZON_LEIDO = {};
 function leidoBuzon(clave){
   if (BUZON_LEIDO[clave] == null){ let v = 0; try { v = +localStorage.getItem('oficina.buzon.' + clave) || 0; } catch (e) {} BUZON_LEIDO[clave] = v; }
@@ -2406,7 +2413,7 @@ function lanzarViaje(e, espera = 0){
 /* Cuenta lo que hay sin leer en cada buzón y echa a andar los paquetes nuevos. Al abrir la oficina también
    repite (una vez) el viaje de lo que llegó en el último día y sigue sin leerse. */
 function revisarEnvios(){
-  const lista = enviosTodos(), ahora = Date.now();
+  const lista = juntarEnvios(), ahora = Date.now();
   for (const k of Object.keys(ESTACIONES)) SIN_LEER[k] = 0;
   for (const e of lista) if (e.creado > leidoBuzon(e.para)) SIN_LEER[e.para]++;
   const salen = [];

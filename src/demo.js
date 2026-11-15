@@ -34,11 +34,11 @@ export function estadoDemo() {
       estado: 'listo', area: 'centro de pensado', actividad: 'Armando el resumen', actualizado: hace(0),
       reportes: [{ id: 'ejemplo', fecha: 'Ejemplo', creado: desde(90), titulo: 'Así se verá un resumen', intro: 'Esto es un resumen de muestra, no son noticias reales.',
         puntos: [{ titulo: 'Primer tema de ejemplo', resumen: 'Aquí va lo más importante en dos o tres líneas.', fuente: 'Nombre de la fuente' }],
-        capsulas: [{ tipo: 'cómo funciona', titulo: 'Cápsula de ejemplo', texto: 'Un dato corto para la pantalla.' }], cierre: '¡Luz verde!' }],
+        capsulas: [{ tipo: 'cómo funciona', titulo: 'Cápsula de ejemplo', texto: 'Un dato corto para la pantalla.' }], cierre: '¡Luz verde!',
+        enviado: desde(0.3), envios: [{ para: 'almacen', tipo: 'archivo', titulo: 'Resumen del día (ejemplo)', texto: 'Así se ve un archivo que Nitro manda a guardar al almacén.' }] }],
       memoria: [{ id: 'pendientes', titulo: 'Pendientes', texto: '- Ejemplo: dar seguimiento a la final.', actualizado: hace(60) }],
     }],
     envios: [
-      { id: 'ej-1', de: 'terrazas', para: 'almacen', tipo: 'archivo', autor: 'Nitro', titulo: 'Resumen del día (ejemplo)', texto: 'Así se ve un archivo que Nitro manda a guardar al almacén.', creado: desde(0.2) },
       { id: 'ej-2', de: 'terrazas', para: 'calleros', tipo: 'nota', autor: 'Nitro', titulo: 'Lo más importante de hoy (ejemplo)', texto: 'Una nota corta para la Oficina Calleros.', creado: desde(0.1) },
       { id: 'ej-3', de: 'centro de pensado', para: 'cerebro delta', tipo: 'dato', autor: 'Nitro', titulo: 'Dato para recordar (ejemplo)', texto: 'Algo que vale la pena guardar en el Cerebro.', creado: desde(300) },
       { id: 'ej-4', de: 'terrazas', para: 'noticias', tipo: 'noticias', autor: 'Nitro', titulo: 'Noticias para la pantalla (ejemplo)', texto: 'Lo que va a salir hoy en la Sala de Noticias.', creado: desde(0) },

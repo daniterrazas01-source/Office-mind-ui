@@ -65,7 +65,10 @@ La página web recibe todo esto con el **mensajero**: una segunda tarea programa
 
 El túnel central (el tronco) corre por en medio del gran pasillo. De él salen ramales, canales con tapa de vidrio en el piso, a los cuartos principales: **Oficina Calleros, Cerebro Delta, Oficina Terrazas, Centro de Pensado** (que también atiende al almacén) y **Sala de Noticias**. En cada cuarto hay una **estación** con buzón.
 
-Un **envío** es algo que un monito o una sesión le manda a otro cuarto. Es un documento de la colección `envios` de la base del Artifact:
+Un **envío** es algo que un monito o una sesión le manda a otro cuarto. Se escribe en uno de dos lugares:
+
+- En el campo `envios` del resumen del día de un monito (`monitos/<id>/reportes/<AAAA-MM-DD>`): una lista de `{ para, tipo, titulo, texto, url }`, más `enviado` con la hora. Salen del cuarto donde vive el monito. Así lo hace Nitro, y así llegan también a la página web, porque el mensajero ya copia los resúmenes.
+- Como documento suelto en la colección `envios` de la base del Artifact, para cualquier sesión:
 
 ```json
 { "de": "terrazas", "para": "almacen", "tipo": "archivo", "autor": "Nitro",
@@ -78,7 +81,9 @@ Un **envío** es algo que un monito o una sesión le manda a otro cuarto. Es un 
 - La estación de destino levanta su banderita y prende el foquito verde hasta que se toca y se lee el buzón. Cada tarjeta trae «▶ Ver el viaje» para repetirlo. Al tocar el tronco sale la lista de todos los envíos.
 - Un monito cuya actividad menciona el túnel o el buzón se para en la estación de su cuarto.
 
-La oficina no inventa envíos: solo muestra los que están en la base. Nitro manda cuatro al terminar su ronda (resumen al almacén, titulares a la Sala de Noticias, lo más importante a la Oficina Calleros y, si lo hay, un dato al Cerebro Delta). Cualquier sesión de Claude con la herramienta `ArtifactData` puede mandar uno escribiendo en `envios`. La geometría y las reglas están en `src/tunel.js`, con pruebas.
+La oficina no inventa envíos: solo muestra los que están en la base. Nitro manda cuatro al terminar su ronda (resumen al almacén, titulares a la Sala de Noticias, lo más importante a la Oficina Calleros y, si lo hay, un dato al Cerebro Delta). Cualquier sesión de Claude con la herramienta `ArtifactData` puede mandar uno suelto escribiendo en `envios`. La geometría y las reglas están en `src/tunel.js`, con pruebas.
+
+Pendiente: los envíos sueltos (colección `envios`) se ven en el Artifact, pero en la página web solo cuando el mensajero copie esa colección. `publicar.py` ya la sabe leer; falta agregarle a la tarea del mensajero el inciso `d) action "query", collection "envios", query {"order_by": {"field": "creado", "direction": "desc"}, "limit": 40}`. Eso solo se puede pedir desde la conversación del mensajero.
 
 ## Relevo para la página web
 
