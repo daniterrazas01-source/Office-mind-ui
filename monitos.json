@@ -1,5 +1,5 @@
 {
-  "actualizado": "2026-11-15T03:15:58Z",
+  "actualizado": "2026-11-15T03:17:15Z",
   "monitos": [
     {
       "id": "nitro",
@@ -18,41 +18,47 @@
       "estado": "trabajando",
       "area": "internet",
       "actividad": "Buscando noticias de arrancones",
-      "actualizado": "2026-11-15T03:15:58Z",
+      "actualizado": "2026-11-15T03:17:15Z",
       "reportes": [
         {
           "id": "2026-11-14",
-          "titulo": "Vegas tiene dueños; Pomona decide los campeones",
+          "titulo": "Pomona al rojo: Herrera gana y aprieta el título",
           "fecha": "14 de noviembre de 2026",
-          "intro": "Buenas, pista. Esta semana la pista huele a llanta quemada, pero las noticias verificadas que encontré son de Las Vegas, con fecha 2 de noviembre. Las finales de Pomona ya están en marcha y todavía no tengo resultados.",
+          "intro": "Pre-stage listo, jefe. Pomona ya tiene números y el cierre de temporada viene apretado. Y mañana domingo hay duelo de Corvettes en Chihuahua.",
           "puntos": [
             {
-              "titulo": "Kalitta y Glenn ganan en Las Vegas; Vandergriff también gana",
-              "resumen": "Doug Kalitta se llevó Top Fuel y Dallas Glenn ganó Pro Stock en el NHRA Las Vegas Nationals (29 de octubre al 1 de noviembre). Vandergriff también ganó en la misma fecha. Fue la carrera 19 de 20 de la temporada y la quinta de seis eventos del Countdown to the Championship.",
+              "titulo": "Herrera le gana a Gadson la final pendiente de Las Vegas",
+              "resumen": "La final de Pro Stock Motorcycle de Las Vegas se pospuso por viento fuerte y se corrió el sábado en Pomona. Gaige Herrera venció al líder del campeonato, Richard Gadson, con 6.701 segundos a 201.13 mph. Gadson llegó a Pomona con 55 puntos de ventaja, y Herrera además calificó número 1 con 6.673 a 201.76 mph.",
+              "fuente": "Speed Sport",
+              "url": "https://speedsport.com/drag-racing/nhra/herrera-wins-make-up-race-kalitta-capps-glenn-speed/"
+            },
+            {
+              "titulo": "Kalitta, número 1 en Top Fuel, pero Langdon sigue arriba",
+              "resumen": "Doug Kalitta marcó 3.677 segundos a 340.39 mph el viernes en las NHRA Finals de Pomona. El clima canceló la segunda sesión y solo le recortó cuatro puntos de bono a su compañero Shawn Langdon, que lidera 2,630 a 2,523. Gane quien gane, el título se queda en Kalitta Motorsports, el séptimo del equipo.",
+              "fuente": "Competition Plus",
+              "url": "https://competitionplus.com/doug-kalitta-grabs-provisional-no-1-at-nhra-pomona-finals-as-rain-shortens-championship-chase/"
+            },
+            {
+              "titulo": "Dallas Glenn, a un paso del bicampeonato de Pro Stock",
+              "resumen": "Glenn se quedó con el número 1 de Pro Stock con 6.512 segundos a 208.42 mph. Según Competition Plus, asegura su segundo título consecutivo en cuanto ponga el auto en la línea en la primera ronda del domingo.",
+              "fuente": "Competition Plus",
+              "url": "https://competitionplus.com/dallas-glenn-puts-second-straight-nhra-pro-stock-championship-within-reach-at-pomona/"
+            },
+            {
+              "titulo": "Funny Car: Capps califica número 1 y el título sigue abierto",
+              "resumen": "Racer reporta a Capps como número 1 de Funny Car en Pomona, junto a Kalitta, Glenn y Herrera en sus categorías. En la cobertura de la carrera, el líder Matt Hagan aparece calificado noveno y abre contra Daniel Wilkerson, con Jordan Vandergriff a 39 puntos. Los campeones se definen el domingo; todavía no hay resultados finales.",
               "fuente": "Racer",
-              "url": "https://racer.com/2026/11/02/vandergriff-kalitta-and-glenn-win-big-at-nhra-las-vegas-nationals"
+              "url": "https://racer.com/2026/11/14/herrera-wins-postponed-vegas-race-kalitta-capps-glenn-and-herrera-qualify-no-1-at-nhra-finals-in-pomona"
             },
             {
-              "titulo": "Final de temporada en Pomona: se deciden los cuatro campeonatos",
-              "resumen": "La In-N-Out Burger NHRA Finals se corre del 12 al 15 de noviembre en Pomona Dragstrip, y cierra la temporada de 75 aniversario de la NHRA. Ahí se definen los cuatro títulos mundiales de la Serie Mission Foods. No encontré todavía los resultados finales, así que los campeones quedan pendientes.",
-              "fuente": "NHRA",
-              "url": "https://www.nhra.com/nhra/news/feature"
-            },
-            {
-              "titulo": "Yucatán: dos muertos en arrancones en la Mérida-Progreso (mayo de 2026)",
-              "resumen": "La Verdad Noticias reportó dos muertes en arrancones ilegales en la carretera Mérida-Progreso, con fecha 14 de mayo de 2026. Es una nota de hace unos meses, no de esta semana; la incluyo porque no encontré cobertura de México de noviembre.",
-              "fuente": "La Verdad Noticias",
-              "url": "https://laverdadnoticias.com/etiqueta/arrancones"
-            },
-            {
-              "titulo": "Edomex: multas de hasta 2,346 pesos por arrancones en la calle",
-              "resumen": "Una nota de ADN40 del 10 de agosto de 2026 reporta multas de hasta 2,346 pesos por esta maniobra en la vía pública en el Estado de México. Es de agosto, así que tampoco es de esta semana.",
-              "fuente": "ADN40",
-              "url": "https://www.adn40.mx/mexico/2026-08-10/multaran-en-edomex-con-hasta-2346-pesos-a-todos-los-conductores-que-realicen-esta-peligrosa-maniobra-en-la-calle/"
+              "titulo": "Chihuahua: Stege contra Valles en la onceava fecha de Arrancones VIP",
+              "resumen": "El domingo 15 de noviembre se corre la onceava fecha de Arrancones VIP 2026 en el Autódromo Francisco Villa, de 12:00 a 18:00 horas. El duelo estelar es Otto Stege en su Corvette ZR1 contra Derek Valles en el \"Corjet\". Los pilotos pueden registrar tiempos en octavo y en cuarto de milla en el mismo recorrido.",
+              "fuente": "Ocho Columnas",
+              "url": "https://www.ochocolumnas.net/2026/11/enfrentaran-otto-stege-y-derek-valles.html"
             }
           ],
-          "cierre": "Eso es todo por hoy. Cuando se apague el semáforo de Pomona, vuelvo con los campeones. ¡Luz verde!",
-          "creado": "2026-11-15T03:07:30Z"
+          "cierre": "Mañana se apaga el árbol en Pomona y salen los campeones. Yo aquí ando, con el pie listo. ¡Luz verde!",
+          "creado": "2026-11-15T03:17:15Z"
         }
       ]
     }
