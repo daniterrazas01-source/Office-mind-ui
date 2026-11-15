@@ -212,6 +212,7 @@ const CALLADO_MIN = 10;         // un visitante con más de esto sin actividad y
 /* Quiénes son supervisores y cuánto aguanta un visitante: config/oficina.json */
 let CONFIG = { supervisores: [] };
 async function cargarConfig(){
+  if (EN_CLAUDE) return;          // dentro de claude.ai los supervisores se eligen en la página
   try { const c = await leerJSON('config/oficina.json'); if (c && typeof c === 'object') CONFIG = c; } catch (e) {}
 }
 const VELOCIDAD = 100;          // pixeles por segundo al caminar
@@ -1719,7 +1720,7 @@ async function consultarSesiones(){
       leerEstado();
       try { const l = await mcp.listTools(CONECTOR); conModelo = l.servers.some(s => s.tools.some(t => t.name === 'get_session')); } catch (e) { conModelo = false; }
     }
-    buscarModelos();
+    if (primera) setTimeout(buscarModelos, 3000); else buscarModelos();
   } catch (e) {
     const c = (e && e.code) || 'upstream_error';
     if (PASAJERO.has(c)) fallos++; else sesionesFalla = c;   // lo pasajero se reintenta solo; lo demás espera a que piques el botón
