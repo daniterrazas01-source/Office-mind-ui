@@ -97,6 +97,7 @@ header{position:fixed;top:0;left:0;right:0;height:46px;display:flex;align-items:
 .pisos{display:flex;gap:6px}
 .pisos button,#bajar{background:#3a2f48;color:var(--texto);border:0;padding:5px 10px;font:inherit;font-size:12px;cursor:pointer;box-shadow:0 2px 0 #120e17}
 .pisos button:hover,#bajar:hover{background:#4a3d5c}
+.pisos a{background:var(--naranja);color:#1a120e;font-weight:700;padding:5px 10px;font-size:12px;text-decoration:none;box-shadow:0 2px 0 #120e17;white-space:nowrap}
 #bajar{position:fixed;left:50%;bottom:14px;transform:translateX(-50%);z-index:6;font-size:13px;padding:8px 14px;background:var(--naranja);color:#1a120e;font-weight:700}
 #bajar.oculto{display:none}
 
@@ -140,7 +141,7 @@ textarea.campo{min-height:70px;resize:vertical}
   .titulo{font-size:14px;letter-spacing:1px}
   .derecha{display:none}
   .pisos{order:3;width:100%;overflow-x:auto}
-  .pisos button{flex:1;font-size:13px;padding:8px 6px;white-space:nowrap}
+  .pisos button,.pisos a{flex:1;font-size:13px;padding:8px 6px;white-space:nowrap;text-align:center}
   #panel{top:auto;left:0;width:100%;max-height:72vh;border-left:0;border-top:4px solid var(--borde);transform:translateY(105%);
     padding-bottom:env(safe-area-inset-bottom,0px)}
   #panelCuerpo{font-size:15px}
@@ -152,7 +153,7 @@ textarea.campo{min-height:70px;resize:vertical}
 <header>
   <div class="titulo"><span class="logo"></span>OFICINA · MONITOREO</div>
   <div class="senal" id="senal"><span class="punto"></span><span id="senalTexto">Conectando…</span></div>
-  <nav class="pisos"><button data-fila="0">Planta principal</button><button data-fila="21">Calleros · Cerebro</button><button data-fila="37">Ampliación</button><button data-fila="59">Espacios libres</button></nav>
+  <nav class="pisos"><button data-fila="0">Planta principal</button><button data-fila="21">Calleros · Cerebro</button><button data-fila="37">Ampliación</button><button data-fila="59">Espacios libres</button><a id="irClaude" href="https://claude.ai/artifact/KbxrcsXckzZSE5F65iZwCE" target="_blank" rel="noopener" hidden>Todas mis sesiones ↗</a></nav>
   <div class="derecha"><span id="ultimo"></span><span id="cuantos"></span><span id="reloj"></span></div>
 </header>
 <div id="tip"></div>
@@ -1478,7 +1479,7 @@ function dibujarAgente(a, t){
   if (pose === 'descansar' && sentado && dir === 'abajo' && !a.zzz) taza(x, by, t);
   if (a.ultra) chispas(x, by, y, m, t, a.semilla);
   if (a.fase === 'aviso') admiracion(x, by - (a.ultra ? 7 : 0));
-  if (a.zzz && enLugar) zetas(x, by, t, a.semilla);
+  if (a.zzz && enLugar && !a.paseo) zetas(x, by, t, a.semilla);
 }
 
 /* ---------- Agentes ---------- */
@@ -1672,7 +1673,48 @@ function salir(a){
 function llegar(a){
   if (a.fase === 'saliendo'){ a.el.remove(); a.elNombre.remove(); agentes.delete(a.id); return; }
   a.fase = 'trabajando'; a.dir = a.lugar ? a.lugar.dir : 'abajo'; a.ruta = [];
+  if (a.paseo && a.areaDestino === 'descanso') a.paseo.hasta = performance.now() / 1000 + a.paseo.quieto;   // llegó a su punto de paseo
   ponerTexto(a, a.textoPendiente, true);
+}
+
+/* ---------- Paseos: quien ya terminó se levanta de vez en cuando a dar una vuelta por la oficina ----------
+   Solo los que están en Descanso. Van a un punto del pasillo, se quedan un rato y regresan a su lugar. */
+const PRISA = new URLSearchParams(location.search).has('prisa') ? 0.08 : 1;   // ?prisa = paseos seguidos, para probar
+const MAX_PASEANDO = 3;
+let PUNTOS_PASEO = [[5, 11, 'arriba'], [12, 12, 'abajo'], [19, 11, 'arriba'], [27, 12, 'abajo'], [9, 24, 'abajo'], [20, 23, 'arriba'], [27, 24, 'abajo'],
+  [13, 46, 'der'], [18, 52, 'izq'], [12, 55, 'der'], [19, 48, 'izq'], [8, 40, 'abajo'], [22, 39, 'arriba'], [10, 61, 'abajo'], [21, 62, 'abajo'],
+  [23, 18, 'abajo'], [28, 16, 'arriba'], [21, 19, 'abajo'], [14, 31, 'abajo'], [15, 34, 'abajo']];
+const entre = (a, b) => a + Math.random() * (b - a);
+const esperaPaseo = a => (a.callado ? entre(150, 420) : entre(40, 130)) * PRISA;   // los dormidos pasean menos
+function pasear(){
+  const ahora = performance.now() / 1000;
+  let paseando = 0; const tomados = new Set();
+  for (const a of agentes.values()) if (a.paseo){ paseando++; tomados.add(a.lugar ? a.lugar.ty * COLS + a.lugar.tx : -1); }
+  for (const a of agentes.values()){
+    if (a.paseo){
+      if (a.areaDestino !== 'descanso' || a.fase === 'saliendo'){ a.paseo = null; continue; }   // le llegó trabajo: ya va a su cuarto
+      if (a.fase === 'trabajando' && ahora >= a.paseo.hasta){                                    // ya miró un rato: regresa a Descanso
+        const inicio = casillaInicio(a);
+        asignarLugar(a, 'descanso');
+        a.ruta = construirRuta(a, inicio, a.lugar); a.fase = 'caminando'; a.modo = 'oculta';
+        a.paseo = null; a.proximoPaseo = ahora + esperaPaseo(a);
+      }
+      continue;
+    }
+    if (!(a.areaDestino === 'descanso' && a.fase === 'trabajando' && a.lugar)){ a.proximoPaseo = 0; continue; }
+    if (!a.proximoPaseo){ a.proximoPaseo = ahora + esperaPaseo(a) * (0.3 + Math.random()); continue; }
+    if (ahora < a.proximoPaseo || paseando >= MAX_PASEANDO) continue;
+    const libres = PUNTOS_PASEO.filter(p => !tomados.has(p[1] * COLS + p[0]));
+    if (!libres.length) continue;
+    const [tx, ty, dir] = libres[Math.floor(Math.random() * libres.length)];
+    const inicio = casillaInicio(a);
+    liberar(a);
+    EXTRA.descanso.set(a.id, { tx, ty });
+    a.lugar = { area: 'descanso', idx: -1, tx, ty, x: tx * T + 8, y: ty * T + 13, dir, sentado: false, silla: null };
+    a.ruta = construirRuta(a, inicio, a.lugar); a.fase = 'caminando'; a.modo = 'oculta';
+    a.paseo = { hasta: Infinity, quieto: entre(8, 20) * Math.max(PRISA, 0.3) };
+    paseando++; tomados.add(ty * COLS + tx);
+  }
 }
 function moverAgente(a, dt){
   if (a.fase === 'aviso'){ a.tAviso -= dt; if (a.tAviso <= 0) a.fase = 'caminando'; return; }
@@ -2199,6 +2241,7 @@ function bucle(ms){
   if (anterior && ms - anterior < 1000 / FPS - 2) return;
   const dt = anterior ? Math.min(1, (ms - anterior) / 1000) : 0;   // según el reloj real, aunque el navegador vaya lento
   anterior = ms;
+  pasear();
   for (const a of [...agentes.values()]) moverAgente(a, dt);
   letrerosActivos();
   ubicarVinetas();
@@ -2208,6 +2251,8 @@ function bucle(ms){
 /* ---------- Arranque ---------- */
 construirMuebles();
 calcularCandidatos();
+PUNTOS_PASEO = PUNTOS_PASEO.filter(p => caminable(p[0], p[1]));
+$('irClaude').hidden = EN_CLAUDE;
 pintarEstatica();
 ajustarEscala();
 window.addEventListener('resize', ajustarEscala);
