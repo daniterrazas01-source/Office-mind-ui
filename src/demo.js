@@ -14,6 +14,7 @@ export function estadoDemo() {
     demo: true,
     agentes: [
       v('calleros', 'Calleros', 'calleros', 'Revisando pendientes', 0.1, { modelo: 'opus', dispositivo: 'laptop-windows' }),
+      v('terrazas-demo', 'DragTree demo', 'terrazas', 'Editando arbol.js', 0.1, { dispositivo: 'tableta-android', origen: 'tableta-android', persona: 'Alberto Terrazas' }),
       v('demo-1', 'Arreglar login', 'escritorio', 'Editando login.js', 0.1, { modelo: 'fable', modo: 'ultra' }),
       v('demo-2', 'Precios de envío', 'internet', 'Buscando en internet', 0.2, { modelo: 'haiku' }),
       v('demo-3', 'Resumen correos', 'biblioteca', 'Leyendo notas.md', 0.3),
@@ -23,6 +24,7 @@ export function estadoDemo() {
       v('demo-7', 'Revisión de PR', 'descanso', 'Esperando instrucciones', 22 * 60, { actualizado: hace(22 * 60) }),
       v('demo-8', 'Sesión de ayer', 'descanso', 'Esperando instrucciones', 25 * 60, { actualizado: hace(25 * 60) }),
     ],
-    archivos_recientes: [],
+    archivos_recientes: ['src/arbol.js', 'src/pista.js', 'src/boleta.js', 'index.html', 'css/tema.css', 'notas/ideas.md', 'src/carrera.js', 'README.md', 'src/sonido.js']
+      .map((nombre, i) => ({ nombre, origen: 'tableta-android', area: 'terrazas', fecha: hace(5 + i * 40), tipo: i % 3 ? 'editado' : 'creado' })),
   };
 }

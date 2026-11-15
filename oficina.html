@@ -14,6 +14,7 @@
 <title>Oficina de Claude · Monitoreo</title>
 <style>
 :root{
+  color-scheme:dark;
   --fondo:#17131d; --barra:#241d2c; --borde:#0c090f; --texto:#f3e9d7; --tenue:#a99a8b;
   --verde:#6fd36f; --rojo:#ff6b5b; --naranja:#d97757; --s:2;
 }
@@ -89,6 +90,8 @@ header{position:fixed;top:0;left:0;right:0;height:46px;display:flex;align-items:
 .aviso div{max-width:560px;background:#fff;color:#151015;padding:22px 26px;font-size:16px;line-height:1.55;
   box-shadow:0 -4px 0 #151015,0 4px 0 #151015,-4px 0 0 #151015,4px 0 0 #151015}
 .aviso b{color:#b4573a}
+.aviso p{margin:0 0 14px}
+.aviso .boton{font-size:15px;padding:9px 14px;margin:0 8px 0 0}
 
 /* Botones para ir de piso en piso */
 .pisos{display:flex;gap:6px}
@@ -171,10 +174,16 @@ textarea.campo{min-height:70px;resize:vertical}
   Si ya lo abriste, entra a: <b>http://localhost:8765/oficina.html</b>
 </div></div>
 
+<div class="aviso" id="conexion"><div>
+  <p id="conexionTexto"></p>
+  <button class="boton principal" id="conexionBoton"></button><button class="boton" id="conexionDemo">Ver un ejemplo</button>
+</div></div>
+
 <script>if (location.protocol === 'file:') document.getElementById('aviso').style.display = 'flex';</script>
 <script type="module">
 import { aplicarReglas, textoPlazo } from './src/reglas.js';
 import { estadoDemo } from './src/demo.js';
+import { estadoDeSesiones, modeloDeRespuesta } from './src/sesiones.js';
 (() => {
 'use strict';
 
@@ -184,7 +193,7 @@ import { estadoDemo } from './src/demo.js';
    ===================================================================== */
 
 /* ---------- Ajustes ---------- */
-const T = 16, COLS = 32, ROWS = 52, W = COLS * T, H = ROWS * T;
+const T = 16, COLS = 32, ROWS = 60, W = COLS * T, H = ROWS * T;
 const FILAS_ARRIBA = 22;        // la planta principal; lo demás se ve bajando con el scroll
 const SEGUNDOS_INACTIVO = 60;   // sin reportar más de esto -> Descanso
 /* De dónde lee: en la laptop, estado.json del servidor local; en el teléfono (GitHub Pages),
@@ -194,8 +203,11 @@ const NUBE = {
   estado: 'https://raw.githubusercontent.com/KALLEROS/oficina-cloud-monitoreo-estado/main/estado.json',
   terrazas: 'https://raw.githubusercontent.com/daniterrazas01-source/dragtrim/claude/oficina-estado/oficina/estado-terrazas.json',
 };
-const DEMO = new URLSearchParams(location.search).has('demo');   // ?demo = datos de ejemplo
-const CADA_MS = EN_NUBE && !DEMO ? 15000 : 2000;   // el teléfono revisa cada 15 s
+/* Dentro de claude.ai (Artifact) la página lee tus sesiones de Claude Code con tu propia cuenta. */
+const EN_CLAUDE = !!(window.claude && typeof window.claude.use === 'function');
+let DEMO = new URLSearchParams(location.search).has('demo') || location.hash === '#demo';   // ?demo o #demo = datos de ejemplo
+const CADA_MS = EN_NUBE && !EN_CLAUDE ? 15000 : 2000;   // el teléfono revisa cada 15 s
+const CADA_SESIONES_MS = 30000; // cada cuánto se pide la lista de sesiones
 const CALLADO_MIN = 10;         // un visitante con más de esto sin actividad ya no trae viñeta, solo duerme
 /* Quiénes son supervisores y cuánto aguanta un visitante: config/oficina.json */
 let CONFIG = { supervisores: [] };
@@ -253,7 +265,7 @@ const MAPA = (() => {
   llenar(1, 38, 13, 38, '='); llenar(16, 38, 30, 38, '=');
   llenar(1, 39, 30, 40, 'h');
   llenar(1, 42, 9, 42, '='); llenar(11, 42, 20, 42, '='); llenar(22, 42, 30, 42, '=');
-  llenar(1, 43, 9, 50, 't'); llenar(11, 43, 20, 50, 'v'); llenar(22, 43, 30, 50, 'v');   // t = Oficina Terrazas
+  llenar(1, 43, 9, 58, 't'); llenar(11, 43, 20, 58, 'v'); llenar(22, 43, 30, 58, 'v');   // t = Oficina Terrazas
   for (const x of [4, 5, 15, 16, 25, 26]){ m[41][x] = 'D'; m[42][x] = 'D'; }
   return m;
 })();
@@ -271,7 +283,7 @@ const AREAS = {
   'descanso':       { letrero: 'DESCANSO',       x0: 16, y0: 15, x1: 30, y1: 20, lx: 304, ly: 210, pose: 'descansar' },
   'calleros':       { letrero: 'OFICINA CALLEROS', x0: 1, y0: 27, x1: 12, y1: 36, lx: 56,  ly: 408, pose: 'teclear' },
   'cerebro delta':  { letrero: 'CEREBRO DELTA',  x0: 17, y0: 27, x1: 30, y1: 36, lx: 316, ly: 408, pose: 'leer' },
-  'terrazas':       { letrero: 'OFICINA TERRAZAS', x0: 1, y0: 43, x1: 9, y1: 50, lx: 80, ly: 664, pose: 'teclear' },
+  'terrazas':       { letrero: 'OFICINA TERRAZAS', x0: 1, y0: 43, x1: 9, y1: 58, lx: 80, ly: 664, pose: 'teclear' },
 };
 const L = (tx, ty, dir, extra = {}) => Object.assign({ tx, ty, ox: 0, oy: 0, dir, sentado: false, silla: null }, extra);
 const LUGARES = {
@@ -330,11 +342,13 @@ const LUGARES = {
     L(18, 28, 'arriba'),
     L(29, 28, 'arriba'),
   ],
-  'terrazas': [                                                        // equipo DragTrim
+  'terrazas': [                                                        // equipo DragTree
     L(6, 47, 'arriba', { oy: -3, sentado: true, silla: 'oficina' }),
     L(8, 47, 'arriba', { oy: -3, sentado: true, silla: 'oficina' }),
-    L(2, 44, 'arriba'),                                                // en el archivero
+    L(2, 44, 'arriba'),                                                // frente a los estantes de archivos
     L(5, 49, 'abajo'),
+    L(4, 55, 'arriba'),                                                // en el otro carril, viendo el carro
+    L(7, 44, 'arriba'),                                                // en el otro estante
   ],
 };
 for (const [area, lista] of Object.entries(LUGARES)) lista.forEach((l, i) => { l.area = area; l.idx = i; l.x = l.tx * T + 8 + l.ox; l.y = l.ty * T + 13 + l.oy; });
@@ -555,6 +569,118 @@ function cerebroGrande(t){
   g.globalAlpha = 1;
 }
 
+/* ---------- Oficina Terrazas: estantes con una carpeta por cada archivo de la sesión ---------- */
+function trabajandoEn(area){ for (const a of agentes.values()) if (a.fase === 'trabajando' && a.lugar && a.lugar.area === area && a.estadoTxt === 'trabajando') return true; return false; }
+function estanteArchivos(x0, n, tx0, tx1){
+  bloquear(tx0, 43, tx1, 43);
+  const y0 = 664, w = 44, h = 38, POR_REPISA = 10;
+  mueble(y0 + h, () => {
+    R(x0, y0, w, h, K); R(x0 + 1, y0 + 1, w - 2, h - 2, '#7a4f2a'); R(x0 + 1, y0 + 1, w - 2, 1, '#9a6a3c');
+    const archivos = archivosTableta();
+    for (let rep = 0; rep < 3; rep++){
+      const fy = y0 + 2 + rep * 12;
+      R(x0 + 2, fy, w - 4, 10, '#3d2614');
+      for (let i = 0; i < POR_REPISA; i++){
+        const k = n * 30 + rep * POR_REPISA + i, bx = x0 + 2 + i * 4;
+        const f = archivos[k];
+        if (f){                                                      // carpeta de un archivo real
+          const c = COLORES_CARPETA[Math.floor(hashTexto(String(f.nombre)) * COLORES_CARPETA.length)];
+          const alto = 7 + (k % 3);
+          R(bx, fy + 10 - alto, 3, alto, c); R(bx, fy + 10 - alto, 1, alto, tono(c, -35)); R(bx + 1, fy + 12 - alto, 1, 2, '#fff8e6');
+        } else if (n === 0 && rep === 2 && i < 6){                   // archivo muerto: carpetas grises de siempre
+          R(bx, fy + 3, 3, 7, i % 2 ? '#8d9cab' : '#7a8997'); R(bx + 1, fy + 5, 1, 2, '#e9eef2');
+        }
+      }
+      R(x0 + 1, fy + 10, w - 2, 2, '#a8763f');
+    }
+    if (n === 1 && archivos.length <= 30){                           // casco y copa mientras ese estante esté libre
+      const cx = x0 + 6, cy = y0 + 4;
+      R(cx, cy + 1, 9, 7, K); R(cx + 1, cy + 2, 7, 5, '#d23b3b'); R(cx + 1, cy + 2, 7, 1, '#f07272'); R(cx + 4, cy + 4, 4, 2, '#1b2a3a'); R(cx + 5, cy + 4, 2, 1, '#8fd3ff');
+      R(x0 + 30, cy + 2, 6, 3, '#e0b93a'); R(x0 + 32, cy + 5, 2, 2, '#e0b93a'); R(x0 + 31, cy + 7, 4, 1, '#a07d1d'); R(x0 + 31, cy + 2, 1, 1, '#fbe08a');
+    }
+  });
+}
+
+/* ---------- El taller de DragTree: carro, árbol de luces (semáforo) y tablero de tiempos ---------- */
+const DIGITOS = { '0': '111101101101111', '1': '010110010010111', '2': '111001111100111', '3': '111001111001111', '4': '101101111001001',
+                  '5': '111100111001111', '6': '111100111101111', '7': '111001010010010', '8': '111101111101111', '9': '111101111001111' };
+function numerito(x, y, texto, c){
+  for (const ch of String(texto)){
+    if (ch === '.'){ R(x, y + 4, 1, 1, c); x += 2; continue; }
+    const d = DIGITOS[ch];
+    if (d) for (let i = 0; i < 15; i++) if (d[i] === '1') R(x + i % 3, y + Math.floor(i / 3), 1, 1, c);
+    x += 4;
+  }
+}
+function disco(cx, cy, r, c){ for (let yy = -r; yy <= r; yy++){ const m = Math.floor(Math.sqrt(r * r - yy * yy) + 0.4); R(cx - m, cy + yy, m * 2 + 1, 1, c); } }
+const CICLO_ARBOL = 7;   // segundos: pre-stage, stage, tres ámbar, verde
+function faseArbol(t){ const u = t % CICLO_ARBOL; return u < 1 ? 0 : u < 2 ? 1 : u < 2.4 ? 2 : u < 2.8 ? 3 : u < 3.2 ? 4 : 5; }
+function tallerDragTree(){
+  /* El carro: de perfil, viendo hacia la línea de salida */
+  bloquear(2, 52, 6, 53);
+  mueble(865, (t) => {
+    const anda = trabajandoEn('terrazas'), fase = faseArbol(t);
+    const x0 = 42, tiembla = anda && fase >= 1 && fase <= 4 && Math.floor(t * 14) % 2 ? 1 : 0, y = 864 - tiembla;
+    const rojo = '#d23b3b', rojoLuz = '#f07272', rojoSombra = '#8e2626';
+    g.fillStyle = 'rgba(0,0,0,0.3)'; g.fillRect(x0 + 2, 863, 62, 3);
+    if (anda && fase >= 2){                                           // humo de la llanta trasera al salir
+      for (let i = 0; i < 4; i++){ const f = (t * 1.6 + i / 4) % 1; g.globalAlpha = 0.55 * (1 - f); R(Math.round(x0 + 6 - f * 18), Math.round(858 - f * 10 - (i % 2) * 2), 4, 4, '#e8e8ee'); }
+      g.globalAlpha = 1;
+    }
+    R(x0 + 1, y - 17, 62, 12, K);                                     // contorno del cuerpo
+    R(x0 + 17, y - 24, 24, 8, K);                                     // contorno de la cabina
+    R(x0 + 2, y - 16, 60, 10, rojo); R(x0 + 2, y - 16, 60, 2, rojoLuz); R(x0 + 2, y - 8, 60, 2, rojoSombra);
+    R(x0 + 42, y - 16, 20, 1, rojoSombra);                            // el cofre baja un poco
+    R(x0 + 18, y - 23, 22, 7, rojo); R(x0 + 18, y - 23, 22, 1, rojoLuz);
+    R(x0 + 20, y - 21, 8, 5, '#1b2a3a'); R(x0 + 30, y - 21, 8, 5, '#1b2a3a'); R(x0 + 21, y - 21, 3, 2, '#8fd3ff'); R(x0 + 31, y - 21, 3, 2, '#8fd3ff');
+    R(x0 + 2, y - 12, 60, 2, '#fff3e6');                              // franja de carreras
+    R(x0 + 44, y - 21, 8, 5, K); R(x0 + 45, y - 20, 6, 3, '#9aa3b5'); R(x0 + 45, y - 20, 6, 1, '#d7dde8');   // toma de aire en el cofre
+    R(x0 - 2, y - 21, 6, 2, K); R(x0 - 1, y - 19, 2, 4, K);          // alerón
+    R(x0 + 61, y - 13, 2, 3, '#ffe066'); R(x0 + 1, y - 13, 2, 3, '#ff5b5b');
+    R(x0 - 6, y - 3, 8, 1, '#9aa3b5'); R(x0 - 7, y - 3, 2, 3, K);    // barra antivuelco de arrancones
+    disco(x0 + 13, y - 6, 6, K); disco(x0 + 13, y - 6, 5, '#26262c'); disco(x0 + 13, y - 6, 2, '#b9bfcc');   // llanta trasera ancha
+    disco(x0 + 50, y - 5, 5, K); disco(x0 + 50, y - 5, 4, '#26262c'); disco(x0 + 50, y - 5, 1, '#b9bfcc');
+  });
+  /* El árbol de luces: corre la secuencia cuando alguien trabaja; si no, se queda en pre-stage */
+  bloquear(8, 54);
+  mueble(879, (t) => {
+    const anda = trabajandoEn('terrazas'), fase = anda ? faseArbol(t) : 0;
+    const cx = 136;
+    R(cx - 4, 876, 9, 3, K); R(cx - 3, 877, 7, 1, '#6b7280'); R(cx - 1, 870, 3, 7, K); R(cx, 870, 1, 7, '#9aa3b5');
+    R(cx - 7, 832, 15, 39, K); R(cx - 6, 833, 13, 37, '#1c1e26'); R(cx, 833, 1, 37, '#3a3f4d');
+    const foco = (fila, on, c, apagado) => { for (const dx of [-5, 2]){ R(cx + dx, 834 + fila * 5, 4, 4, on ? c : apagado); if (on) R(cx + dx + 1, 834 + fila * 5, 1, 1, '#ffffff'); } };
+    foco(0, true, '#ffd34d', '#4a3d14');                              // pre-stage
+    foco(1, fase >= 1, '#ffd34d', '#4a3d14');                         // stage
+    foco(2, fase === 2, '#ffae2b', '#4a3210'); foco(3, fase === 3, '#ffae2b', '#4a3210'); foco(4, fase === 4, '#ffae2b', '#4a3210');
+    foco(5, fase === 5, '#4dff6a', '#134a1e');
+    foco(6, false, '#ff4d4d', '#4a1414');
+    if (fase === 5){ g.globalAlpha = 0.25; R(cx - 10, 857, 21, 8, '#4dff6a'); g.globalAlpha = 1; }
+  });
+  /* Tablero de tiempos: reacción y tiempo de la última pasada */
+  bloquear(7, 51, 9, 51);
+  mueble(833, (t) => {
+    const anda = trabajandoEn('terrazas'), pasada = Math.floor(t / CICLO_ARBOL), fase = anda ? faseArbol(t) : 5;
+    const rnd = azar(pasada * 977 + 5), rt = (0.38 + rnd() * 0.2).toFixed(3).slice(1), et = (9.4 + rnd() * 2.4).toFixed(2);
+    R(112, 806, 46, 20, K); R(113, 807, 44, 18, '#11131a'); R(113, 807, 44, 1, '#2a2f3c');
+    R(118, 826, 2, 7, K); R(150, 826, 2, 7, K);
+    for (let i = 0; i < 11; i++) R(113 + i * 4, 807, 2, 2, i % 2 ? '#f3f3f3' : '#11131a');   // orilla a cuadros
+    R(115, 811, 5, 1, '#6b7280'); R(137, 811, 5, 1, '#6b7280');
+    if (fase === 5 || !anda){ numerito(115, 815, rt, '#ffae2b'); numerito(136, 815, et, '#4dff6a'); }
+    else if (Math.floor(t * 3) % 2){ R(118, 817, 8, 1, '#4a3210'); R(140, 817, 10, 1, '#134a1e'); }
+  });
+  /* Caja de herramientas y llantas de repuesto */
+  bloquear(1, 56, 2, 56);
+  mueble(56 * T + 15, () => {
+    R(18, 888, 28, 22, K); R(19, 889, 26, 20, '#c0392b'); R(19, 889, 26, 2, '#e05a4a');
+    for (let i = 0; i < 3; i++){ R(21, 893 + i * 5, 22, 4, '#9c2b20'); R(29, 894 + i * 5, 6, 1, '#d7dde8'); }
+    R(20, 910, 4, 3, K); R(40, 910, 4, 3, K);
+  });
+  bloquear(9, 56);
+  mueble(56 * T + 15, () => {
+    for (let i = 0; i < 3; i++){ const yy = 906 - i * 6; R(142, yy - 6, 16, 7, K); R(143, yy - 5, 14, 5, '#26262c'); R(146, yy - 4, 8, 3, '#3a3a42'); R(143, yy - 5, 14, 1, '#4a4a55'); }
+  });
+}
+
 function construirMuebles(){
   /* Biblioteca */
   bloquear(1, 2, 9, 2);              // libreros (se pintan en la capa fija)
@@ -722,17 +848,10 @@ function construirMuebles(){
   planta(1, 23); caja(30, 23); caja(30, 24, true); caja(29, 23);
   caja(1, 39); caja(2, 39, true); escalera(30, 39); cubeta(30, 40);
   escalera(19, 44); caja(12, 49); caja(13, 49, true); cubeta(18, 49);
+  caja(12, 57); caja(13, 57, true); cubeta(19, 53); escalera(28, 54); caja(29, 57); caja(23, 56, true);
   caja(29, 44); caja(29, 45, true); caja(23, 49); cubeta(27, 47);
-  /* ===== Oficina Terrazas: documentos que llegan del celular ===== */
-  bloquear(1, 43, 2, 43);
-  mueble(43 * T + 15, () => {                        // archivero: un cajón se ilumina por cada 5 documentos
-    const x = 20, y = 674, n = archivosTableta().length;
-    R(x, y, 26, 29, K); R(x + 1, y + 1, 24, 27, '#6f7e8b');
-    for (let i = 0; i < 3; i++){
-      R(x + 2, y + 2 + i * 9, 22, 8, '#8d9cab'); R(x + 2, y + 9 + i * 9, 22, 1, '#56636e');
-      R(x + 4, y + 4 + i * 9, 6, 3, n > i * 5 ? '#fff5d6' : '#d7dde3'); R(x + 14, y + 5 + i * 9, 6, 1, K);
-    }
-  });
+  /* ===== Oficina Terrazas: archivos en estantes, y abajo el taller de DragTree ===== */
+  estanteArchivos(18, 0, 1, 3); estanteArchivos(98, 1, 6, 8);
   bloquear(6, 46, 8, 46);
   mueble(46 * T + 14, (t) => {                       // escritorio con base de carga y bandeja
     const n = Math.min(archivosTableta().length, 7);
@@ -746,14 +865,15 @@ function construirMuebles(){
     R(119, 729, 20, 5, K); R(120, 730, 18, 3, '#c9cfd6');                      // bandeja
     for (let i = 0; i < n; i++){ R(121, 728 - i * 2, 16, 2, '#f7f3ea'); R(121, 729 - i * 2, 16, 1, '#d8d2c4'); }
   });
-  planta(1, 50); planta(9, 50); planta(9, 43);
+  planta(1, 50); planta(9, 43); planta(9, 58); planta(1, 58);
+  tallerDragTree();
   caballete(16, 46, 'espacio-b'); caballete(25, 46, 'espacio-c');
 
   /* Sillas y pufs de cada lugar */
   for (const lista of Object.values(LUGARES)) for (const l of lista){ if (l.silla) silla(l); if (l.puf) puf(l); }
 
   /* Lo único que se puede tocar (solo para leer) */
-  zonaLectura(16, 672, 144, 144, () => `Oficina Terrazas: ${archivosTableta().length} archivos de la tableta`, () => panelTerrazas());
+  zonaLectura(16, 672, 144, 272, () => `Oficina Terrazas: ${archivosTableta().length} archivos en los estantes`, () => panelTerrazas());
 }
 
 /* ---------- Capa fija: pisos, paredes y adornos que no se mueven ---------- */
@@ -823,11 +943,13 @@ function baldosa(x, y){
       R(px, py, T, T, '#231c38'); R(px, py, T, 1, '#2d2547'); R(px, py, 1, T, '#2d2547');
       if ((x * 3 + y * 5) % 7 === 0) R(px + 7, py + 7, 2, 2, '#6b4fd8');
       break;
-    case 't':   // Oficina Terrazas: losetas de barro con junta clara
-      R(px, py, T, T, '#e8dcc6');
-      for (let a = 0; a < 2; a++) for (let b = 0; b < 2; b++)
-        R(px + a * 8 + 1, py + b * 8 + 1, 7, 7, ((a + b + x + y) & 1) ? '#c56a43' : '#bb6240');
-      if ((x * 5 + y * 3) % 7 === 0) R(px + 3, py + 4, 2, 1, '#d98058');
+    case 't':   // Oficina Terrazas: duela ancha de madera clara
+      for (let i = 0; i < 2; i++){
+        const yy = py + i * 8, fila = y * 2 + i;
+        R(px, yy, T, 8, (fila & 1) ? '#c9995a' : '#d1a364'); R(px, yy, T, 1, '#dcb174'); R(px, yy + 7, T, 1, '#a57a43');
+        if ((x + fila * 3) % 4 === 0) R(px + ((fila * 5) % 12), yy + 1, 1, 6, '#a57a43');          // junta entre tablas
+        if ((x * 7 + fila * 5) % 11 === 0){ R(px + 6, yy + 3, 3, 2, '#b3864c'); R(px + 7, yy + 3, 1, 1, '#8f6836'); }   // nudo
+      }
       break;
     case 'v':   // concreto sin terminar
       R(px, py, T, T, ((x + y) & 1) ? '#a8a59e' : '#a39f98');
@@ -906,6 +1028,14 @@ function pintarEstatica(){
   R(40, 770, 96, 34, '#4f6d3c'); R(42, 772, 92, 30, '#6a8f50');
   for (let i = 0; i < 22; i++) R(46 + (i * 13) % 86, 775 + (i * 7) % 24, 1, 2, '#83a96a');
   cinta(200, 704, 70, 44); cinta(372, 700, 80, 34); cinta(440, 768, 44, 36);
+  cinta(186, 846, 96, 62); cinta(362, 838, 70, 76);
+  // Oficina Terrazas: pista de arrancones (dos carriles, línea de salida y orilla a cuadros)
+  R(20, 836, 136, 64, '#22242b'); R(21, 837, 134, 62, '#3b3e48');
+  for (let i = 0; i < 40; i++) R(24 + (i * 37) % 128, 839 + (i * 23) % 58, 2, 1, '#454852');
+  for (let i = 0; i < 126; i += 10) R(24 + i, 868, 6, 1, '#e6c229');
+  R(124, 837, 2, 62, '#f3f3f3'); R(118, 837, 1, 62, '#8a8d97');
+  for (let i = 0; i < 31; i++) for (let j = 0; j < 2; j++) R(148 + j * 3, 837 + i * 2, 3, 2, (i + j) % 2 ? '#f3f3f3' : '#15161b');
+  R(26, 846, 22, 3, '#2a2c33'); R(26, 858, 26, 3, '#2a2c33');   // marcas de llanta
   // franjas de "en obra" a la entrada del pasillo de la ampliación
   for (let i = 0; i < 8; i++) R(224 + i * 4, 592, 2, 4, i % 2 ? K : '#e6c229');
   g = antes;
@@ -1498,7 +1628,7 @@ function fecha(s){ if (!s) return null; const v = Date.parse(s); return isNaN(v)
 
 function procesar(datos){
   const ahora = Date.now();
-  const lista = aplicarReglas(CONFIG, datos || {}, ahora).agentes;   // supervisores fijos + visitantes sin vencer
+  const lista = aplicarReglas(configActiva(), datos || {}, ahora).agentes;   // supervisores fijos + visitantes sin vencer
   const raizTs = fecha(datos && datos.actualizado);
   ARCHIVOS = Array.isArray(datos && datos.archivos_recientes) ? datos.archivos_recientes.filter(f => f && f.nombre) : [];
   let masReciente = raizTs || 0;
@@ -1516,9 +1646,10 @@ function procesar(datos){
     a.modelo = MODELOS[modelo] ? modelo : null;
     a.tableta = esTableta(r);
     a.rol = r.rol; a.vence = r.vence || 0; a.seVaPronto = !!r.se_va_pronto;
+    a.sesionId = String(r.sesion_id || r.id || ''); a.tePide = r.te_pide || ''; a.loUltimo = r.lo_ultimo || '';
     a.sesionNombre = r.sesion_nombre || ''; a.sesionesExtra = r.sesiones_extra || 0; a.proyecto = r.proyecto || '';
     a.persona = r.persona || (a.tableta ? 'Alberto Terrazas' : 'Calleros');
-    a.dispositivo = a.tableta ? 'Tableta Android' : r.equipo ? String(r.equipo) : (r.dispositivo || r.origen) ? 'Calleros — Laptop' : '';
+    a.dispositivo = r.equipo ? String(r.equipo) : a.tableta ? 'Tableta Android' : (r.dispositivo || r.origen) ? 'Calleros — Laptop' : '';
     a.ultraPedido = String(r.modo || '').toLowerCase() === 'ultra' || !!r.ultra;
     const firma = (r.area || '') + '|' + (r.actividad || '') + '|' + (r.actualizado || '');
     if (firma !== a.firma){ a.firma = firma; a.vistoCambio = ahora; }
@@ -1529,10 +1660,12 @@ function procesar(datos){
     a.ausente = !!r.ausente;
     a.callado = a.rol === 'visitante' && inactivo && ahora - a.ts > CALLADO_MIN * 60000;
     let area = normalizarArea(r.area) || 'escritorio';
-    if (a.tableta) area = 'terrazas';                 // lo de la tableta nunca se mezcla con la oficina principal
+    // El cuarto de la tableta es de su supervisor y de lo que la tableta reporta ahí; los demás visitantes usan toda la oficina
+    const enTerrazas = a.tableta && (a.rol === 'supervisor' || area === 'terrazas');
+    if (enTerrazas) area = 'terrazas';
     else if (area === 'terrazas') area = 'escritorio';
     let texto = textoBreve(r.actividad);
-    if (inactivo){ area = a.tableta ? 'terrazas' : 'descanso'; texto = 'Esperando instrucciones'; }   // Terrazas espera en su cuarto
+    if (inactivo){ area = enTerrazas ? 'terrazas' : 'descanso'; texto = 'Esperando instrucciones'; }   // Terrazas espera en su cuarto
     else if (area === 'descanso' && !texto) texto = 'Esperando instrucciones';
     const estado = inactivo ? 'inactivo' : String(r.estado || 'trabajando').toLowerCase();
     a.elNombre.style.setProperty('--e', ESTADO_COLOR[estado] || ESTADO_COLOR.trabajando);
@@ -1568,6 +1701,100 @@ function juntar(base, terr){
   datos.agentes = agentes; datos.archivos_recientes = archivos;
   return datos;
 }
+/* ---------- Tus sesiones de Claude Code, leídas con tu propia cuenta (solo dentro de claude.ai) ----------
+   La página solo LEE la lista (conector "Claude Code Remote"); no manda mensajes ni cambia nada. */
+const CONECTOR = 'Claude Code Remote';
+const PASAJERO = new Set(['server_unavailable', 'upstream_error', 'rate_limited', 'cancelled']);
+let mcp = null, mcpListo = false, sesionesCrudas = null, sesionesFalla = '', consultando = false, conModelo = false;
+const MODELOS_SESION = new Map();   // id de sesión -> { modelo, visto }
+async function consultarSesiones(){
+  if (!mcp || consultando || DEMO) return;
+  consultando = true;
+  try {
+    const r = await mcp.callTool(CONECTOR, 'list_sessions', { limit: 50 }, { cache: false });
+    const primera = !sesionesCrudas;
+    sesionesCrudas = r && r.payload !== undefined ? r.payload : r;
+    sesionesFalla = ''; ultimaOK = Date.now(); fallos = 0;
+    if (primera){
+      leerEstado();
+      try { const l = await mcp.listTools(CONECTOR); conModelo = l.servers.some(s => s.tools.some(t => t.name === 'get_session')); } catch (e) { conModelo = false; }
+    }
+    buscarModelos();
+  } catch (e) {
+    const c = (e && e.code) || 'upstream_error';
+    if (PASAJERO.has(c)) fallos++; else sesionesFalla = c;   // lo pasajero se reintenta solo; lo demás espera a que piques el botón
+  } finally { consultando = false; pintarConexion(); }
+}
+async function buscarModelos(){   // de a poquito: máximo 2 por vuelta, y solo de las sesiones que se ven
+  if (!conModelo) return;
+  const ahora = Date.now(); let n = 0;
+  for (const a of agentes.values()){
+    if (n >= 2 || a.ausente || a.fase === 'saliendo' || !a.sesionId) continue;
+    const g = MODELOS_SESION.get(a.sesionId);
+    if (g && (ahora - g.visto < 5 * 60000 || a.estadoTxt !== 'trabajando')) continue;
+    n++;
+    try {
+      const r = await mcp.callTool(CONECTOR, 'get_session', { session_id: a.sesionId }, { cache: false });
+      MODELOS_SESION.set(a.sesionId, { modelo: modeloDeRespuesta(r && r.payload !== undefined ? r.payload : r), visto: ahora });
+    } catch (e) {
+      MODELOS_SESION.set(a.sesionId, { modelo: (g && g.modelo) || null, visto: ahora });
+      if (e && !PASAJERO.has(e.code)){ conModelo = false; return; }
+    }
+  }
+}
+function pintarConexion(){
+  const caja = $('conexion');
+  if (!EN_CLAUDE || DEMO){ caja.style.display = 'none'; return; }
+  let texto = '', boton = '';
+  if (mcpListo && !mcp) texto = 'Desde esta vista no puedo leer tus sesiones. Abre la oficina en claude.ai o en la app de Claude, con tu cuenta.';
+  else if (['approval_required', 'not_in_manifest', 'consent_required', 'not_granted'].includes(sesionesFalla)){
+    texto = 'La oficina necesita tu permiso para ver la lista de tus sesiones de Claude Code. Solo las lee; no cambia nada.'; boton = 'Permitir y conectar';
+  } else if (['server_not_connected', 'selection_required', 'server_not_found'].includes(sesionesFalla)){
+    texto = 'Falta el conector «Claude Code Remote» en tu cuenta. Agrégalo en claude.ai, en Ajustes → Conectores.'; boton = 'Volver a intentar';
+  } else if (sesionesFalla === 'needs_reauth'){
+    texto = 'Hay que volver a conectar «Claude Code Remote» en claude.ai, en Ajustes → Conectores.'; boton = 'Volver a intentar';
+  } else if (sesionesFalla){
+    texto = 'No se pudo leer la lista de sesiones (' + sesionesFalla + ').'; boton = 'Volver a intentar';
+  }
+  $('conexionTexto').textContent = texto;
+  $('conexionBoton').textContent = boton; $('conexionBoton').style.display = boton ? '' : 'none';
+  caja.style.display = texto ? 'flex' : 'none';
+}
+
+/* Supervisores elegidos desde la página (★ en la ficha). Se guardan en la base del Artifact para verse igual en todos tus aparatos. */
+let PINES = [], dbPines = null;
+function configActiva(){ return EN_CLAUDE && !DEMO ? Object.assign({}, CONFIG, { supervisores: PINES }) : CONFIG; }
+function leerPinesLocal(){ try { const v = JSON.parse(localStorage.getItem('oficina.supervisores') || '[]'); return Array.isArray(v) ? v : []; } catch (e) { return []; } }
+function guardarPines(){
+  try { localStorage.setItem('oficina.supervisores', JSON.stringify(PINES)); } catch (e) {}
+  if (dbPines) dbPines.set({ lista: PINES }).catch(() => {});
+}
+function cambiarSupervisor(a){
+  const id = a.sesionId;
+  if (PINES.some(p => p.id === id)) PINES = PINES.filter(p => p.id !== id);
+  else PINES = PINES.concat([{ clave: id, id, nombre: a.nombre, modelo: a.modelo || undefined, dispositivo: a.tableta ? 'android' : undefined, equipo: a.dispositivo || undefined }]);
+  guardarPines(); cerrarPanel(); leerEstado();
+}
+async function conectarClaude(){
+  if (!EN_CLAUDE) return;
+  PINES = leerPinesLocal();
+  window.claude.use('db').then(db => {
+    if (!db) return;
+    dbPines = db.doc('oficina/supervisores');
+    dbPines.onSnapshot(snap => {
+      const d = snap.exists ? snap.data() : null;
+      if (d && Array.isArray(d.lista)){ PINES = d.lista; leerEstado(); }
+      else if (PINES.length) dbPines.set({ lista: PINES }).catch(() => {});   // primera vez: sube los que ya tenía este aparato
+    }, () => {});
+  }).catch(() => {});
+  try { mcp = await window.claude.use('mcp'); } catch (e) { mcp = null; }
+  mcpListo = true;
+  pintarConexion();
+  if (!mcp) return;
+  consultarSesiones();
+  setInterval(() => { if (!document.hidden && !sesionesFalla) consultarSesiones(); }, CADA_SESIONES_MS);
+}
+
 async function leerEstado(){
   if (location.protocol === 'file:' || leyendo) return;
   leyendo = true;
@@ -1575,6 +1802,11 @@ async function leerEstado(){
     await configLista;
     let datos;
     if (DEMO) datos = estadoDemo();
+    else if (EN_CLAUDE){
+      if (!sesionesCrudas) return;                                   // todavía no llega la primera lista
+      procesar(estadoDeSesiones(sesionesCrudas, Date.now(), id => (MODELOS_SESION.get(id) || {}).modelo || null));
+      return;
+    }
     else if (EN_NUBE){
       const nube = Object.assign({}, NUBE, CONFIG.nube);
       const [base, terr] = await Promise.all([leerJSON(nube.estado), leerJSON(nube.terrazas).catch(() => null)]);
@@ -1702,7 +1934,7 @@ function barra(){
   $('cuantos').textContent = n === 0 ? 'sin agentes' : n === 1 ? '1 agente' : n + ' agentes';
   const senal = $('senal'), st = $('senalTexto');
   if (location.protocol === 'file:'){ senal.className = 'senal mal'; st.textContent = 'Abre con iniciar_oficina.bat'; }
-  else if (ultimaOK && Date.now() - ultimaOK < CADA_MS + 3500){ senal.className = 'senal ok'; st.textContent = 'EN VIVO'; $('aviso').style.display = 'none'; }
+  else if (ultimaOK && Date.now() - ultimaOK < (EN_CLAUDE && !DEMO ? CADA_SESIONES_MS * 2 + 5000 : CADA_MS + 3500)){ senal.className = 'senal ok'; st.textContent = DEMO ? 'EJEMPLO' : 'EN VIVO'; $('aviso').style.display = 'none'; }
   else if (ultimaOK || fallos > 2){ senal.className = 'senal mal'; st.textContent = EN_NUBE ? 'SIN SEÑAL' : 'SIN SEÑAL: ¿cerraste la ventana del servidor?'; }
   if (ultimoReporte){
     const s = Math.max(0, Math.round((Date.now() - ultimoReporte) / 1000));
@@ -1757,8 +1989,15 @@ function fichaAgente(a){
   if (a.sesionesExtra) filas.push(['Otras sesiones', a.sesionesExtra + ' más de este supervisor']);
   if (a.rol !== 'supervisor' && a.vence) filas.push(['Se va', textoPlazo(a.vence - Date.now()) + ' si no hace nada']);
   let html = filas.map(([k, v]) => `<div class="fila"><span>${esc(k)}</span><span>${esc(v)}</span></div>`).join('');
+  if (a.tePide) html += `<div class="tarjeta" style="margin-top:12px"><b>Te pide</b><div>${esc(a.tePide)}</div></div>`;
+  if (a.loUltimo) html += `<div class="tarjeta" style="margin-top:12px;border-left-color:#79c0ff"><b>Lo último que hizo</b><div>${esc(a.loUltimo)}</div></div>`;
+  if (EN_CLAUDE && !DEMO && a.sesionId){
+    const es = PINES.some(p => p.id === a.sesionId);
+    html += `<div class="botones"><button class="boton${es ? '' : ' principal'}" id="botonSupervisor">${es ? 'Quitar de supervisores' : '★ Hacer supervisor (no se va)'}</button></div>`;
+  }
   if (a.tableta) html += '<h4 style="margin:16px 0 8px">Archivos recientes de la tableta</h4>' + listaArchivos(archivosTableta());
   abrirPanel(a.nombre, html);
+  const b = $('botonSupervisor'); if (b) b.addEventListener('click', () => cambiarSupervisor(a));
 }
 
 /* Oficina Terrazas: lo que sale de la tableta Android de Alberto Terrazas (solo lectura) */
@@ -1906,12 +2145,15 @@ pintarEstatica();
 ajustarEscala();
 window.addEventListener('resize', ajustarEscala);
 if (location.protocol === 'file:') $('aviso').style.display = 'flex';
-document.addEventListener('visibilitychange', () => { if (!document.hidden) leerEstado(); });
+document.addEventListener('visibilitychange', () => { if (!document.hidden){ leerEstado(); if (EN_CLAUDE && !sesionesFalla) consultarSesiones(); } });
 const configLista = cargarConfig();
 setInterval(cargarConfig, 60000);
 leerEstado();
 setInterval(leerEstado, CADA_MS);
-if ('serviceWorker' in navigator && EN_NUBE) navigator.serviceWorker.register('sw.js').catch(() => {});
+if ('serviceWorker' in navigator && EN_NUBE && !EN_CLAUDE) navigator.serviceWorker.register('sw.js').catch(() => {});
+$('conexionBoton').addEventListener('click', () => { sesionesFalla = ''; pintarConexion(); consultarSesiones(); });
+$('conexionDemo').addEventListener('click', () => { DEMO = true; pintarConexion(); leerEstado(); });
+conectarClaude();
 cargarDatos();
 setInterval(cargarDatos, 60000);
 setInterval(barra, 1000);

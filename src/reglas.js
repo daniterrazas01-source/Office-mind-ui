@@ -65,7 +65,8 @@ export function aplicarReglas(config = {}, datos = {}, ahora = Date.now()) {
       .sort((a, b) => (ultimaActividad(b, datos.actualizado) ?? 0) - (ultimaActividad(a, datos.actualizado) ?? 0));
     suyas.forEach((r) => usados.add(r));
     const sesion = suyas[0];
-    const fijo = { id: idSupervisor(sup), nombre: sup.nombre, rol: 'supervisor' };
+    // `clave` fija el id del monito (los supervisores elegidos en la página usan el id de su sesión)
+    const fijo = { id: sup.clave || idSupervisor(sup), nombre: sup.nombre, rol: 'supervisor' };
     if (sup.aspecto) fijo.aspecto = sup.aspecto;
     if (sesion) {
       agentes.push({ ...sesion, ...fijo, sesion_id: sesion.id, sesion_nombre: sesion.titulo || sesion.nombre, sesiones_extra: suyas.length - 1 });
