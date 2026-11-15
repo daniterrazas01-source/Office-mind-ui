@@ -63,6 +63,7 @@ const QUE = {
   Edit: ['escritorio', 'Editando {f}'], NotebookEdit: ['escritorio', 'Editando {f}'],
   WebSearch: ['internet', 'Buscando en internet'], WebFetch: ['internet', 'Leyendo una página'],
   Agent: ['sala de juntas', 'Pidiendo ayuda a un ayudante'], Task: ['sala de juntas', 'Pidiendo ayuda a un ayudante'],
+  EnterPlanMode: ['centro de pensado', 'Planeando'], ExitPlanMode: ['centro de pensado', 'Planeando'], TodoWrite: ['centro de pensado', 'Organizando pendientes'],
 };
 const MIN = 60 * 1000;
 const TOPE_HERRAMIENTA = 30 * MIN;   // una herramienta puede tardar; pasado esto se da por detenida

@@ -27,6 +27,7 @@ export function areaDeTexto(texto) {
   const t = plano(texto);
   if (!t) return 'escritorio';
   if (/\b(sub)?agent|ayudante|delegat|deleg|coordin|workflow/.test(t)) return 'sala de juntas';
+  if (/\bthink|pensa|razon|reason|planea|planning|\bplan\b|design|disen|arquitect/.test(t)) return 'centro de pensado';
   if (/\bweb\b|internet|online|\burl|pagina|sitio|naveg|brows|fetch|descarg|download|search(ing)? (the )?(web|online)/.test(t)) return 'internet';
   if (/\bread|leyendo|\bleer|revis|review|inspect|explor|analiz|analy[sz]|investig|research|buscando|\bbusca|search|look(ing)? (at|for|into)|estudi|\bgrep|understand|entend/.test(t)) return 'biblioteca';
   return 'escritorio';

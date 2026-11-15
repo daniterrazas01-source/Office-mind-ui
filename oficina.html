@@ -70,6 +70,10 @@ header{position:fixed;top:0;left:0;right:0;height:46px;display:flex;align-items:
   background:rgba(18,12,18,.8);border-left:calc(var(--s)*1.5px) solid var(--c,#d97757);z-index:2}
 .nombre i{font-style:normal;font-weight:700;margin-left:calc(var(--s)*1.5px)}
 .nombre .jefe{color:#ffd34d;margin-right:calc(var(--s)*1px)}
+.nombre .reloj{color:#7fe7ff;margin-right:calc(var(--s)*1px)}
+.reporte h4{margin:14px 0 2px;font-size:16px}
+.reporte p{margin:6px 0}
+.reporte .tarjeta a{color:#c9a6ff;word-break:break-all}
 .nombre.pronto{opacity:.62}
 .nombre b{display:inline-block;width:calc(var(--s)*2px);height:calc(var(--s)*2px);min-width:4px;min-height:4px;
   margin-left:calc(var(--s)*1.5px);background:var(--e,#6fd36f);vertical-align:middle}
@@ -269,7 +273,7 @@ const MAPA = (() => {
   llenar(1, 42, 9, 42, '='); llenar(11, 42, 20, 42, '='); llenar(22, 42, 30, 42, '=');
   llenar(1, 43, 9, 58, 't');                                  // t = Oficina Terrazas (larga)
   llenar(11, 43, 20, 58, 'h');                                // gran pasillo, con el túnel en medio
-  llenar(22, 43, 30, 50, 'v');                                // espacio libre de siempre
+  llenar(22, 43, 30, 50, 'k');                                // k = Centro de Pensado y almacén
   llenar(22, 52, 30, 52, '='); llenar(22, 53, 30, 58, 'v');   // otro espacio libre debajo
   for (const x of [4, 5, 25, 26]){ m[41][x] = 'D'; m[42][x] = 'D'; }
   // ---- Planta de hasta abajo: pasillo 4 y tres cuartos libres más ----
@@ -282,7 +286,9 @@ const MAPA = (() => {
   for (const x of [4, 5, 15, 16, 25, 26]){ m[63][x] = 'D'; m[64][x] = 'D'; }
   return m;
 })();
-const CAMINABLE = new Set(['h', 'b', 'e', 'i', 'j', 'd', 'D', 'E', 'c', 'x', 'v', 't']);
+const CAMINABLE = new Set(['h', 'b', 'e', 'i', 'j', 'd', 'D', 'E', 'c', 'x', 'v', 't', 'k']);
+/* Túnel subterráneo: una escotilla en la Oficina Terrazas y otra en el Centro de Pensado */
+const ESCOTILLAS = [{ x: 9, y: 45 }, { x: 22, y: 45 }];
 const BLOQUEO = new Set();
 function bloquear(x0, y0, x1 = x0, y1 = y0){ for (let y = y0; y <= y1; y++) for (let x = x0; x <= x1; x++) BLOQUEO.add(y * COLS + x); }
 function caminable(x, y){ return x >= 0 && y >= 0 && x < COLS && y < ROWS && CAMINABLE.has(MAPA[y][x]) && !BLOQUEO.has(y * COLS + x); }
@@ -297,6 +303,7 @@ const AREAS = {
   'calleros':       { letrero: 'OFICINA CALLEROS', x0: 1, y0: 27, x1: 12, y1: 36, lx: 56,  ly: 408, pose: 'teclear' },
   'cerebro delta':  { letrero: 'CEREBRO DELTA',  x0: 17, y0: 27, x1: 30, y1: 36, lx: 316, ly: 408, pose: 'leer' },
   'terrazas':       { letrero: 'OFICINA TERRAZAS', x0: 1, y0: 43, x1: 9, y1: 58, lx: 80, ly: 664, pose: 'teclear' },
+  'centro de pensado': { letrero: 'CENTRO DE PENSADO', x0: 22, y0: 43, x1: 30, y1: 50, lx: 400, ly: 664, pose: 'leer' },
 };
 const L = (tx, ty, dir, extra = {}) => Object.assign({ tx, ty, ox: 0, oy: 0, dir, sentado: false, silla: null }, extra);
 const LUGARES = {
@@ -355,6 +362,12 @@ const LUGARES = {
     L(18, 28, 'arriba'),
     L(29, 28, 'arriba'),
   ],
+  'centro de pensado': [
+    L(24, 48, 'arriba'),                                               // frente al foco de ideas
+    L(27, 50, 'arriba', { ox: 8, oy: -3, sentado: true, silla: 'oficina' }),
+    L(27, 46, 'izq'),
+    L(29, 44, 'arriba'),                                               // en los anaqueles del almacén
+  ],
   'terrazas': [                                                        // equipo DragTree
     L(6, 47, 'arriba', { oy: -3, sentado: true, silla: 'oficina' }),
     L(8, 47, 'arriba', { oy: -3, sentado: true, silla: 'oficina' }),
@@ -372,6 +385,7 @@ function normalizarArea(a){
   if (s.includes('calleros')) return 'calleros';
   if (s.includes('cerebro')) return 'cerebro delta';
   if (s.includes('terraza')) return 'terrazas';
+  if (s.includes('pensado') || s.includes('pensar') || s.includes('pensamiento')) return 'centro de pensado';
   if (s.includes('junta') || s === 'sala' || s.includes('reunion')) return 'sala de juntas';
   if (s.startsWith('escritorio') || s === 'computadora') return 'escritorio';
   if (s.startsWith('biblio')) return 'biblioteca';
@@ -694,6 +708,50 @@ function tallerDragTree(){
   });
 }
 
+/* ---------- Centro de Pensado: un foco gigante que prende cuando alguien piensa ahí, y el almacén ---------- */
+function centroDePensado(){
+  bloquear(23, 46, 25, 47);
+  mueble(47 * T + 14, (t) => {
+    const cx = 392, cy = 738, activo = trabajandoEn('centro de pensado') || hayAlguien('centro de pensado');
+    const pulso = 0.5 + 0.5 * Math.sin(t * (activo ? 5 : 1.6));
+    R(368, 760, 48, 14, K); R(369, 761, 46, 12, '#243a52'); R(369, 761, 46, 2, '#3a5a7c'); R(374, 768, 36, 2, '#d9a441');   // pedestal
+    R(385, 750, 14, 10, K); R(386, 751, 12, 8, '#8a92a8'); R(386, 753, 12, 1, '#5a6278'); R(386, 756, 12, 1, '#5a6278');     // rosca del foco
+    g.globalAlpha = (activo ? 0.2 : 0.08) + 0.16 * pulso; disco(cx, cy, 19, '#ffd76a'); g.globalAlpha = 1;                  // resplandor
+    disco(cx, cy, 13, K); disco(cx, cy, 12, activo ? '#ffe9a0' : '#c9c2a0'); disco(cx - 3, cy - 3, 6, activo ? '#fff8dc' : '#ddd8bd');
+    const f = activo ? '#e0761a' : '#7a705a';                                                                                 // filamento
+    R(cx - 5, cy + 2, 1, 8, f); R(cx + 4, cy + 2, 1, 8, f);
+    for (let i = 0; i < 5; i++) R(cx - 4 + i * 2, cy + (i % 2 ? 0 : 2), 2, 1, f);
+    for (let i = 0; i < (activo ? 5 : 2); i++){                                                                               // ideas que salen
+      const u = (t * (activo ? 0.7 : 0.3) + i / 5) % 1, ang = i * 1.3 + t * 0.4;
+      g.globalAlpha = 1 - u; R(Math.round(cx + Math.cos(ang) * (15 + u * 9)), Math.round(cy - 4 - u * 16 + Math.sin(ang) * 4), 2, 2, '#fff2b0');
+    }
+    g.globalAlpha = 1;
+  });
+  escritorioMueble(27, 49, 1, 'centro de pensado');
+  /* Almacén: anaqueles con cajas y discos, y bultos en el piso */
+  bloquear(28, 43, 30, 43);
+  mueble(702, (t) => {
+    const x0 = 450, y0 = 664, w = 44, h = 38;
+    R(x0, y0, w, h, K); R(x0 + 1, y0 + 1, w - 2, h - 2, '#4a5568'); R(x0 + 1, y0 + 1, w - 2, 1, '#6b7890');
+    for (let rep = 0; rep < 3; rep++){
+      const fy = y0 + 2 + rep * 12;
+      R(x0 + 2, fy, w - 4, 10, '#1c232e');
+      for (let i = 0; i < 4; i++){
+        const bx = x0 + 3 + i * 10;
+        if ((rep + i) % 3 === 0){ R(bx, fy + 2, 8, 8, '#c79a5b'); R(bx, fy + 2, 8, 2, '#dab06f'); R(bx + 3, fy + 2, 2, 8, '#ead9ab'); }       // caja
+        else { R(bx, fy + 3, 8, 7, '#2f3a4c'); R(bx, fy + 3, 8, 1, '#4d5c75'); R(bx + 1, fy + 7, 2, 1, (Math.floor(t * 3 + rep * 2 + i) % 3) ? '#5dff7a' : '#1f5a2a'); R(bx + 4, fy + 7, 3, 1, '#8a92a8'); }   // disco
+      }
+      R(x0 + 1, fy + 10, w - 2, 2, '#6b7890');
+    }
+  });
+  caja(30, 46); caja(30, 47, true); caja(29, 47); caja(30, 49);
+  bloquear(28, 49);
+  mueble(49 * T + 15, () => {                                        // tambo
+    R(450, 782, 12, 17, K); R(451, 783, 10, 15, '#3f6f9c'); R(451, 786, 10, 1, '#2a4d70'); R(451, 793, 10, 1, '#2a4d70'); R(452, 783, 3, 15, '#5a8fc0');
+  });
+  planta(22, 50); planta(22, 43);
+}
+
 function construirMuebles(){
   /* Biblioteca */
   bloquear(1, 2, 9, 2);              // libreros (se pintan en la capa fija)
@@ -865,7 +923,6 @@ function construirMuebles(){
   planta(1, 61); caja(30, 61); caja(30, 62, true); caja(29, 61);                        // pasillo 4
   caja(2, 71); caja(3, 71, true); cubeta(8, 66); escalera(19, 66); caja(12, 71); cubeta(13, 70);
   caja(29, 66); caja(29, 67, true); caja(23, 71); escalera(23, 66);
-  caja(29, 44); caja(29, 45, true); caja(23, 49); cubeta(27, 47);
   /* ===== Oficina Terrazas: archivos en estantes, y abajo el taller de DragTree ===== */
   estanteArchivos(18, 0, 1, 3); estanteArchivos(98, 1, 6, 8);
   bloquear(6, 46, 8, 46);
@@ -883,7 +940,8 @@ function construirMuebles(){
   });
   planta(1, 50); planta(9, 43); planta(9, 58); planta(1, 58);
   tallerDragTree();
-  caballete(25, 46, 'espacio-c'); caballete(25, 55, 'espacio-b');
+  caballete(25, 55, 'espacio-b');
+  centroDePensado();
   caballete(5, 68, 'espacio-d'); caballete(16, 68, 'espacio-e'); caballete(25, 68, 'espacio-f');
 
   /* Sillas y pufs de cada lugar */
@@ -896,12 +954,12 @@ function construirMuebles(){
 /* ---------- Capa fija: pisos, paredes y adornos que no se mueven ---------- */
 const estatica = document.createElement('canvas'); estatica.width = W; estatica.height = H;
 const CARA = { biblioteca: '#d4c3a0', escritorio: '#e2d4b4', internet: '#b8c3d4', pasillo: '#dccfb2', sala: '#ccd2dc', descanso: '#ead3ae',
-               calleros: '#d8c39b', cerebro: '#3a3157', vacio: '#cfcbc2', terrazas: '#e9d9bd' };
+               calleros: '#d8c39b', cerebro: '#3a3157', vacio: '#cfcbc2', terrazas: '#e9d9bd', pensado: '#3b5166' };
 function caraDe(x, y){
   if (y === 1) return x <= 9 ? CARA.biblioteca : x <= 20 ? CARA.escritorio : CARA.internet;
   if (y === 10 || y === 22 || y === 38 || y === 60) return CARA.pasillo;
   if (y === 26) return x <= 12 ? CARA.calleros : CARA.cerebro;
-  if (y === 42) return x <= 9 ? CARA.terrazas : x <= 20 ? CARA.pasillo : CARA.vacio;
+  if (y === 42) return x <= 9 ? CARA.terrazas : x <= 20 ? CARA.pasillo : CARA.pensado;
   if (y === 52 || y === 64) return CARA.vacio;
   return x <= 14 ? CARA.sala : CARA.descanso;
 }
@@ -968,6 +1026,10 @@ function baldosa(x, y){
         if ((x + fila * 3) % 4 === 0) R(px + ((fila * 5) % 12), yy + 1, 1, 6, '#a57a43');          // junta entre tablas
         if ((x * 7 + fila * 5) % 11 === 0){ R(px + 6, yy + 3, 3, 2, '#b3864c'); R(px + 7, yy + 3, 1, 1, '#8f6836'); }   // nudo
       }
+      break;
+    case 'k':   // Centro de Pensado: piso azul profundo con cuadrícula y nodos ámbar
+      R(px, py, T, T, '#1b2b3d'); R(px, py, T, 1, '#24384d'); R(px, py, 1, T, '#24384d');
+      if ((x * 5 + y * 3) % 6 === 0) R(px + 7, py + 7, 2, 2, '#d9a441');
       break;
     case 'u':   // túnel central: piso de metal oscuro (la banda y los rieles se pintan aparte)
       R(px, py, T, T, '#20222c');
@@ -1048,7 +1110,23 @@ function pintarEstatica(){
   // Oficina Terrazas: tapete verde tipo pasto
   R(40, 770, 96, 34, '#4f6d3c'); R(42, 772, 92, 30, '#6a8f50');
   for (let i = 0; i < 22; i++) R(46 + (i * 13) % 86, 775 + (i * 7) % 24, 1, 2, '#83a96a');
-  cinta(372, 700, 80, 34); cinta(440, 768, 44, 36); cinta(366, 860, 70, 56);
+  cinta(366, 860, 70, 56);
+  // Centro de Pensado: cables del foco de ideas hacia la consola, la escotilla y el almacén; zona del almacén marcada en el piso
+  const cable = (x0, y0, x1, y1) => { const pasos = Math.max(Math.abs(x1 - x0), Math.abs(y1 - y0)); for (let i = 0; i <= pasos; i += 3) R(Math.round(x0 + (x1 - x0) * i / pasos), Math.round(y0 + (y1 - y0) * i / pasos), 1, 1, '#d9a441'); };
+  cable(392, 770, 440, 790); cable(380, 760, 362, 732); cable(404, 760, 446, 730); cable(392, 772, 392, 812);
+  cinta(442, 706, 50, 104);
+  for (let i = 0; i < 9; i++) R(444 + i * 5, 808, 3, 2, i % 2 ? K : '#e6c229');
+  // Túnel subterráneo: escotillas con escalones y, en el gran pasillo, losas de vidrio por donde se ve pasar
+  for (const e of ESCOTILLAS){
+    const ex = e.x * T, ey = e.y * T;
+    R(ex, ey, 16, 16, K); R(ex + 1, ey + 1, 14, 14, '#e6c229'); R(ex + 2, ey + 2, 12, 12, '#0e0f14');
+    for (let i = 0; i < 4; i++) R(ex + 2, ey + 2 + i * 3, 12, 2, tono('#7c8596', -i * 26));
+  }
+  for (let tx = 11; tx <= 20; tx++){
+    if (tx === 15 || tx === 16) continue;                           // ahí pasa por debajo del túnel central
+    const lx = tx * T;
+    R(lx + 1, 721, 14, 14, '#8a7c62'); R(lx + 2, 722, 12, 12, K); R(lx + 3, 723, 10, 10, '#1d2a36'); R(lx + 3, 723, 10, 1, '#35506a');
+  }
   cinta(40, 1076, 76, 44); cinta(196, 1088, 64, 52); cinta(380, 1072, 84, 46);
   // Gran pasillo: una raya amarilla a cada lado del túnel y flechas en el piso (bajada a la izquierda, subida a la derecha)
   for (let y = 692; y < 940; y += 8){ R(236, y, 1, 5, '#e6c229'); R(275, y, 1, 5, '#e6c229'); }
@@ -1156,6 +1234,19 @@ function pintarTunel(){
     R(x - 4, yy - 6, 5, 39, K); R(x - 3, yy - 5, 3, 37, '#4a5368'); R(x + 31, yy - 6, 5, 39, K); R(x + 32, yy - 5, 3, 37, '#4a5368');
   }
 }
+function subterraneo(t){   // lucecitas bajo las losas de vidrio, y un brillo donde va alguien por abajo
+  let n = 0;
+  for (let tx = 11; tx <= 20; tx++){
+    if (tx === 15 || tx === 16) continue;
+    const on = (n++ - Math.floor(t * 5)) % 4 === 0;
+    R(tx * T + 7, 727, 2, 2, on ? '#ffd34d' : '#3a3520');
+  }
+  for (const a of agentes.values()){
+    if (!a.bajo) continue;
+    const tx = Math.floor(a.x / T);
+    if (tx >= 11 && tx <= 20 && tx !== 15 && tx !== 16){ R(tx * T + 3, 723, 10, 10, '#ffe9a0'); R(Math.round(a.x) - 3, 725, 6, 6, MODELOS[a.modelo] ? MODELOS[a.modelo].color : '#d97757'); }
+  }
+}
 function tunel(t){
   const { x, y0, y1 } = TUNEL, largo = y1 - y0 - 12;
   for (let k = 0; k < 13; k++){                                     // flechitas que bajan por la banda
@@ -1180,6 +1271,7 @@ function tunel(t){
 }
 function paredesAnimadas(t){
   tunel(t);
+  subterraneo(t);
   ventana(196, 17, 42, 12, t);
   relojPared(264, 24);
   pantallaGrande(t);
@@ -1543,6 +1635,7 @@ function ponerNombre(a, nombre){
   a.gafete = clave; a.nombre = nombre; a.elNombre.textContent = nombre; a.medirNombre = true;
   a.elNombre.classList.toggle('pronto', !!plazo);
   if (a.rol === 'supervisor'){ const j = document.createElement('span'); j.className = 'jefe'; j.textContent = '★'; a.elNombre.prepend(j); }
+  if (a.rol === 'programado'){ const j = document.createElement('span'); j.className = 'reloj'; j.textContent = '◆'; a.elNombre.prepend(j); }
   const m = MODELOS[a.modelo];
   if (m){ const i = document.createElement('i'); i.textContent = m.nombre; i.style.color = m.etiqueta; a.elNombre.appendChild(i); }
   if (a.ultra){ const u = document.createElement('span'); u.className = 'ultra'; u.textContent = 'ULTRA'; a.elNombre.appendChild(u); }
@@ -1610,6 +1703,9 @@ function buscarCamino(a, b){
       const ns = (ny * COLS + nx) * 4 + nd, nc = c + 10 + (nd !== d ? 5 : 0);
       if (nc < dist[ns]){ dist[ns] = nc; prev[ns] = s; push(nc, ns); }
     }
+    const e0 = ESCOTILLAS[0].y * COLS + ESCOTILLAS[0].x, e1 = ESCOTILLAS[1].y * COLS + ESCOTILLAS[1].x;
+    const otra = celda === e0 ? e1 : celda === e1 ? e0 : -1;
+    if (otra >= 0){ const ns = otra * 4 + d, nc = c + 60; if (nc < dist[ns]){ dist[ns] = nc; prev[ns] = s; push(nc, ns); } }   // por el túnel subterráneo
   }
   if (mejor < 0) return [a, b];
   const celdas = [];
@@ -1633,8 +1729,9 @@ function construirRuta(a, inicio, lugar){
   const celdas = buscarCamino(inicio, { x: lugar.tx, y: lugar.ty });
   for (let i = 1; i < celdas.length; i++){
     const p = celdas[i - 1], c = celdas[i], n = celdas[i + 1];
-    if (n && n.x - c.x === c.x - p.x && n.y - c.y === c.y - p.y) continue;
-    pts.push({ x: c.x * T + 8, y: c.y * T + 13 });
+    const salto = Math.abs(c.x - p.x) + Math.abs(c.y - p.y) > 1;       // de una escotilla a la otra: ese tramo va por abajo
+    if (!salto && n && n.x - c.x === c.x - p.x && n.y - c.y === c.y - p.y) continue;
+    pts.push({ x: c.x * T + 8, y: c.y * T + 13, bajo: salto });
   }
   pts.push({ x: lugar.x, y: lugar.y });
   return pts;
@@ -1726,6 +1823,7 @@ function moverAgente(a, dt){
     if (d <= resto){ a.x = p.x; a.y = p.y; resto -= d; a.recorrido += d; a.ruta.shift(); }
     else { a.x += dx / d * resto; a.y += dy / d * resto; a.recorrido += resto; resto = 0; }
   }
+  a.bajo = !!(a.ruta[0] && a.ruta[0].bajo);
   if (!a.ruta.length) llegar(a);
 }
 
@@ -1736,6 +1834,8 @@ function fecha(s){ if (!s) return null; const v = Date.parse(s); return isNaN(v)
 function procesar(datos){
   const ahora = Date.now();
   const lista = aplicarReglas(configActiva(), datos || {}, ahora).agentes;   // supervisores fijos + visitantes sin vencer
+  if (datos && Array.isArray(datos.monitos)) MONITOS_DEMO = datos.monitos;
+  for (const m of monitosTodos()) lista.push(registroProgramado(m, ahora));   // monitos con tarea programada: siempre están
   const raizTs = fecha(datos && datos.actualizado);
   ARCHIVOS = Array.isArray(datos && datos.archivos_recientes) ? datos.archivos_recientes.filter(f => f && f.nombre) : [];
   let masReciente = raizTs || 0;
@@ -1752,7 +1852,7 @@ function procesar(datos){
     const modelo = String(r.modelo || '').toLowerCase();
     a.modelo = MODELOS[modelo] ? modelo : null;
     a.tableta = esTableta(r);
-    a.rol = r.rol; a.vence = r.vence || 0; a.seVaPronto = !!r.se_va_pronto;
+    a.rol = r.rol; a.vence = r.vence || 0; a.seVaPronto = !!r.se_va_pronto; a.monito = r.monito || '';
     a.sesionId = String(r.sesion_id || r.id || ''); a.tePide = r.te_pide || ''; a.loUltimo = r.lo_ultimo || '';
     a.sesionNombre = r.sesion_nombre || ''; a.sesionesExtra = r.sesiones_extra || 0; a.proyecto = r.proyecto || '';
     a.persona = r.persona || (a.tableta ? 'Alberto Terrazas' : 'Calleros');
@@ -1763,12 +1863,12 @@ function procesar(datos){
     const ts = r.ausente ? 0 : (fecha(r.actualizado) ?? raizTs ?? a.vistoCambio);
     if (ts > masReciente) masReciente = ts;
     a.ts = r.ausente ? 0 : (fecha(r.ultima_actividad) ?? ts);
-    const inactivo = !!r.ausente || (ahora - ts) / 1000 > SEGUNDOS_INACTIVO;
+    const inactivo = !r.fijo && (!!r.ausente || (ahora - ts) / 1000 > SEGUNDOS_INACTIVO);
     a.ausente = !!r.ausente;
     a.callado = a.rol === 'visitante' && inactivo && ahora - a.ts > CALLADO_MIN * 60000;
     let area = normalizarArea(r.area) || 'escritorio';
     // El cuarto de la tableta es de su supervisor y de lo que la tableta reporta ahí; los demás visitantes usan toda la oficina
-    const enTerrazas = a.tableta && (a.rol === 'supervisor' || area === 'terrazas');
+    const enTerrazas = (r.fijo && area === 'terrazas') || (a.tableta && (a.rol === 'supervisor' || area === 'terrazas'));
     if (enTerrazas) area = 'terrazas';
     else if (area === 'terrazas') area = 'escritorio';
     let texto = textoBreve(r.actividad);
@@ -1887,6 +1987,7 @@ async function conectarClaude(){
   PINES = leerPinesLocal();
   window.claude.use('db').then(db => {
     if (!db) return;
+    escucharMonitos(db);
     dbPines = db.doc('oficina/supervisores');
     dbPines.onSnapshot(snap => {
       const d = snap.exists ? snap.data() : null;
@@ -1910,14 +2011,20 @@ async function leerEstado(){
     let datos;
     if (DEMO) datos = estadoDemo();
     else if (EN_CLAUDE){
-      if (!sesionesCrudas) return;                                   // todavía no llega la primera lista
-      procesar(estadoDeSesiones(sesionesCrudas, Date.now(), id => (MODELOS_SESION.get(id) || {}).modelo || null));
+      if (!sesionesCrudas && !MONITOS.size) return;                  // todavía no llega nada
+      procesar(estadoDeSesiones(sesionesCrudas || [], Date.now(), id => (MODELOS_SESION.get(id) || {}).modelo || null));
       return;
     }
     else if (EN_NUBE){
       const nube = Object.assign({}, NUBE, CONFIG.nube);
-      const [base, terr] = await Promise.all([leerJSON(nube.estado), leerJSON(nube.terrazas).catch(() => null)]);
+      const [base, terr, relevo] = await Promise.all([leerJSON(nube.estado), leerJSON(nube.terrazas).catch(() => null),
+        nube.relevo ? leerJSON(String(nube.relevo).replace(/\/$/, '') + '/estado').catch(() => null) : null]);
       datos = juntar(base, terr);
+      if (relevo && Array.isArray(relevo.agentes)){                   // el relevo trae las sesiones de todos lados (ver relevo/INSTALAR.md)
+        const ya = new Set(datos.agentes.map(a => String(a.id)));
+        datos.agentes = datos.agentes.concat(relevo.agentes.filter(a => a && !ya.has(String(a.id))));
+        if (Array.isArray(relevo.archivos_recientes)) datos.archivos_recientes = datos.archivos_recientes.concat(relevo.archivos_recientes);
+      }
     } else {
       try { datos = await leerJSON('estado.json'); }
       catch (e) { if (e instanceof SyntaxError) return; throw e; }   // a medio escribir: se ignora esta vuelta
@@ -1952,9 +2059,10 @@ function ubicarVinetas(){
     }
     b.a.elNombre.style.left = (b.a.x * escala) + 'px';
     b.a.elNombre.style.top = (b.y * escala) + 'px';
+    b.a.elNombre.style.display = b.a.bajo ? 'none' : '';
   }
   for (const a of agentes.values()){
-    const visible = a.modo !== 'oculta' && !(a.callado && a.fase === 'trabajando');
+    const visible = a.modo !== 'oculta' && !(a.callado && a.fase === 'trabajando') && !a.bajo;
     a.el.style.display = visible ? '' : 'none';
     a.tallo = null;
     if (!visible) continue;
@@ -2071,7 +2179,7 @@ function obsidianURL(boveda, ruta){ return 'obsidian://open?vault=' + encodeURIC
 
 /* Ficha de un monito (solo lectura) */
 const NOMBRE_AREA = { escritorio: 'Escritorio', biblioteca: 'Biblioteca', internet: 'Internet', 'sala de juntas': 'Sala de juntas',
-                      descanso: 'Descanso', calleros: 'Oficina Calleros', 'cerebro delta': 'Cerebro Delta', terrazas: 'Oficina Terrazas' };
+                      descanso: 'Descanso', calleros: 'Oficina Calleros', 'cerebro delta': 'Cerebro Delta', terrazas: 'Oficina Terrazas', 'centro de pensado': 'Centro de Pensado' };
 function fechaCorta(s){
   const v = typeof s === 'number' ? s * (s < 1e12 ? 1000 : 1) : Date.parse(s);
   if (!v || isNaN(v)) return '—';
@@ -2085,7 +2193,77 @@ function listaArchivos(lista){
       <small>${esc(fechaCorta(f.fecha))}${f.tipo ? ' · ' + esc(f.tipo) : ''}</small></div>`;
   }).join('');
 }
+/* ---------- Monitos con tarea programada ----------
+   Cada uno es una tarea programada de Claude que corre sola (por ejemplo, diario), deja su resumen en la base
+   del Artifact y aquí se lee. Nunca se van: viven en su cuarto, salen a trabajar cuando les toca y avisan
+   cuando traen resumen nuevo.   monitos/<id> = quién es · monitos/<id>/reportes/<fecha> = sus resúmenes */
+const MONITOS = new Map(); let MONITOS_DEMO = [];
+const monitosTodos = () => DEMO ? MONITOS_DEMO : [...MONITOS.values()];
+const monitoPorId = id => monitosTodos().find(m => m.id === id);
+function escucharMonitos(db){
+  db.collection('monitos').onSnapshot(snap => {
+    const vivos = new Set();
+    for (const d of snap.docs){
+      vivos.add(d.id);
+      let m = MONITOS.get(d.id);
+      if (!m){
+        m = { id: d.id, reportes: [] }; MONITOS.set(d.id, m);
+        db.collection('monitos/' + d.id + '/reportes').orderBy('creado', 'desc').limit(10).onSnapshot(rs => {
+          m.reportes = rs.docs.map(x => Object.assign({ id: x.id }, x.data()));
+        }, () => {});
+      }
+      Object.assign(m, d.data(), { id: d.id });
+    }
+    for (const id of [...MONITOS.keys()]) if (!vivos.has(id)) MONITOS.delete(id);
+  }, () => {});
+}
+function leidoDe(id){ try { return localStorage.getItem('oficina.leido.' + id) || ''; } catch (e) { return ''; } }
+function marcarLeido(id, reporte){ try { localStorage.setItem('oficina.leido.' + id, reporte); } catch (e) {} }
+function registroProgramado(m, ahora){
+  const visto = fecha(m.actualizado) || 0;
+  const trabajando = m.estado === 'trabajando' && ahora - visto < 30 * 60000;       // si la tarea se cayó, no se queda "trabajando" para siempre
+  const ultimo = (m.reportes || [])[0], nuevo = !!ultimo && leidoDe(m.id) !== ultimo.id;
+  const frases = Array.isArray(m.frases) ? m.frases : [];
+  const seg = ahora / 1000, frase = frases.length && seg % 50 < 9 ? frases[Math.floor(seg / 50) % frases.length] : '';   // de vez en cuando dice algo suyo
+  return {
+    id: 'monito-' + m.id, monito: m.id, nombre: m.nombre || m.id, rol: 'programado', fijo: true,
+    area: trabajando ? (m.area || 'internet') : (m.casa || 'descanso'),
+    actividad: trabajando ? (m.actividad || 'Trabajando') : nuevo ? '¡Traigo resumen nuevo!' : frase,
+    estado: trabajando ? 'trabajando' : nuevo ? 'terminado' : 'esperando',
+    modelo: m.modelo, aspecto: m.aspecto, equipo: m.horario || 'Tarea programada',
+    actualizado: new Date(ahora).toISOString(), ultima_actividad: m.actualizado,
+  };
+}
+const enlaceSeguro = u => /^https?:\/\//i.test(String(u || '')) ? String(u) : '';
+function htmlReporte(r){
+  let h = `<div class="reporte"><h4>${esc(r.titulo || 'Resumen')}</h4><small class="meta">${esc(r.fecha || r.id || '')}</small>`;
+  if (r.intro) h += `<p>${esc(r.intro)}</p>`;
+  for (const p of Array.isArray(r.puntos) ? r.puntos : []){
+    const u = enlaceSeguro(p.url);
+    h += `<div class="tarjeta"><b>${esc(p.titulo || '')}</b><div>${esc(p.resumen || '')}</div>` +
+         (p.fuente || u ? `<div><i>Fuente: </i>${u ? `<a href="${esc(u)}" target="_blank" rel="noopener">${esc(p.fuente || u)}</a>` : esc(p.fuente)}</div>` : '') + '</div>';
+  }
+  if (r.cierre) h += `<p>${esc(r.cierre)}</p>`;
+  return h + '</div>';
+}
+function fichaMonito(a, cual){
+  const m = monitoPorId(a.monito); if (!m) return;
+  const reportes = m.reportes || [], r = reportes.find(x => x.id === cual) || reportes[0];
+  let html = (m.descripcion ? `<p>${esc(m.descripcion)}</p>` : '') +
+    [['Rol', '◆ Tarea programada (no se va)'], ['Cuándo trabaja', m.horario || '—'], ['Vive en', NOMBRE_AREA[m.casa] || 'Descanso'],
+     ['Ahora', a.estadoTxt === 'trabajando' ? (a.textoPendiente || 'Trabajando') : 'Descansando'],
+     ['Último resumen', reportes[0] ? (reportes[0].fecha || reportes[0].id) : 'todavía ninguno']]
+      .map(([k, v]) => `<div class="fila"><span>${esc(k)}</span><span>${esc(v)}</span></div>`).join('');
+  html += r ? htmlReporte(r) : '<p class="vacio" style="margin-top:14px">Todavía no trae ningún resumen. Aparecerá aquí cuando corra su tarea.</p>';
+  if (reportes.length > 1) html += '<h4 style="margin:16px 0 8px">Resúmenes anteriores</h4>' +
+    reportes.filter(x => x !== r).map(x => `<button class="item" data-reporte="${esc(x.id)}">${esc(x.titulo || 'Resumen')}<small>${esc(x.fecha || x.id)}</small></button>`).join('');
+  abrirPanel(m.nombre || a.nombre, html);
+  cuerpo.querySelectorAll('[data-reporte]').forEach(b => b.addEventListener('click', () => fichaMonito(a, b.dataset.reporte)));
+  if (reportes[0]) marcarLeido(m.id, reportes[0].id);
+}
+
 function fichaAgente(a){
+  if (a.rol === 'programado') return fichaMonito(a);
   const m = MODELOS[a.modelo];
   const filas = [['Rol', a.rol === 'supervisor' ? '★ Supervisor (no se va)' : 'Visitante'],
                  ['Persona', a.persona], ['Dispositivo', a.dispositivo || '—'], ['Área', NOMBRE_AREA[a.areaDestino] || '—'], ['Haciendo', a.ausente ? 'Sin sesión abierta' : a.textoPendiente || '—'],
@@ -2131,7 +2309,8 @@ async function cargarCalleros(){
 
 const EXTRAS = [];   // letreros que no son áreas de trabajo
 function letreroExtra(x, y, texto){ const el = document.createElement('div'); el.className = 'letrero'; el.textContent = texto; capa.appendChild(el); EXTRAS.push({ el, x, y }); return el; }
-const LETREROS_ESPACIO = { 'espacio-c': letreroExtra(416, 664, ''), 'espacio-b': letreroExtra(416, 840, ''),
+letreroExtra(468, 823, 'ALMACÉN');
+const LETREROS_ESPACIO = { 'espacio-b': letreroExtra(416, 840, ''),
                            'espacio-d': letreroExtra(80, 1016, ''), 'espacio-e': letreroExtra(256, 1016, ''), 'espacio-f': letreroExtra(416, 1016, '') };
 letreroExtra(256, 642, 'TÚNEL CENTRAL');
 letreroExtra(120, 600, '↓ AMPLIACIÓN (EN OBRA)');
@@ -2151,7 +2330,7 @@ function aLogico(ev){ const r = lienzo.getBoundingClientRect(); return { x: (ev.
 function agenteEn(p){
   let mejor = null;
   for (const a of agentes.values()){
-    if (a.fase === 'saliendo') continue;
+    if (a.fase === 'saliendo' || a.bajo) continue;
     const m = modeloDe(a);
     const holgura = 3 + 14 / escala;   // con el dedo se atina más fácil
     if (Math.abs(p.x - a.x) <= m.w / 2 + holgura && p.y <= a.y + holgura && p.y >= a.y - m.h - 6 - holgura) mejor = a;
@@ -2227,7 +2406,7 @@ function dibujar(t){
   const items = MUEBLES.slice();
   for (const a of agentes.values()) items.push({ sortY: a.y, a });
   items.sort((p, q) => p.sortY - q.sortY);
-  for (const it of items){ if (it.a) dibujarAgente(it.a, t); else it.dibujar(t); }
+  for (const it of items){ if (!it.a) it.dibujar(t); else if (!it.a.bajo) dibujarAgente(it.a, t); }
   tallos();
   if (zonaEncima){   // marco punteado sobre lo que se puede picar
     const z = zonaEncima, c = Math.floor(t * 4) % 2 ? '#ffe066' : '#fff6c2';

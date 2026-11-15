@@ -24,6 +24,14 @@ export function estadoDemo() {
       v('demo-7', 'Revisión de PR', 'descanso', 'Esperando instrucciones', 22 * 60, { actualizado: hace(22 * 60) }),
       v('demo-8', 'Sesión de ayer', 'descanso', 'Esperando instrucciones', 25 * 60, { actualizado: hace(25 * 60) }),
     ],
+    monitos: [{
+      id: 'nitro', nombre: 'Nitro', casa: 'terrazas', aspecto: 'gorra_roja', modelo: 'sonnet', horario: 'Diario, 7:23 a.m.',
+      descripcion: 'Reportero de arrancones. Cada mañana busca las noticias y te deja el resumen aquí. (Ejemplo.)',
+      frases: ['¿Ya viste los tiempos de ayer?', 'Huele a llanta quemada…', '¡Luz verde!'],
+      estado: Math.floor(ahora / 1000) % 60 < 22 ? 'trabajando' : 'listo', area: 'centro de pensado', actividad: 'Armando el resumen', actualizado: hace(0),
+      reportes: [{ id: 'ejemplo', fecha: 'Ejemplo', titulo: 'Así se verá un resumen', intro: 'Esto es un resumen de muestra, no son noticias reales.',
+        puntos: [{ titulo: 'Primer tema', resumen: 'Aquí va lo más importante en dos o tres líneas.', fuente: 'Nombre de la fuente' }], cierre: '¡Luz verde!' }],
+    }],
     archivos_recientes: ['src/arbol.js', 'src/pista.js', 'src/boleta.js', 'index.html', 'css/tema.css', 'notas/ideas.md', 'src/carrera.js', 'README.md', 'src/sonido.js']
       .map((nombre, i) => ({ nombre, origen: 'tableta-android', area: 'terrazas', fecha: hace(5 + i * 40), tipo: i % 3 ? 'editado' : 'creado' })),
   };
