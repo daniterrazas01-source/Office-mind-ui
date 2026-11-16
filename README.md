@@ -44,6 +44,10 @@ El primero es **Nitro**: noticias de arrancones, diario a las 7:23 a.m. (hora de
 
 Entre tarea y tarea no se quedan quietos: cada pocos minutos cambian de plan. A veces hacen algo por su cuenta (el campo `rutina` de su ficha: lista de `{ area, actividad }`), a veces se quedan en su lugar y a veces se van a Descanso, donde también se pasean. Eso es ambiente; la tarea de verdad es la programada.
 
+### Horario de la oficina
+
+La oficina abre de 6:00 a.m. a 7:30 p.m. (hora del aparato que la ve) y se cambia con el botón **Horario**. En el Artifact se guarda en la base (`oficina/horario`, `{ abre, cierra }`) y lo ven todos; en la página web se guarda en el aparato. **Abierta:** los jefes mandan a sus agentes y cada quien hace lo suyo. **Cerrada:** descansan, se pasean o acomodan cosas (`noche` de cada equipo en `EQUIPOS`), y la oficina se ve de noche: se oscurece y quedan prendidas lámparas en pasillos, cuartos, espacios libres y Ampliación (`lamparas()`); se prende y apaga poco a poco. Lo que una sesión o una tarea programada hace de verdad se muestra siempre, a la hora que sea. «Ver cómo se ve de noche» la oscurece 20 segundos para probar.
+
 ### Modelo y esfuerzo en el gafete
 
 Todo monito dice en el renglón de abajo de su gafete con qué trabaja, por ejemplo «Opus en alto ▮▮▮▯▯», y con esfuerzo alto o más trae un resplandor a sus pies. Vale para cualquiera que mande los campos `modelo` y `esfuerzo` (`low`, `medium`, `high`, `xhigh`, `max`): las sesiones con aviso (tableta, relevo, laptop con `collector/`), las del pase, las del Artifact cuando Claude da el dato, y los monitos programados, que lo escriben en su ficha. Si falta el esfuerzo, el gafete deja lo de antes (aparato u horario).

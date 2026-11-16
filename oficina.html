@@ -174,7 +174,7 @@ textarea.campo{min-height:70px;resize:vertical}
 <header>
   <div class="titulo"><span class="logo"></span>OFICINA · MONITOREO</div>
   <div class="senal" id="senal"><span class="punto"></span><span id="senalTexto">Conectando…</span></div>
-  <nav class="pisos"><button data-fila="0">Planta principal</button><button data-fila="21">Calleros · Cerebro</button><button data-fila="37">Terrazas · Pensado</button><button data-fila="59">Espacios libres</button><button data-fila="72">Ampliación</button><a id="irPase" href="#pase" role="button">＋ Sesión</a><a id="irTexto" href="#texto" role="button" title="Tamaño del texto de los monitos">Aa</a><a id="irClaude" href="https://claude.ai/artifact/KbxrcsXckzZSE5F65iZwCE" target="_blank" rel="noopener" hidden>Todas mis sesiones ↗</a></nav>
+  <nav class="pisos"><button data-fila="0">Planta principal</button><button data-fila="21">Calleros · Cerebro</button><button data-fila="37">Terrazas · Pensado</button><button data-fila="59">Espacios libres</button><button data-fila="72">Ampliación</button><a id="irPase" href="#pase" role="button">＋ Sesión</a><a id="irTexto" href="#texto" role="button" title="Tamaño del texto de los monitos">Aa</a><a id="irHorario" href="#horario" role="button" title="Horario de la oficina">Horario</a><a id="irClaude" href="https://claude.ai/artifact/KbxrcsXckzZSE5F65iZwCE" target="_blank" rel="noopener" hidden>Todas mis sesiones ↗</a></nav>
   <div class="derecha"><span id="ultimo"></span><span id="cuantos"></span><span id="reloj"></span></div>
 </header>
 <div id="tip"></div>
@@ -2315,6 +2315,8 @@ async function conectarClaude(){
   window.claude.use('db').then(db => {
     if (!db) return;
     escucharMonitos(db);
+    dbHorario = db.doc('oficina/horario');
+    dbHorario.onSnapshot(snap => { const h = snap.exists ? snap.data() : null; if (horarioValido(h)) ponerHorario(h, false); }, () => {});
     dbPines = db.doc('oficina/supervisores');
     dbPines.onSnapshot(snap => {
       const d = snap.exists ? snap.data() : null;
@@ -2485,7 +2487,7 @@ function barra(){
   revisarEnvios();
   $('reloj').textContent = new Date().toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
   const n = [...agentes.values()].filter(a => a.fase !== 'saliendo').length;
-  $('cuantos').textContent = n === 0 ? 'sin agentes' : n === 1 ? '1 agente' : n + ' agentes';
+  $('cuantos').textContent = (n === 0 ? 'sin agentes' : n === 1 ? '1 agente' : n + ' agentes') + (abierta(Date.now()) ? ' · abierta hasta ' + horaBonita(HORARIO.cierra) : ' · cerrada, abre ' + horaBonita(HORARIO.abre));
   const senal = $('senal'), st = $('senalTexto');
   if (location.protocol === 'file:'){ senal.className = 'senal mal'; st.textContent = 'Abre con iniciar_oficina.bat'; }
   else if (ultimaOK && Date.now() - ultimaOK < (EN_CLAUDE && !DEMO ? CADA_SESIONES_MS * 2 + 5000 : CADA_MS + 3500)){ senal.className = 'senal ok'; st.textContent = DEMO ? 'EJEMPLO' : 'EN VIVO'; $('aviso').style.display = 'none'; }
@@ -2743,8 +2745,37 @@ function marcarLeido(id, reporte){ try { localStorage.setItem('oficina.leido.' +
    (su "rutina"), a veces se queda en su lugar y a veces se va a Descanso, donde también se pasea. Todos los
    que ven la oficina lo ven hacer lo mismo, porque el plan sale del reloj. */
 const RATO_MIN = 4;
+/* ---------- Horario de la oficina ----------
+   Dentro del horario, los jefes mandan a sus agentes y cada quien hace lo suyo. Fuera de él, todos descansan, se
+   pasean o acomodan cosas, y la oficina se ve de noche, con sus lámparas prendidas. Lo que una sesión o una tarea
+   programada hace de verdad se muestra siempre, a la hora que sea. Va con la hora de este aparato. */
+let HORARIO = { abre: '06:00', cierra: '19:30' }, dbHorario = null, nochePrueba = 0;
+const aMinutos = t => { const m = /^(\d{1,2}):(\d{2})$/.exec(String(t || '')); return m ? (+m[1] % 24) * 60 + (+m[2] % 60) : null; };
+const horarioValido = h => !!h && aMinutos(h.abre) != null && aMinutos(h.cierra) != null && aMinutos(h.abre) !== aMinutos(h.cierra);
+try { const h = JSON.parse(localStorage.getItem('oficina.horario') || 'null'); if (horarioValido(h)) HORARIO = { abre: h.abre, cierra: h.cierra }; } catch (e) {}
+function abierta(ahora){
+  const d = new Date(ahora), min = d.getHours() * 60 + d.getMinutes(), a = aMinutos(HORARIO.abre), c = aMinutos(HORARIO.cierra);
+  return a < c ? min >= a && min < c : min >= a || min < c;     // también sirve si cierra pasada la medianoche
+}
+const horaBonita = t => { const m = aMinutos(t), h = Math.floor(m / 60), x = m % 60; return `${h % 12 || 12}:${String(x).padStart(2, '0')} ${h < 12 ? 'a.m.' : 'p.m.'}`; };
+function ponerHorario(h, guardar){
+  if (!horarioValido(h)) return false;
+  HORARIO = { abre: h.abre, cierra: h.cierra };
+  if (guardar){
+    try { localStorage.setItem('oficina.horario', JSON.stringify(HORARIO)); } catch (e) {}
+    if (dbHorario) dbHorario.set(HORARIO).catch(() => {});
+  }
+  return true;
+}
+function planDeNoche(casa, quien, ahora){   // fuera de horario: descansar, pasearse (los de Descanso se pasean solos) o acomodar cosas
+  const eq = EQUIPOS.find(e => e.casa === casa);
+  const lista = eq ? eq.noche : [[casa || 'descanso', 'Acomodando sus cosas'], ['descanso', 'Descansando'], ['descanso', 'Descansando']];
+  const p = lista[Math.floor(azar(Math.floor(hashTexto(String(quien)) * 1e9) + Math.floor(ahora / (2 * RATO_MIN * 60000)) * 7919)() * lista.length)];
+  return { area: p[0], actividad: p[1], noche: true };
+}
 const ES_DEL_TUNEL = /t[uú]nel|buz[oó]n/i;   // lo que se hace en la estación del túnel
 function ratoLibre(m, ahora){
+  if (!abierta(ahora)) return planDeNoche(m.casa, m.id, ahora);
   const propia = (Array.isArray(m.rutina) ? m.rutina : []).filter(x => x && x.area);
   const planes = propia.concat(propia, [{ area: m.casa || 'descanso', actividad: '' }, { area: 'descanso', actividad: 'Descansando un rato' }, { area: 'descanso', actividad: 'Descansando un rato' }]);
   const x = enPantalla(ahora);                                       // cada 20 minutos se para un rato junto a la pantalla a presentar su noticia
@@ -2766,12 +2797,14 @@ const EQUIPOS = [
   { casa: 'terrazas', es: r => esTableta(r) || /dragtree|terrazas/i.test(sinAcentos(r.nombre)),
     solo: [['terrazas', 'Revisando el trabajo del equipo'], ['terrazas', 'Probando el árbol de luces'], ['centro de pensado', 'Revisando la memoria del equipo'], ['almacen', 'Revisando el archivo'],
            ['noticias', 'Revisando el noticiero'], ['descanso', 'Tomando un café'], ['internet', 'Viendo cómo va la competencia']],
+    noche: [['terrazas', 'Acomodando la oficina'], ['almacen', 'Acomodando el archivo'], ['centro de pensado', 'Apagando la compu'], ['descanso', 'Descansando'], ['descanso', 'Descansando'], ['descanso', 'Descansando']],
     encargos: [['internet', 'busca qué hay de nuevo', 'Buscando lo que pidió el jefe'], ['biblioteca', 'revisa el reglamento', 'Revisando lo que pidió el jefe'],
                ['noticias', 'checa cómo se ve el noticiero', 'Revisando el noticiero para el jefe'], ['centro de pensado', 'ordena tus notas', 'Ordenando mis notas para el jefe']] },
   { casa: 'calleros', es: r => /calleros/i.test(sinAcentos(String(r.nombre || '') + ' ' + String(r.id || ''))),
     solo: [['calleros', 'Revisando pendientes'], ['calleros', 'Firmando papeles'], ['cerebro delta', 'Consultando el Cerebro'], ['cerebro delta', 'Revisando las notas del Cerebro'],
            ['sala de juntas', 'Preparando la junta'], ['biblioteca', 'Hojeando un libro'], ['escritorio', 'Viendo cómo va el trabajo'], ['internet', 'Leyendo las noticias'],
            ['noticias', 'Viendo el noticiero'], ['descanso', 'Tomando un café']],
+    noche: [['calleros', 'Acomodando la oficina'], ['cerebro delta', 'Acomodando notas del Cerebro'], ['biblioteca', 'Acomodando libros'], ['descanso', 'Descansando'], ['descanso', 'Descansando'], ['descanso', 'Descansando']],
     encargos: [['cerebro delta', 'busca esto en el Cerebro', 'Buscando en el Cerebro para el jefe'], ['biblioteca', 'tráeme ese libro', 'Buscando el libro que pidió el jefe'],
                ['internet', 'investiga esto', 'Investigando lo que pidió el jefe'], ['calleros', 'ordena estos papeles', 'Ordenando papeles para el jefe']] },
 ];
@@ -2779,6 +2812,7 @@ const PLANES = new Map();   // casa del equipo -> lo que hace el jefe ahorita y,
 const enSuTarea = (m, ahora) => m.estado === 'trabajando' && ahora - (fecha(m.actualizado) || 0) < 30 * 60000;
 const deEquipo = eq => monitosTodos().filter(m => (m.casa || '') === eq.casa);
 function planDeJefe(eq, ahora){   // de ambiente
+  if (!abierta(ahora)) return planDeNoche(eq.casa, 'jefe-' + eq.casa, ahora);   // fuera de horario no manda a nadie
   const r = azar(424242 + Math.floor(hashTexto(eq.casa) * 1e6) + Math.floor(ahora / (RATO_MIN * 60000)) * 104729);
   const libres = deEquipo(eq).filter(m => !enSuTarea(m, ahora) && !ratoLibre(m, ahora).plan);
   const tiro = r(), m = libres.length ? libres[Math.floor(r() * libres.length)] : null, cual = r();
@@ -2824,7 +2858,7 @@ function organizarEquipos(lista, ahora){
     }
     const plan = planDeJefe(eq, ahora);
     PLANES.set(eq.casa, plan);
-    Object.assign(jefe, { area: plan.area, actividad: plan.actividad, plan: plan.actividad, estado: 'por su cuenta', fijo: true, suelto: true,
+    Object.assign(jefe, { area: plan.area, actividad: plan.actividad, plan: plan.actividad, estado: plan.noche && plan.area === 'descanso' ? 'esperando' : 'por su cuenta', fijo: true, suelto: true,
       ultima_actividad: jefe.ultima_actividad || jefe.actualizado, actualizado: new Date(ahora).toISOString() });
   }
 }
@@ -3025,6 +3059,24 @@ function panelTexto(){
 $('irTexto').addEventListener('click', ev => { ev.preventDefault(); panelTexto(); });
 ponerTamanoTexto(TEXTO);
 
+/* ---------- Panel del horario ---------- */
+function panelHorario(aviso){
+  const ya = abierta(Date.now());
+  abrirPanel('HORARIO DE LA OFICINA', `<p>Ahorita está <b>${ya ? 'abierta' : 'cerrada'}</b>. Abre a las ${horaBonita(HORARIO.abre)} y cierra a las ${horaBonita(HORARIO.cierra)} (hora de este aparato).</p>
+    <p><b>Abierta:</b> los jefes mandan a sus agentes y cada quien hace lo suyo. <b>Cerrada:</b> descansan, se pasean o acomodan cosas, y la oficina se ve de noche con sus lámparas prendidas. Lo que una sesión o una tarea programada hace de verdad se ve siempre.</p>
+    <div class="fila"><span>Abre</span><span><input type="time" id="horAbre" value="${esc(HORARIO.abre)}" style="font:inherit;background:#1c1622;color:#e9dfcf;border:1px solid #4a3d5c;padding:4px 6px"></span></div>
+    <div class="fila"><span>Cierra</span><span><input type="time" id="horCierra" value="${esc(HORARIO.cierra)}" style="font:inherit;background:#1c1622;color:#e9dfcf;border:1px solid #4a3d5c;padding:4px 6px"></span></div>
+    <div class="botones"><button class="boton principal" id="horGuardar">Guardar horario</button><button class="boton" id="horNoche">Ver cómo se ve de noche</button></div>
+    <p class="meta" id="horAviso" style="margin-top:10px">${esc(aviso || (EN_CLAUDE && !DEMO ? 'El horario se guarda para todos los que abren esta vista.' : 'En la página web el horario se guarda en este aparato.'))}</p>`);
+  $('horGuardar').addEventListener('click', () => {
+    const ok = ponerHorario({ abre: $('horAbre').value, cierra: $('horCierra').value }, true);
+    panelHorario(ok ? 'Guardado.' : 'Pon dos horas distintas.');
+    if (ok) leerEstado();
+  });
+  $('horNoche').addEventListener('click', () => { nochePrueba = Date.now() + 20000; if (innerWidth <= 760) cerrarPanel(); $('horAviso').textContent = 'Así se ve de noche. Vuelve a la normalidad en 20 segundos.'; });
+}
+$('irHorario').addEventListener('click', ev => { ev.preventDefault(); panelHorario(); });
+
 /* Ir de piso en piso */
 const irAFila = fila => escenario.scrollTo({ top: Math.max(0, fila * T * escala), behavior: 'smooth' });
 document.querySelectorAll('.pisos button').forEach(b => b.addEventListener('click', () => irAFila(FILA(+b.dataset.fila))));
@@ -3077,11 +3129,52 @@ function dibujar(t){
   items.sort((p, q) => p.sortY - q.sortY);
   for (const it of items){ if (!it.a) it.dibujar(t); else if (!it.a.bajo) dibujarAgente(it.a, t); }
   tallos();
+  noche();
   if (zonaEncima){   // marco punteado sobre lo que se puede picar
     const z = zonaEncima, c = Math.floor(t * 4) % 2 ? '#ffe066' : '#fff6c2';
     for (let i = 0; i < z.w; i += 4){ R(z.x + i, z.y, 2, 1, c); R(z.x + i, z.y + z.h - 1, 2, 1, c); }
     for (let i = 0; i < z.h; i += 4){ R(z.x, z.y + i, 1, 2, c); R(z.x + z.w - 1, z.y + i, 1, 2, c); }
   }
+}
+/* ---------- De noche: la oficina se oscurece y quedan prendidas las lámparas de pasillos y cuartos ---------- */
+let capaNoche = null, nivelNoche = 0;
+function lamparas(){   // [x, y, alcance] en pixeles de ahora
+  const L = [];
+  for (const y of [208, 432, 704, 1056]) for (let x = 56; x < W; x += 80) L.push([x, y, y === 704 || y === 1056 ? 46 : 58]);          // pasillos
+  for (const y of [536, 632]) L.push([240, y, 44]);                                                                                 // entre Calleros y el Cerebro
+  for (const y of [800, 912, 1000]){ L.push([200, y, 50]); L.push([312, y, 50]); }                                                  // gran pasillo, a los lados del túnel
+  for (const [nombre, A] of Object.entries(AREAS)){                                                                                 // cada cuarto
+    if (nombre === 'almacen') continue;
+    const cx = (A.x0 + A.x1 + 1) / 2 * T, cy = (A.y0 + A.y1 + 1) / 2 * T, ancho = (A.x1 - A.x0 + 1) * T, alto = (A.y1 - A.y0 + 1) * T;
+    if (alto > 200){ L.push([cx, cy - alto / 4, 74]); L.push([cx, cy + alto / 4, 74]); }
+    else if (ancho > 170){ L.push([cx - ancho / 4, cy, 70]); L.push([cx + ancho / 4, cy, 70]); }
+    else L.push([cx, cy, 72]);
+  }
+  for (const x of [88, 256, 424]) L.push([x, 73 * T, 50]);                                                                           // espacios libres: una sola, más tenue
+  for (const x of [120, 256, 400]) L.push([x, 85 * T, 56]);                                                                          // Ampliación: lámparas de obra
+  return L;
+}
+function armarNoche(){
+  const c = document.createElement('canvas'); c.width = W; c.height = H;
+  const x = c.getContext('2d'), L = lamparas();
+  x.fillStyle = 'rgb(7,9,28)'; x.globalAlpha = 0.66; x.fillRect(0, 0, W, H);
+  x.globalCompositeOperation = 'destination-out';                     // cada lámpara abre su charco de luz, en tres escalones
+  for (const [lx, ly, r] of L) for (const [f, a] of [[1, 0.3], [0.72, 0.36], [0.44, 0.5]]){ x.globalAlpha = a; x.beginPath(); x.arc(lx, ly, r * f, 0, 7); x.fill(); }
+  x.globalCompositeOperation = 'source-over';
+  for (const [lx, ly, r] of L){                                       // luz cálida y la lámpara misma
+    x.globalAlpha = 0.1; x.fillStyle = '#ffd27a'; x.beginPath(); x.arc(lx, ly, r * 0.72, 0, 7); x.fill();
+    x.globalAlpha = 1; x.fillStyle = K; x.fillRect(Math.round(lx) - 3, Math.round(ly) - 2, 6, 4);
+    x.fillStyle = '#ffe9a0'; x.fillRect(Math.round(lx) - 2, Math.round(ly) - 1, 4, 2);
+  }
+  return c;
+}
+function noche(){
+  const ahora = Date.now(), meta = !abierta(ahora) || ahora < nochePrueba ? 1 : 0;
+  nivelNoche += (meta - nivelNoche) * 0.04;                           // se prende y se apaga poco a poco
+  if (Math.abs(meta - nivelNoche) < 0.01) nivelNoche = meta;
+  if (nivelNoche <= 0) return;
+  if (!capaNoche) capaNoche = armarNoche();
+  ctx.globalAlpha = nivelNoche; ctx.drawImage(capaNoche, 0, 0); ctx.globalAlpha = 1;
 }
 let anterior = 0;
 function bucle(ms){
