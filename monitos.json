@@ -1,5 +1,5 @@
 {
-  "actualizado": "2026-11-16T14:20:42Z",
+  "actualizado": "2026-11-16T18:31:22Z",
   "monitos": [
     {
       "actividad": "",
@@ -792,9 +792,61 @@
           "id": "ya-contado"
         }
       ]
+    },
+    {
+      "actividad": "",
+      "actualizado": "2026-11-16T15:00:00Z",
+      "area": "calleros",
+      "aspecto": "lentes",
+      "casa": "calleros",
+      "descripcion": "El agente de Calleros (nombre provisional). Vive en la Oficina Calleros y trabaja cuando la sesión de Calleros usa un ayudante. Entre encargos anda por la Oficina Calleros y el Cerebro Delta.",
+      "estado": "listo",
+      "frases": [
+        "A la orden, jefe.",
+        "Lo busco en el Cerebro.",
+        "Ya quedó archivado."
+      ],
+      "jefe": "Calleros",
+      "modelo": "sonnet",
+      "nombre": "Ayudante",
+      "rutina": [
+        {
+          "actividad": "Ordenando papeles",
+          "area": "calleros"
+        },
+        {
+          "actividad": "Revisando el buzón del túnel",
+          "area": "calleros"
+        },
+        {
+          "actividad": "Consultando el Cerebro",
+          "area": "cerebro delta"
+        },
+        {
+          "actividad": "Acomodando notas en el Cerebro",
+          "area": "cerebro delta"
+        },
+        {
+          "actividad": "Buscando un libro",
+          "area": "biblioteca"
+        },
+        {
+          "actividad": "Preparando la sala",
+          "area": "sala de juntas"
+        }
+      ],
+      "id": "ayudante-calleros",
+      "reportes": [],
+      "memoria": []
     }
   ],
   "avisos": [
+    {
+      "creado": "2026-11-16T15:00:00Z",
+      "texto": "DragTree manda a Nitro desde la Oficina Terrazas y el Centro de Pensado. Calleros manda a su agente desde la Oficina Calleros y el Cerebro Delta. Cuando la sesión del jefe usa un ayudante, su agente hace ese trabajo en la oficina.",
+      "titulo": "Dos equipos en la oficina",
+      "id": "2026-11-16-equipos"
+    },
     {
       "creado": "2026-11-16T05:30:00Z",
       "texto": "Arrancones (Nitro) y Fórmula 1 (Pole) tienen cada uno su sección, y las noticias con más de una semana ya no salen en pantalla. DragTree es el jefe de los dos y les da instrucciones.",
