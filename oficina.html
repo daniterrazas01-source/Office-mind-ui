@@ -174,7 +174,7 @@ textarea.campo{min-height:70px;resize:vertical}
 <header>
   <div class="titulo"><span class="logo"></span>OFICINA · MONITOREO</div>
   <div class="senal" id="senal"><span class="punto"></span><span id="senalTexto">Conectando…</span></div>
-  <nav class="pisos"><button data-fila="0">Planta principal</button><button data-fila="21">Calleros · Cerebro</button><button data-fila="37">Terrazas · Pensado</button><button data-fila="59">Espacios libres</button><button data-fila="72">Ampliación</button><a id="irPase" href="#pase" role="button">＋ Sesión</a><a id="irTexto" href="#texto" role="button" title="Tamaño del texto de los monitos">Aa</a><a id="irHorario" href="#horario" role="button" title="Horario de la oficina">Horario</a><a id="irClaude" href="https://claude.ai/artifact/KbxrcsXckzZSE5F65iZwCE" target="_blank" rel="noopener" hidden>Todas mis sesiones ↗</a></nav>
+  <nav class="pisos"><button data-fila="0">Planta principal</button><button data-fila="21">Calleros · Cerebro</button><button data-fila="37">Terrazas · Pensado</button><button data-fila="59">Espacios libres</button><button data-fila="72">Ampliación</button><button data-fila="86">Cuarto de agentes</button><a id="irPase" href="#pase" role="button">＋ Sesión</a><a id="irTexto" href="#texto" role="button" title="Tamaño del texto de los monitos">Aa</a><a id="irHorario" href="#horario" role="button" title="Horario de la oficina">Horario</a><a id="irClaude" href="https://claude.ai/artifact/KbxrcsXckzZSE5F65iZwCE" target="_blank" rel="noopener" hidden>Todas mis sesiones ↗</a></nav>
   <div class="derecha"><span id="ultimo"></span><span id="cuantos"></span><span id="reloj"></span></div>
 </header>
 <div id="tip"></div>
@@ -222,7 +222,7 @@ const T = 16, COLS = 32;
    filas y todo lo de abajo se recorre. Los muebles y adornos de siempre siguen escritos con sus medidas de
    antes y se dibujan recorridos; FILA() y PY() convierten una fila o un pixel de antes a su lugar de ahora.
    Lo nuevo (el periférico y sus estaciones) ya se escribe con las medidas de ahora. */
-const N1 = 2, N2 = 2, FILAS_V = 88;            // filas que gana cada pasillo · filas del mapa como se escribió
+const N1 = 2, N2 = 2, FILAS_V = 101;            // filas que gana cada pasillo · filas del mapa como se escribió
 const ROWS = FILAS_V + N1 + N2, W = COLS * T, H = ROWS * T;
 const FILA = r => r + (r >= 25 ? N1 + N2 : r >= 13 ? N1 : 0);
 const PY = y => y + (y >= 400 ? (N1 + N2) * T : y >= 208 ? N1 * T : 0);
@@ -320,6 +320,11 @@ const MAPA = (() => {
   // ---- Hasta abajo: la Ampliación, una zona grande en obra, sin cuartos (a = piso de obra) ----
   llenar(1, 74, 30, 74, '='); llenar(1, 75, 30, 86, 'a');
   for (const x of [4, 5, 15, 16, 25, 26]){ m[73][x] = 'D'; m[74][x] = 'D'; }
+  // ---- Debajo de la Ampliación: pasillo 5 y tres cuartos más. g = Cuarto de Agentes (solo para los agentes) ----
+  llenar(1, 87, 30, 87, '='); llenar(1, 88, 30, 89, 'h');
+  llenar(1, 91, 9, 91, '='); llenar(11, 91, 20, 91, '='); llenar(22, 91, 30, 91, '=');
+  llenar(1, 92, 9, 99, 'g'); llenar(11, 92, 20, 99, 'v'); llenar(22, 92, 30, 99, 'v');
+  for (const x of [4, 5, 15, 16, 25, 26]){ m[87][x] = 'D'; m[90][x] = 'D'; m[91][x] = 'D'; }
   // Pasillos 1 y 2 más anchos: se repite su última fila
   const ancho = [];
   m.forEach((fila, r) => {
@@ -328,7 +333,7 @@ const MAPA = (() => {
   });
   return ancho;
 })();
-const CAMINABLE = new Set(['h', 'b', 'e', 'i', 'j', 'd', 'D', 'E', 'c', 'x', 'v', 't', 'k', 'n', 'a']);
+const CAMINABLE = new Set(['h', 'b', 'e', 'i', 'j', 'd', 'D', 'E', 'c', 'x', 'v', 't', 'k', 'n', 'a', 'g']);
 /* Túnel subterráneo: una escotilla en la Oficina Terrazas y otra en el Centro de Pensado (filas de antes) */
 const ESCOTILLAS = [{ x: 9, y: 45 }, { x: 22, y: 45 }];
 const BLOQUEO = new Set();
@@ -347,6 +352,7 @@ const AREAS = {
   'terrazas':       { letrero: 'OFICINA TERRAZAS', x0: 1, y0: 43, x1: 9, y1: 58, lx: 80, ly: 664, pose: 'teclear' },
   'centro de pensado': { letrero: 'CENTRO DE PENSADO', x0: 22, y0: 43, x1: 27, y1: 50, lx: 394, ly: 664, pose: 'leer' },
   'almacen':        { letrero: 'ALMACÉN',        x0: 28, y0: 44, x1: 30, y1: 50, lx: 472, ly: 659, pose: 'leer' },
+  'agentes':        { letrero: 'CUARTO DE AGENTES', x0: 1, y0: 92, x1: 9, y1: 99, lx: 80, ly: 1448, pose: 'descansar' },
   'noticias':       { letrero: 'NOTICIAS',       x0: 22, y0: 55, x1: 30, y1: 58, lx: 416, ly: 823, pose: 'leer' },
 };
 const L = (tx, ty, dir, extra = {}) => Object.assign({ tx, ty, ox: 0, oy: 0, dir, sentado: false, silla: null }, extra);
@@ -427,6 +433,16 @@ const LUGARES = {
     L(30, 55, 'izq'),
     L(23, 56, 'izq', { tubo: true }),
   ],
+  'agentes': [                                                         // solo para los agentes: el sillón, los pufs y los casilleros
+    L(3, 93, 'abajo', { oy: -15, sentado: true }),
+    L(4, 93, 'abajo', { oy: -15, sentado: true }),
+    L(2, 93, 'abajo', { oy: -15, sentado: true }),
+    L(5, 93, 'abajo', { oy: -15, sentado: true }),
+    L(3, 96, 'der', { sentado: true, puf: '#8a58cf' }),
+    L(6, 96, 'izq', { sentado: true, puf: '#2bb3a3' }),
+    L(5, 98, 'arriba', { sentado: true, puf: '#f2c230' }),
+    L(8, 93, 'arriba'),                                                // en su casillero
+  ],
   'terrazas': [                                                        // equipo DragTree
     L(6, 47, 'arriba', { oy: -3, sentado: true, silla: 'oficina' }),
     L(8, 47, 'arriba', { oy: -3, sentado: true, silla: 'oficina' }),
@@ -448,6 +464,7 @@ function normalizarArea(a){
   if (s.includes('pensado') || s.includes('pensar') || s.includes('pensamiento') || s.includes('memoria')) return 'centro de pensado';
   if (s.includes('almacen') || s.includes('archivero') || s.includes('archivo')) return 'almacen';
   if (s.includes('noticia') || s.includes('pantalla') || s.includes('cartelera')) return 'noticias';
+  if (s.includes('agentes') || s.includes('ayudantes')) return 'agentes';
   if (s.includes('junta') || s === 'sala' || s.includes('reunion')) return 'sala de juntas';
   if (s.startsWith('escritorio') || s === 'computadora') return 'escritorio';
   if (s.startsWith('biblio')) return 'biblioteca';
@@ -873,6 +890,38 @@ function mudar(){
   for (const i of viejo) BLOQUEO.add(FILA(Math.floor(i / COLS)) * COLS + i % COLS);
 }
 
+/* ---------- Cuarto de Agentes: solo para ellos. Ahí se toman su descanso un par de veces al día y en la noche ---------- */
+function cuartoDeAgentes(){
+  bloquear(2, 92, 5, 92);
+  mueble(92 * T + 15, () => {                                        // sillón largo contra la pared
+    const dx = -240, dy = 1232;
+    R(267 + dx, 236 + dy, 74, 21, K);
+    R(268 + dx, 237 + dy, 72, 8, '#2f6f86'); R(268 + dx, 237 + dy, 72, 1, '#4b93ad');
+    R(273 + dx, 245 + dy, 62, 10, '#367c95'); R(273 + dx, 245 + dy, 62, 1, '#5aa3bd');
+    R(288 + dx, 245 + dy, 1, 10, '#285d70'); R(304 + dx, 245 + dy, 1, 10, '#285d70'); R(320 + dx, 245 + dy, 1, 10, '#285d70');
+    R(268 + dx, 239 + dy, 5, 16, '#245468'); R(335 + dx, 239 + dy, 5, 16, '#245468');
+    R(276 + dx, 240 + dy, 8, 5, '#f2c230'); R(276 + dx, 240 + dy, 8, 1, '#ffd95a'); R(318 + dx, 240 + dy, 8, 5, '#d97757'); R(318 + dx, 240 + dy, 8, 1, '#f0a07f');
+  });
+  bloquear(4, 96, 5, 96);
+  mueble(96 * T + 14, () => {                                        // mesita de centro
+    const dx = -224, dy = 1264;
+    R(289 + dx, 273 + dy, 30, 13, K); R(290 + dx, 274 + dy, 28, 8, '#8b5a2b'); R(290 + dx, 274 + dy, 28, 1, '#a87040'); R(290 + dx, 282 + dy, 28, 3, '#6b4423');
+    R(294 + dx, 276 + dy, 5, 4, '#f2efe6'); R(295 + dx, 276 + dy, 3, 1, '#6b3b1f'); R(306 + dx, 275 + dy, 8, 5, '#3f8f3f'); R(307 + dx, 275 + dy, 6, 1, '#6fcf7b');
+  });
+  bloquear(8, 92, 9, 92);
+  mueble(92 * T + 15, () => {                                        // casilleros de los agentes
+    const x0 = 128, y0 = 1460;
+    R(x0, y0, 32, 28, K);
+    for (let i = 0; i < 3; i++){
+      const x = x0 + 1 + i * 10;
+      R(x, y0 + 1, 10, 26, ['#5b6f8a', '#6a5b8a', '#5b8a74'][i]); R(x, y0 + 1, 10, 1, '#8fa3bf'); R(x + 9, y0 + 1, 1, 26, K);
+      for (let j = 0; j < 3; j++) R(x + 2, y0 + 4 + j * 2, 6, 1, '#2a2f3a');
+      R(x + 7, y0 + 14, 1, 3, '#e6c229');
+    }
+  });
+  planta(1, 99); planta(9, 99);
+}
+
 /* ---------- Sala de Noticias: una pantalla grande donde los monitos muestran lo que traen ---------- */
 const PANTALLA = { x: 364, y: 832, w: 120, h: 48 };
 function salaDeNoticias(){
@@ -1075,6 +1124,10 @@ function construirMuebles(){
   centroDePensado();
   salaDeNoticias();
   caballete(5, 68, 'espacio-d'); caballete(13, 68, 'espacio-e'); caballete(25, 68, 'espacio-f');
+  caballete(13, 95, 'espacio-g'); caballete(25, 95, 'espacio-h');
+  caja(19, 98); caja(20, 98, true); cubeta(29, 93); caja(23, 98);
+  planta(1, 88); caja(30, 88); caja(30, 89, true);                                      // pasillo 5
+  cuartoDeAgentes();
   /* Ampliación (hasta abajo): pura obra */
   caja(2, 76); caja(3, 76, true); caja(2, 77); escalera(6, 76); cubeta(8, 77); caja(28, 85); caja(29, 85, true); caja(29, 84);
   escalera(27, 76); cubeta(22, 85); caja(12, 85); cubeta(4, 84); caja(20, 76); caja(21, 76, true);
@@ -1092,7 +1145,7 @@ function construirMuebles(){
 /* ---------- Capa fija: pisos, paredes y adornos que no se mueven ---------- */
 const estatica = document.createElement('canvas'); estatica.width = W; estatica.height = H;
 const CARA = { biblioteca: '#d4c3a0', escritorio: '#e2d4b4', internet: '#b8c3d4', pasillo: '#dccfb2', sala: '#ccd2dc', descanso: '#ead3ae',
-               calleros: '#d8c39b', cerebro: '#3a3157', vacio: '#cfcbc2', terrazas: '#e9d9bd', pensado: '#3b5166', noticias: '#4a4f66' };
+               calleros: '#d8c39b', cerebro: '#3a3157', vacio: '#cfcbc2', agentes: '#9fb1c9', terrazas: '#e9d9bd', pensado: '#3b5166', noticias: '#4a4f66' };
 function caraDe(x, y){
   if (y === 1) return x <= 9 ? CARA.biblioteca : x <= 20 ? CARA.escritorio : CARA.internet;
   if (y === 10 || y === 22 || y === 38 || y === 60) return CARA.pasillo;
@@ -1100,6 +1153,8 @@ function caraDe(x, y){
   if (y === 42) return x <= 9 ? CARA.terrazas : x <= 20 ? CARA.pasillo : CARA.pensado;
   if (y === 52) return CARA.noticias;
   if (y === 64 || y === 74) return CARA.vacio;
+  if (y === 87) return CARA.pasillo;
+  if (y === 91) return x <= 9 ? CARA.agentes : CARA.vacio;
   return x <= 14 ? CARA.sala : CARA.descanso;
 }
 function baldosa(x, y){
@@ -1181,6 +1236,10 @@ function baldosa(x, y){
       if ((x * 7 + y * 3) % 4 === 0) R(px + 3 + (x * 5) % 9, py + 4 + (y * 7) % 8, 2, 1, '#7f7462');
       if ((x * 5 + y * 11) % 7 === 0) R(px + 9, py + 10, 2, 2, '#b3a791');
       if ((x * 3 + y * 13) % 11 === 0) R(px + 2, py + 12, 4, 1, '#857a67');
+      break;
+    case 'g':   // Cuarto de Agentes: alfombra azul suave
+      R(px, py, T, T, ((x + y) & 1) ? '#4a5a78' : '#465673');
+      if ((x * 3 + y * 5) % 4 === 0) R(px + 6, py + 6, 2, 2, '#56688a');
       break;
     case 'v':   // concreto sin terminar
       R(px, py, T, T, ((x + y) & 1) ? '#a8a59e' : '#a39f98');
@@ -1264,6 +1323,9 @@ function adornosFijos(){
     for (let i = 0; i < w; i += 6){ R(x + i, y, Math.min(3, w - i), 1, '#e6c229'); R(x + i, y + h, Math.min(3, w - i), 1, '#e6c229'); }
     for (let i = 0; i < h; i += 6){ R(x, y + i, 1, Math.min(3, h - i), '#e6c229'); R(x + w, y + i, 1, Math.min(3, h - i), '#e6c229'); }
   };
+  // Cuarto de Agentes: tapete redondo para estar
+  R(36, 1516, 108, 70, '#2a2f45'); R(38, 1518, 104, 66, '#c9a86a'); R(42, 1522, 96, 58, '#7a5a9a'); R(46, 1526, 88, 50, '#8f6bb0');
+  for (let i = 0; i < 6; i++) R(50 + i * 14, 1574, 6, 2, '#c9a86a');
   // Oficina Terrazas: tapete verde tipo pasto
   R(40, 770, 96, 34, '#4f6d3c'); R(42, 772, 92, 30, '#6a8f50');
   for (let i = 0; i < 22; i++) R(46 + (i * 13) % 86, 775 + (i * 7) % 24, 1, 2, '#83a96a');
@@ -2090,6 +2152,7 @@ const PRISA = new URLSearchParams(location.search).has('prisa') ? 0.08 : 1;   //
 const MAX_PASEANDO = 3;
 let PUNTOS_PASEO = [[5, 11, 'arriba'], [12, 12, 'abajo'], [19, 11, 'arriba'], [27, 12, 'abajo'], [9, 24, 'abajo'], [20, 23, 'arriba'], [27, 24, 'abajo'],
   [13, 46, 'der'], [18, 52, 'izq'], [12, 55, 'der'], [19, 48, 'izq'], [8, 40, 'abajo'], [22, 39, 'arriba'], [10, 61, 'abajo'], [21, 62, 'abajo'],
+  [8, 88, 'abajo'], [22, 89, 'arriba'], [12, 88, 'abajo'],
   [23, 18, 'abajo'], [28, 16, 'arriba'], [21, 19, 'abajo'], [14, 31, 'abajo'], [15, 34, 'abajo']];
 const entre = (a, b) => a + Math.random() * (b - a);
 const esperaPaseo = a => (a.callado ? entre(150, 420) : entre(40, 130)) * PRISA;   // los dormidos pasean menos
@@ -2185,6 +2248,7 @@ function procesar(datos){
     a.ausente = !!r.ausente;
     a.callado = a.rol === 'visitante' && inactivo && ahora - a.ts > CALLADO_MIN * 60000;
     let area = normalizarArea(r.area) || 'escritorio';
+    if (area === 'agentes' && r.rol !== 'programado') area = 'descanso';   // el Cuarto de Agentes es solo para los agentes
     // El cuarto de la tableta es de su supervisor y de lo que la tableta reporta ahí; los demás visitantes usan toda la oficina
     const enTerrazas = !r.suelto && ((r.fijo && area === 'terrazas') || (a.tableta && (a.rol === 'supervisor' || area === 'terrazas')));
     if (enTerrazas) area = 'terrazas';
@@ -2520,7 +2584,7 @@ function obsidianURL(boveda, ruta){ return 'obsidian://open?vault=' + encodeURIC
 
 /* Ficha de un monito (solo lectura) */
 const NOMBRE_AREA = { escritorio: 'Escritorio', biblioteca: 'Biblioteca', internet: 'Internet', 'sala de juntas': 'Sala de juntas',
-                      descanso: 'Descanso', calleros: 'Oficina Calleros', 'cerebro delta': 'Cerebro Delta', terrazas: 'Oficina Terrazas', 'centro de pensado': 'Centro de Pensado', almacen: 'Almacén', noticias: 'Sala de Noticias' };
+                      descanso: 'Descanso', calleros: 'Oficina Calleros', 'cerebro delta': 'Cerebro Delta', terrazas: 'Oficina Terrazas', 'centro de pensado': 'Centro de Pensado', almacen: 'Almacén', noticias: 'Sala de Noticias', agentes: 'Cuarto de Agentes' };
 function fechaCorta(s){
   const v = typeof s === 'number' ? s * (s < 1e12 ? 1000 : 1) : Date.parse(s);
   if (!v || isNaN(v)) return '—';
@@ -2769,13 +2833,28 @@ function ponerHorario(h, guardar){
 }
 function planDeNoche(casa, quien, ahora){   // fuera de horario: descansar, pasearse (los de Descanso se pasean solos) o acomodar cosas
   const eq = EQUIPOS.find(e => e.casa === casa);
-  const lista = eq ? eq.noche : [[casa || 'descanso', 'Acomodando sus cosas'], ['descanso', 'Descansando'], ['descanso', 'Descansando']];
+  const base = eq ? eq.noche : [[casa || 'descanso', 'Acomodando sus cosas'], ['descanso', 'Descansando'], ['descanso', 'Descansando']];
+  const lista = String(quien).startsWith('jefe-') ? base               // los agentes, de noche, también se van a su cuarto
+    : base.filter(x => x[0] !== 'descanso').concat([['agentes', 'Descansando en mi cuarto'], ['agentes', 'Descansando en mi cuarto'], ['descanso', 'Descansando']]);
   const p = lista[Math.floor(azar(Math.floor(hashTexto(String(quien)) * 1e9) + Math.floor(ahora / (2 * RATO_MIN * 60000)) * 7919)() * lista.length)];
   return { area: p[0], actividad: p[1], noche: true };
 }
 const ES_DEL_TUNEL = /t[uú]nel|buz[oó]n/i;   // lo que se hace en la estación del túnel
+/* Un par de veces al día (a media mañana y a media tarde, a horas un poco distintas para cada uno) el agente se
+   va 25 minutos a su cuarto a refrescarse y descansar. Los jefes no lo llaman mientras tanto. */
+const DESCANSO_AGENTE_MIN = 25;
+function descansoDeAgente(m, ahora){
+  const d = new Date(ahora), min = d.getHours() * 60 + d.getMinutes(), a = aMinutos(HORARIO.abre), c = aMinutos(HORARIO.cierra), h = hashTexto(m.id);
+  const largo = (c - a + 1440) % 1440;
+  for (const f of [0.3 + h * 0.08, 0.68 + h * 0.08]){
+    const ini = (a + Math.floor(largo * f)) % 1440, pasado = (min - ini + 1440) % 1440;
+    if (pasado < DESCANSO_AGENTE_MIN) return { area: 'agentes', actividad: pasado < 8 ? 'Refrescándome un rato' : 'En mi descanso', pausa: true };
+  }
+  return null;
+}
 function ratoLibre(m, ahora){
   if (!abierta(ahora)) return planDeNoche(m.casa, m.id, ahora);
+  const pausa = descansoDeAgente(m, ahora); if (pausa) return pausa;
   const propia = (Array.isArray(m.rutina) ? m.rutina : []).filter(x => x && x.area);
   const planes = propia.concat(propia, [{ area: m.casa || 'descanso', actividad: '' }, { area: 'descanso', actividad: 'Descansando un rato' }, { area: 'descanso', actividad: 'Descansando un rato' }]);
   const x = enPantalla(ahora);                                       // cada 20 minutos se para un rato junto a la pantalla a presentar su noticia
@@ -2814,7 +2893,7 @@ const deEquipo = eq => monitosTodos().filter(m => (m.casa || '') === eq.casa);
 function planDeJefe(eq, ahora){   // de ambiente
   if (!abierta(ahora)) return planDeNoche(eq.casa, 'jefe-' + eq.casa, ahora);   // fuera de horario no manda a nadie
   const r = azar(424242 + Math.floor(hashTexto(eq.casa) * 1e6) + Math.floor(ahora / (RATO_MIN * 60000)) * 104729);
-  const libres = deEquipo(eq).filter(m => !enSuTarea(m, ahora) && !ratoLibre(m, ahora).plan);
+  const libres = deEquipo(eq).filter(m => { const r = ratoLibre(m, ahora); return !enSuTarea(m, ahora) && !r.plan && !r.pausa; });
   const tiro = r(), m = libres.length ? libres[Math.floor(r() * libres.length)] : null, cual = r();
   if (m && tiro < 0.3){
     const pend = ((m.memoria || []).find(x => x.id === 'pendientes') || {}).texto;
@@ -2869,7 +2948,7 @@ function registroProgramado(m, ahora){
   const frases = Array.isArray(m.frases) ? m.frases : [];
   const seg = ahora / 1000, frase = frases.length && seg % 50 < 9 ? frases[Math.floor(seg / 50) % frases.length] : '';   // de vez en cuando dice algo suyo
   const suelto = ratoLibre(m, ahora);
-  const plan = PLANES.get(m.casa || ''), mio = !!plan && plan.monito === m.id && !trabajando && (plan.real || !suelto.plan);
+  const plan = PLANES.get(m.casa || ''), mio = !!plan && plan.monito === m.id && !trabajando && (plan.real || (!suelto.plan && !suelto.pausa));
   const orden = mio ? plan.orden : null;                             // lo que le encargó su jefe
   const libre = orden ? { area: orden.area, actividad: orden.actividad, orden: true, real: !!plan.real } : suelto;
   const enEstacion = !trabajando && ES_DEL_TUNEL.test(libre.actividad || '');   // en la estación dice lo que hace ahí
@@ -2965,7 +3044,8 @@ async function cargarCalleros(){
 
 const EXTRAS = [];   // letreros que no son áreas de trabajo
 function letreroExtra(x, y, texto){ const el = document.createElement('div'); el.className = 'letrero'; el.textContent = texto; capa.appendChild(el); EXTRAS.push({ el, x, y }); return el; }
-const LETREROS_ESPACIO = { 'espacio-d': letreroExtra(80, 1016, ''), 'espacio-e': letreroExtra(256, 1016, ''), 'espacio-f': letreroExtra(416, 1016, '') };
+const LETREROS_ESPACIO = { 'espacio-d': letreroExtra(80, 1016, ''), 'espacio-e': letreroExtra(256, 1016, ''), 'espacio-f': letreroExtra(416, 1016, ''),
+  'espacio-g': letreroExtra(256, 1448, ''), 'espacio-h': letreroExtra(416, 1448, '') };
 letreroExtra(256, 642, 'PERIFÉRICO · TÚNEL CENTRAL');
 letreroExtra(120, 1192, 'AMPLIACIÓN (EN OBRA)');
 function letrerosEspacios(){
@@ -3205,6 +3285,9 @@ function bucle(ms){
   ubicarVinetas();
   dibujar(ms / 1000);
 }
+
+/* ?depurar: deja ver por dentro desde la consola (para pruebas) */
+if (new URLSearchParams(location.search).has('depurar')) window.oficinaDepurar = { agentes, monitosTodos, ratoLibre, registroProgramado, planDeNoche, abierta };
 
 /* ---------- Arranque ---------- */
 construirMuebles();
