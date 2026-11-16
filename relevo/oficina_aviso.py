@@ -85,6 +85,8 @@ def main():
     d = json.loads(sys.stdin.buffer.read().decode("utf-8-sig", "replace") or "{}")
     if d.get("agent_id"):
         return  # los ayudantes no salen como monitos aparte
+    if os.path.exists(os.path.join(str(d.get("cwd") or ""), ".claude", "hooks", "oficina_terrazas.py")):
+        return  # este proyecto ya avisa a la oficina con su propio hook (dragtrim): no se duplica
     ses = re.sub(r"[^A-Za-z0-9]", "", str(d.get("session_id") or "x"))[:12] or "x"
     guarda = os.path.join(tempfile.gettempdir(), "oficina_aviso_%s.json" % ses)
     try:

@@ -1,6 +1,20 @@
 # Relevo: que la página web vea todas las sesiones
 
-**Estado: armado y probado en local, sin instalar.** Falta desplegarlo en Cloudflare desde una computadora. Estas instrucciones están escritas para que las siga una persona o cualquier asistente de IA con acceso a una terminal.
+**Estado: armado y probado en local, sin instalar.** Falta desplegarlo en Cloudflare. Se puede hacer desde una computadora (paso 1) o sin computadora, desde una sesión de Claude Code en la nube (paso 1B). Estas instrucciones están escritas para que las siga una persona o cualquier asistente de IA con acceso a una terminal.
+
+## Qué sesiones se ven hoy y qué agrega el relevo
+
+| Sesión | En el Artifact («Todas mis sesiones») | En la página web / app |
+|---|---|---|
+| Claude Code en la nube (tableta, teléfono, web) | Sí, sola | Solo con el relevo |
+| Claude Code en la compu con Remote Control | Sí, sola | Solo con el relevo |
+| Claude Code en la compu sin Remote Control | Con el pase (botón «＋ Sesión») | Con el relevo (hook en la compu) |
+| Sesión del repositorio `dragtrim` (DragTree) | Sí, sola | Sí, con su propio hook (llega con unos minutos de retraso) |
+| Laptop de Calleros con el programa de `C:\claude-office` | — | Sí |
+| Monitos con tarea programada (Nitro, Pole) | Sí | Sí, una vez al día con el mensajero |
+| Otras sesiones de Claude con herramienta de Artifacts | Con el pase | Con el pase, cuando el mensajero las copia |
+
+El relevo cubre los «solo con el relevo»: cada sesión de Claude Code avisa al momento y la página web lo lee sin retraso.
 
 ## Para qué es
 
@@ -37,6 +51,23 @@ npx wrangler secret put ESCRITURA
 - `secret put ESCRITURA` pide la llave. Usa una larga y al azar, por ejemplo la salida de `python -c "import secrets;print(secrets.token_urlsafe(32))"`. Anótala: es `LLAVE`. No la subas al repositorio ni la pegues en un chat.
 
 Comprobar: abrir `URL/estado` en el navegador debe mostrar `{"actualizado":"…","agentes":[],"archivos_recientes":[]}`.
+
+## Paso 1B. Desplegar el worker sin computadora (desde una sesión de Claude Code en la nube)
+
+Lo hace el asistente desde una sesión que tenga este repositorio. La persona solo crea la cuenta y escribe dos secretos en formularios; ninguno se pega en el chat.
+
+1. La persona crea la cuenta gratuita en Cloudflare y, en *My Profile → API Tokens*, un token con la plantilla **Edit Cloudflare Workers**. También copia su **Account ID** (no es secreto).
+2. El asistente pide el token con `request_credential` para el host `api.cloudflare.com` (tipo bearer). La persona lo escribe en el formulario. Eso también permite ese host en la red de la sesión.
+3. El asistente despliega. El token real lo pone el proxy; a `wrangler` se le da uno de relleno:
+   ```
+   cd relevo
+   CLOUDFLARE_API_TOKEN=relleno CLOUDFLARE_ACCOUNT_ID=<Account ID> npx wrangler deploy
+   ```
+   Si `wrangler` pide más hosts (por ejemplo para subir el código), se agregan los que el error nombre con `update_environment`.
+4. La llave `ESCRITURA` la inventa la persona (larga y al azar) y la escribe ella misma en el panel de Cloudflare: *Workers & Pages → oficina-relevo → Settings → Variables and Secrets → Add → Secret*, nombre `ESCRITURA`. Así no pasa por el chat ni por la terminal.
+5. Comprobar `URL/estado` y seguir con el paso 2. En el paso 4, la misma llave se escribe en el formulario de `request_credential` para el host del worker.
+
+**Sin verificar:** esta ruta no se ha corrido. Lo que puede variar es qué hosts necesita `wrangler` además de `api.cloudflare.com`.
 
 ## Paso 2. Decirle a la página dónde está
 
@@ -82,3 +113,5 @@ Esto cambia el entorno **Default** de Claude Code en la nube, o sea, todas las s
 - La página aplica las reglas (supervisores, 24 horas); el relevo solo guarda lo último de cada sesión y limpia lo que pase de 48 horas.
 - Lo que viaja: título de la sesión, carpeta, lo que está haciendo y nombres de archivos editados. Queda legible para cualquiera que conozca la URL. Si eso no conviene, no instalar.
 - Un aviso de "esperando" no reinicia el plazo de 24 horas.
+- El hook no avisa desde un proyecto que ya trae su propio hook de la oficina (`.claude/hooks/oficina_terrazas.py`, como `dragtrim`), para que esa sesión no salga dos veces.
+- El relevo no cambia nada del Artifact, del pase, de los monitos ni del periférico: solo agrega sesiones a la página web. Si el relevo se cae, la página sigue mostrando lo demás.

@@ -50,12 +50,13 @@ header{position:fixed;top:0;left:0;right:0;height:46px;display:flex;align-items:
 
 /* Viñeta de cómic: blanca, borde negro de pixel, cola en escalón */
 .vineta{position:absolute;left:0;top:0;background:#fff;color:#151015;font-weight:700;
-  font-size:max(11px,calc(var(--s)*5.2px));line-height:1.18;text-align:center;
-  padding:calc(var(--s)*1.5px) calc(var(--s)*2.5px);
-  width:max-content;max-width:max(120px,calc(var(--s)*88px));
+  font-size:calc(max(11px,var(--s)*5.2px)*var(--t,1));line-height:1.18;text-align:center;
+  padding:calc(var(--s)*1.5px*var(--t,1)) calc(var(--s)*2.5px*var(--t,1));
+  width:max-content;max-width:calc(max(120px,var(--s)*88px)*var(--t,1));
   box-shadow:0 calc(var(--s)*-1px) 0 #151015,0 calc(var(--s)*1px) 0 #151015,
              calc(var(--s)*-1px) 0 0 #151015,calc(var(--s)*1px) 0 0 #151015;
   z-index:3}
+body.sinTexto .vineta{display:none!important}
 .vineta .cola{position:absolute;top:100%;left:0;width:calc(var(--s)*7px);height:calc(var(--s)*4px);display:block}
 .vineta.pop{animation:pop .3s steps(3,end)}
 @keyframes pop{0%{transform:scale(.3)}100%{transform:scale(1)}}
@@ -148,6 +149,12 @@ textarea.campo{min-height:70px;resize:vertical}
 .fila span:first-child{color:var(--tenue)}
 .vacio{color:var(--tenue);font-style:italic}
 /* Teléfono: va al final para que sí le gane a las reglas de arriba (antes el panel quedaba encimado) */
+/* Tableta o ventana angosta: los botones bajan a su propio renglón para que quepan todos */
+@media (max-width:1180px){
+  header{height:auto;flex-wrap:wrap;gap:6px 14px;padding-top:8px;padding-bottom:8px}
+  .pisos{order:3;width:100%;overflow-x:auto}
+  .pisos button,.pisos a{white-space:nowrap}
+}
 @media (max-width:760px){
   header{height:auto;flex-wrap:wrap;gap:6px 12px;padding:calc(8px + env(safe-area-inset-top,0px)) max(12px,env(safe-area-inset-right,0px)) 8px max(12px,env(safe-area-inset-left,0px));
     font-family:-apple-system,system-ui,"Segoe UI",sans-serif}
@@ -166,7 +173,7 @@ textarea.campo{min-height:70px;resize:vertical}
 <header>
   <div class="titulo"><span class="logo"></span>OFICINA · MONITOREO</div>
   <div class="senal" id="senal"><span class="punto"></span><span id="senalTexto">Conectando…</span></div>
-  <nav class="pisos"><button data-fila="0">Planta principal</button><button data-fila="21">Calleros · Cerebro</button><button data-fila="37">Terrazas · Pensado</button><button data-fila="59">Espacios libres</button><button data-fila="72">Ampliación</button><a id="irPase" href="#pase" role="button">＋ Sesión</a><a id="irClaude" href="https://claude.ai/artifact/KbxrcsXckzZSE5F65iZwCE" target="_blank" rel="noopener" hidden>Todas mis sesiones ↗</a></nav>
+  <nav class="pisos"><button data-fila="0">Planta principal</button><button data-fila="21">Calleros · Cerebro</button><button data-fila="37">Terrazas · Pensado</button><button data-fila="59">Espacios libres</button><button data-fila="72">Ampliación</button><a id="irPase" href="#pase" role="button">＋ Sesión</a><a id="irTexto" href="#texto" role="button" title="Tamaño del texto de los monitos">Aa</a><a id="irClaude" href="https://claude.ai/artifact/KbxrcsXckzZSE5F65iZwCE" target="_blank" rel="noopener" hidden>Todas mis sesiones ↗</a></nav>
   <div class="derecha"><span id="ultimo"></span><span id="cuantos"></span><span id="reloj"></span></div>
 </header>
 <div id="tip"></div>
@@ -2405,6 +2412,7 @@ function ubicarVinetas(){
   }
 }
 function tallos(){
+  if (TEXTO === 'nada') return;
   for (const a of agentes.values()) if (a.tallo){ const t = a.tallo; for (let y = t.y0; y < t.y1; y += 2) R(t.x, y, 1, 1, '#151015'); }
 }
 
@@ -2898,6 +2906,27 @@ function panelPase(){
   });
 }
 $('irPase').addEventListener('click', ev => { ev.preventDefault(); panelPase(); });
+
+/* ---------- Tamaño del texto de las viñetas (lo que dice cada monito). Se guarda en este aparato. ---------- */
+const TEXTOS = [['grande', 'Grande', 1], ['mediana', 'Mediana', 0.8], ['chica', 'Chica', 0.62], ['nada', 'Sin texto', 0]];
+let TEXTO = 'mediana';
+try { const v = localStorage.getItem('oficina.texto'); if (TEXTOS.some(x => x[0] === v)) TEXTO = v; } catch (e) {}
+function ponerTamanoTexto(cual){
+  TEXTO = cual;
+  const f = TEXTOS.find(x => x[0] === cual)[2];
+  document.documentElement.style.setProperty('--t', String(f || 1));
+  document.body.classList.toggle('sinTexto', !f);
+  try { localStorage.setItem('oficina.texto', cual); } catch (e) {}
+  for (const a of agentes.values()) a.medir = true;
+}
+function panelTexto(){
+  abrirPanel('TEXTO DE LOS MONITOS', '<p>Qué tan grande sale lo que dice cada monito («Esperando instrucciones», «Buscando en internet»…). Se guarda en este aparato.</p><div class="botones">' +
+    TEXTOS.map(([k, nombre]) => `<button class="boton${k === TEXTO ? ' principal' : ''}" data-texto="${k}">${nombre}</button>`).join('') +
+    '</div><p class="meta" style="margin-top:10px">Con «Sin texto» solo quedan los gafetes con el nombre; al tocar un monito sigues viendo qué hace.</p>');
+  cuerpo.querySelectorAll('[data-texto]').forEach(b => b.addEventListener('click', () => { ponerTamanoTexto(b.dataset.texto); panelTexto(); }));
+}
+$('irTexto').addEventListener('click', ev => { ev.preventDefault(); panelTexto(); });
+ponerTamanoTexto(TEXTO);
 
 /* Ir de piso en piso */
 const irAFila = fila => escenario.scrollTo({ top: Math.max(0, fila * T * escala), behavior: 'smooth' });
