@@ -1,5 +1,5 @@
 {
-  "actualizado": "2026-11-16T13:39:21Z",
+  "actualizado": "2026-11-16T14:20:42Z",
   "monitos": [
     {
       "actividad": "",
@@ -16,6 +16,7 @@
         "¡Luz verde!"
       ],
       "horario": "Diario, 7:23 a.m.",
+      "jefe": "DragTree",
       "modelo": "haiku",
       "nombre": "Nitro",
       "rutina": [
@@ -44,6 +45,7 @@
           "area": "centro de pensado"
         }
       ],
+      "seccion": "Arrancones",
       "id": "nitro",
       "reportes": [
         {
@@ -398,6 +400,12 @@
           "id": "fuentes"
         },
         {
+          "actualizado": "2026-11-16T05:30:00Z",
+          "texto": "- Tu sección del noticiero es Arrancones. Solo arrancones: nada de Fórmula 1, eso es de Pole.\n- En \"puntos\" van solo noticias de los últimos 3 días, de la más nueva a la más vieja, cada una con su fecha en \"cuando\".\n- Lo que tenga más de 3 días no va en \"puntos\": si sigue sirviendo, ponlo como cápsula de \"resultado\" o \"historia\"; si no, omítelo.\n- Si hoy no hay nada nuevo, dilo en la intro y deja pocos \"puntos\" antes que rellenar con notas viejas.\n- No repitas lo que ya está en \"Ya lo conté\".",
+          "titulo": "Instrucciones del jefe (DragTree)",
+          "id": "instrucciones-del-jefe"
+        },
+        {
           "actualizado": "2026-11-16T13:28:00Z",
           "texto": "- Chihuahua, onceava fecha Arrancones VIP (domingo 15 nov, Stege vs Valles): sin resultados en la búsqueda de hoy. Buscar en Heraldo de Chihuahua o Tiempo.\n- Confirmar fecha de Chihuahua con fuente oficial; no la reconfirmé.\n- Pomona: los resultados salieron en resúmenes de búsqueda, pero draglist, competitionplus, dragzine y autoaction no abrieron. Confirmar con una fuente abierta.\n- Pro Stock Motorcycle: la búsqueda dice que Herrera ganó el título; Gadson llegaba con 55 puntos de ventaja. Confirmar.\n- Pro Stock: la búsqueda dice que Glenn es campeón. Confirmar.\n- Temporada 2027: homenaje a John Force en cada fecha. Buscar fechas oficiales.",
           "titulo": "Pendientes",
@@ -426,6 +434,7 @@
         "Luces fuera."
       ],
       "horario": "Diario, 7:29 a.m.",
+      "jefe": "DragTree",
       "modelo": "haiku",
       "nombre": "Pole",
       "rutina": [
@@ -458,6 +467,7 @@
           "area": "escritorio"
         }
       ],
+      "seccion": "Fórmula 1",
       "id": "pole",
       "reportes": [
         {
@@ -764,6 +774,12 @@
           "id": "fuentes"
         },
         {
+          "actualizado": "2026-11-16T05:30:00Z",
+          "texto": "- Tu sección del noticiero es Fórmula 1. Solo Fórmula 1: los arrancones son de Nitro.\n- En \"puntos\" van solo noticias de los últimos 3 días, de la más nueva a la más vieja, cada una con su fecha en \"cuando\".\n- Lo que tenga más de 3 días no va en \"puntos\": el resultado de la última carrera y la tabla del campeonato van como cápsulas de \"resultado\" y \"campeonato\".\n- Si hoy no hay nada nuevo, dilo en la intro y deja pocos \"puntos\" antes que rellenar con notas viejas.\n- No repitas lo que ya está en \"Ya lo conté\".",
+          "titulo": "Instrucciones del jefe (DragTree)",
+          "id": "instrucciones-del-jefe"
+        },
+        {
           "actualizado": "2026-11-16T13:32:00Z",
           "texto": "- Confirmar Qatar (29 nov) y Abu Dabi (6 dic) en fuente oficial; solo hay fechas de RacingNews365.\n- Sanción de Antonelli: fecha exacta de la decisión de los comisarios, sin confirmar.\n- Asientos 2027 sin confirmar: Haas, Racing Bulls y Aston Martin (fuentes en conflicto).\n- Upgrades de Red Bull para Las Vegas: sin confirmar en fuente de hoy; McLaren sí anunció novedades.\n- Horario de Las Vegas: resuelto por Motorsport.com, Telediario y Mexican Times (sábado 21, 22:00 CDMX). ESPN da 23:00; confirmar en formula1.com antes del viernes.\n- Ningún nota fechada del 14, 15 ni 16 de noviembre encontrada; volver a buscar mañana.",
           "titulo": "Pendientes",
@@ -779,6 +795,12 @@
     }
   ],
   "avisos": [
+    {
+      "creado": "2026-11-16T05:30:00Z",
+      "texto": "Arrancones (Nitro) y Fórmula 1 (Pole) tienen cada uno su sección, y las noticias con más de una semana ya no salen en pantalla. DragTree es el jefe de los dos y les da instrucciones.",
+      "titulo": "El noticiero ya va por secciones",
+      "id": "2026-11-16-secciones"
+    },
     {
       "creado": "2026-11-15T18:25:00Z",
       "texto": "Pole vive en la Oficina Terrazas y cada mañana trae las noticias de Fórmula 1: resultados, próximas carreras y cambios en los equipos. Sus noticias se turnan con las de Nitro en la pantalla.",
