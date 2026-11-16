@@ -197,7 +197,7 @@ textarea.campo{min-height:70px;resize:vertical}
 <script type="module">
 import { aplicarReglas, textoPlazo } from './src/reglas.js';
 import { estadoDemo } from './src/demo.js';
-import { estadoDeSesiones, modeloDeRespuesta, conVisitas } from './src/sesiones.js';
+import { estadoDeSesiones, modeloDeRespuesta, conVisitas, areaDeTexto } from './src/sesiones.js';
 import { ESTACIONES, NODOS, RAMALES, ANCHOS, TRONCO, rutaTunel, largoRuta, puntoEnRuta, enviosLimpios } from './src/tunel.js';
 import { CADA_PANTALLA, turnos, turnoDe, esDeHoy } from './src/pantalla.js';
 (() => {
@@ -2152,13 +2152,19 @@ function procesar(datos){
     const ts = r.ausente ? 0 : (fecha(r.actualizado) ?? raizTs ?? a.vistoCambio);
     if (ts > masReciente) masReciente = ts;
     a.ts = r.ausente ? 0 : (fecha(r.ultima_actividad) ?? ts);
-    const inactivo = !r.fijo && (!!r.ausente || (ahora - ts) / 1000 > SEGUNDOS_INACTIVO);
+    const aguanta = a.tableta && EN_NUBE ? 420 : SEGUNDOS_INACTIVO;   // lo de la tableta llega por GitHub con varios minutos de retraso
+    const inactivo = !r.fijo && (!!r.ausente || (ahora - ts) / 1000 > aguanta);
     a.ausente = !!r.ausente;
     a.callado = a.rol === 'visitante' && inactivo && ahora - a.ts > CALLADO_MIN * 60000;
     let area = normalizarArea(r.area) || 'escritorio';
     // El cuarto de la tableta es de su supervisor y de lo que la tableta reporta ahí; los demás visitantes usan toda la oficina
     const enTerrazas = (r.fijo && area === 'terrazas') || (a.tableta && (a.rol === 'supervisor' || area === 'terrazas'));
     if (enTerrazas) area = 'terrazas';
+    // La tableta siempre dice "terrazas": mientras trabaja, sale al cuarto que le toca según lo que hace (leer, buscar en internet, pedir ayuda…)
+    if (enTerrazas && a.tableta && !inactivo && String(r.estado || '').toLowerCase() === 'trabajando' && !/mensaje/i.test(String(r.actividad || ''))){
+      const sale = areaDeTexto(r.actividad);
+      if (sale !== 'escritorio') area = sale;
+    }
     else if (area === 'terrazas') area = 'escritorio';
     let texto = textoBreve(r.actividad);
     const quiereTubo = !!r.tubo || (!!ESTACIONES[area] && ES_DEL_TUNEL.test(String(r.actividad || '')));

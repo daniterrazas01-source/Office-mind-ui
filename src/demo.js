@@ -16,7 +16,7 @@ export function estadoDemo() {
     demo: true,
     agentes: [
       v('calleros', 'Calleros', 'calleros', 'Revisando pendientes', 0.1, { modelo: 'opus', dispositivo: 'laptop-windows' }),
-      v('terrazas-demo', 'DragTree demo', 'terrazas', 'Editando arbol.js', 0.1, { dispositivo: 'tableta-android', origen: 'tableta-android', persona: 'Alberto Terrazas' }),
+      v('terrazas-demo', 'DragTree demo', 'terrazas', Math.floor(ahora / 40000) % 2 ? 'Buscando en internet' : 'Editando arbol.js', 0.1, { dispositivo: 'tableta-android', origen: 'tableta-android', persona: 'Alberto Terrazas' }),
       v('demo-1', 'Arreglar login', 'escritorio', 'Editando login.js', 0.1, { modelo: 'fable', modo: 'ultra' }),
       v('demo-2', 'Precios de envío', 'internet', 'Buscando en internet', 0.2, { modelo: 'haiku' }),
       v('demo-3', 'Resumen correos', 'biblioteca', 'Leyendo notas.md', 0.3),
