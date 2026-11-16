@@ -1,9 +1,9 @@
 {
-  "actualizado": "2026-11-15T18:29:47Z",
+  "actualizado": "2026-11-16T13:39:21Z",
   "monitos": [
     {
       "actividad": "",
-      "actualizado": "2026-11-15T18:06:30Z",
+      "actualizado": "2026-11-16T13:30:00Z",
       "area": "internet",
       "aspecto": "gorra_roja",
       "casa": "terrazas",
@@ -46,6 +46,158 @@
       ],
       "id": "nitro",
       "reportes": [
+        {
+          "capsulas": [
+            {
+              "fuente": "Dragzine",
+              "texto": "Shawn Langdon ganó el campeonato de Top Fuel en Pomona. Doug Kalitta se llevó el evento.",
+              "tipo": "resultado",
+              "titulo": "Langdon, segundo título mundial",
+              "url": "https://www.dragzine.com/features/2026-nhra-world-champions-crowned-langdon-todd-glenn-and-herrera-clinch-titles-in-pomona/"
+            },
+            {
+              "fuente": "Competition Plus",
+              "texto": "J.R. Todd ganó su segundo título mundial de Funny Car al vencer a Daniel Wilkerson en la final.",
+              "tipo": "resultado",
+              "titulo": "Todd, campeón de Funny Car",
+              "url": "https://competitionplus.com/j-r-todd-pulls-off-stunning-nhra-funny-car-title-comeback-as-kalitta-glenn-and-herrera-win-pomona-finals/"
+            },
+            {
+              "fuente": "Competition Plus",
+              "texto": "Gaige Herrera ganó el campeonato y la final, venciendo a Matt Smith.",
+              "tipo": "resultado",
+              "titulo": "Herrera, título de Pro Stock Motorcycle",
+              "url": "https://competitionplus.com/gaige-herrera-defeats-matt-smith-at-nhra-pomona-finals-to-complete-two-win-weekend/"
+            },
+            {
+              "fuente": "Auto Action",
+              "texto": "Richie Crampton ganó el evento de Top Alcohol Dragster en Pomona, su victoria número 12 nacional.",
+              "tipo": "resultado",
+              "titulo": "Crampton, victoria 12 en Top Alcohol",
+              "url": "https://autoaction.com.au/2026/11/16/richie-crampton-nhra-finals-pomona-2026"
+            },
+            {
+              "fuente": "Dragzine",
+              "texto": "Doug Kalitta marcó 3.657 segundos a 339.19 mph en su victoria del evento en Top Fuel.",
+              "tipo": "récord",
+              "titulo": "Kalitta, 339.19 mph",
+              "url": "https://www.dragzine.com/event-coverage/nhra-ihra/nhra-finals-results-j-r-todd-doug-kalitta-dallas-glenn-and-gaige-herrera-win-in-pomona/"
+            },
+            {
+              "fuente": "Dragzine",
+              "texto": "Dallas Glenn ganó el título de Pro Stock. Una fuente anota que fue su victoria número 28 de carrera.",
+              "tipo": "récord",
+              "titulo": "Glenn, victoria 28 de carrera",
+              "url": "https://www.dragzine.com/event-coverage/nhra-ihra/nhra-finals-results-j-r-todd-doug-kalitta-dallas-glenn-and-gaige-herrera-win-in-pomona/"
+            },
+            {
+              "fuente": "Competition Plus",
+              "texto": "Herrera ganó la final pospuesta de Las Vegas y luego el campeonato de Pomona.",
+              "tipo": "historia",
+              "titulo": "Herrera, dos victorias en un fin de semana",
+              "url": "https://competitionplus.com/gaige-herrera-defeats-matt-smith-at-nhra-pomona-finals-to-complete-two-win-weekend/"
+            },
+            {
+              "texto": "Son las luces que arrancan la carrera: primero las amarillas y al final la verde. Salir antes de la verde es falso arranque y el pilotaje queda fuera.",
+              "tipo": "cómo funciona",
+              "titulo": "El árbol de luces"
+            },
+            {
+              "texto": "En pre-stage el auto avanza hasta el primer sensor; en stage lo acomoda del todo. Recién entonces se enciende el árbol.",
+              "tipo": "cómo funciona",
+              "titulo": "Pre-stage y stage"
+            },
+            {
+              "texto": "Es lo que tarda el piloto en salir desde que se enciende la verde. Se mide aparte del tiempo total en la pista.",
+              "tipo": "cómo funciona",
+              "titulo": "Tiempo de reacción"
+            },
+            {
+              "texto": "Son poco más de 400 metros. Ahí se mide el tiempo de paso y la velocidad al cruzar la meta.",
+              "tipo": "cómo funciona",
+              "titulo": "El cuarto de milla"
+            }
+          ],
+          "cierre": "Pomona ya tiene campeones, y mañana vuelvo a la pista. ¡Luz verde!",
+          "creado": "2026-11-16T13:26:00Z",
+          "enviado": "2026-11-16T13:29:00Z",
+          "envios": [
+            {
+              "para": "almacen",
+              "texto": "Van 6 noticias y 11 cápsulas; la principal es que Langdon ganó el título de Top Fuel en Pomona, y Todd, Glenn y Herrera también son campeones.",
+              "tipo": "archivo",
+              "titulo": "Resumen del 16 de noviembre de 2026"
+            },
+            {
+              "para": "noticias",
+              "texto": "- Langdon, campeón de Top Fuel por segunda vez (15 nov)\n- J.R. Todd, campeón de Funny Car; Hagan cae en primera ronda (15 nov)\n- Glenn gana el título de Pro Stock (15 nov)\n- Herrera, campeón de Pro Stock Motorcycle (15 nov)\n- Crampton gana en Top Alcohol Dragster (15 nov)\n- Herrera gana la final pospuesta de Las Vegas (14 nov)",
+              "tipo": "noticias",
+              "tipo_nota": "noticias",
+              "titulo": "Noticias de hoy para la pantalla"
+            },
+            {
+              "para": "calleros",
+              "texto": "Pomona ya tiene campeones: Langdon en Top Fuel, J.R. Todd en Funny Car, Glenn en Pro Stock y Herrera en Pro Stock Motorcycle. Los datos vienen de resúmenes de búsqueda y las fuentes no abrieron desde aquí, así que confírmalos antes de citarlos. Chihuahua sigue sin resultados.",
+              "tipo": "nota",
+              "titulo": "Lo más importante de hoy"
+            },
+            {
+              "para": "cerebro delta",
+              "texto": "Shawn Langdon ganó el campeonato mundial de Top Fuel en Pomona 2026, su segundo título, según Dragzine.",
+              "tipo": "dato",
+              "titulo": "Dato para recordar: título de Top Fuel",
+              "url": "https://www.dragzine.com/features/2026-nhra-world-champions-crowned-langdon-todd-glenn-and-herrera-clinch-titles-in-pomona/"
+            }
+          ],
+          "fecha": "16 de noviembre de 2026",
+          "intro": "Pomona ya tiene campeones, jefe, y la pista se quedó caliente. Estos datos salen de resúmenes de búsqueda: las páginas de las fuentes no abrieron desde aquí, así que confírmalos antes de citarlos. De Chihuahua no encontré nada nuevo.",
+          "puntos": [
+            {
+              "cuando": "15 de noviembre",
+              "fuente": "Dragzine",
+              "resumen": "Shawn Langdon ganó el título mundial de Top Fuel en las NHRA Finals de Pomona. Doug Kalitta se llevó el evento con 3.657 segundos a 339.19 mph.",
+              "titulo": "Langdon, campeón de Top Fuel por segunda vez",
+              "url": "https://www.dragzine.com/event-coverage/nhra-ihra/nhra-finals-results-j-r-todd-doug-kalitta-dallas-glenn-and-gaige-herrera-win-in-pomona/"
+            },
+            {
+              "cuando": "15 de noviembre",
+              "fuente": "Competition Plus",
+              "resumen": "J.R. Todd ganó su segundo título mundial de Funny Car al vencer a Daniel Wilkerson en una final en la que necesitaba ganar. Matt Hagan perdió en la primera ronda y no logró su quinto título.",
+              "titulo": "J.R. Todd, campeón de Funny Car; Hagan cae en primera ronda",
+              "url": "https://competitionplus.com/j-r-todd-pulls-off-stunning-nhra-funny-car-title-comeback-as-kalitta-glenn-and-herrera-win-pomona-finals/"
+            },
+            {
+              "cuando": "15 de noviembre",
+              "fuente": "Dragzine",
+              "resumen": "Glenn quedó campeón de Pro Stock. Según una de las fuentes de la búsqueda, ganó la final con 6.531 segundos a 209.23 mph, su victoria número 28 de carrera.",
+              "titulo": "Dallas Glenn gana el título de Pro Stock",
+              "url": "https://www.dragzine.com/event-coverage/nhra-ihra/nhra-finals-results-j-r-todd-doug-kalitta-dallas-glenn-and-gaige-herrera-win-in-pomona/"
+            },
+            {
+              "cuando": "15 de noviembre",
+              "fuente": "Competition Plus",
+              "resumen": "Gaige Herrera ganó el campeonato de Pro Stock Motorcycle y la final, venciendo a Matt Smith. Completó un fin de semana de dos victorias, después de ganar la final pospuesta de Las Vegas.",
+              "titulo": "Herrera gana el título y la final de Pro Stock Motorcycle",
+              "url": "https://competitionplus.com/gaige-herrera-defeats-matt-smith-at-nhra-pomona-finals-to-complete-two-win-weekend/"
+            },
+            {
+              "cuando": "15 de noviembre",
+              "fuente": "Auto Action",
+              "resumen": "Richie Crampton ganó el evento de Top Alcohol Dragster en Pomona. Es su victoria número 12 en eventos nacionales de la NHRA.",
+              "titulo": "Crampton gana en Top Alcohol Dragster",
+              "url": "https://autoaction.com.au/2026/11/16/richie-crampton-nhra-finals-pomona-2026"
+            },
+            {
+              "cuando": "14 de noviembre",
+              "fuente": "Speed Sport",
+              "resumen": "Gaige Herrera ganó la final pospuesta de Pro Stock Motorcycle con 6.701 segundos a 201.13 mph, por delante de Richard Gadson. Fue la carrera que se corrió en Pomona el sábado.",
+              "titulo": "Herrera gana la final pospuesta de Las Vegas",
+              "url": "https://speedsport.com/drag-racing/nhra/herrera-wins-make-up-race-kalitta-capps-glenn-speed/"
+            }
+          ],
+          "titulo": "Pomona cerró: Langdon, Todd, Glenn y Herrera",
+          "id": "2026-11-16"
+        },
         {
           "capsulas": [
             {
@@ -240,20 +392,20 @@
       ],
       "memoria": [
         {
-          "actualizado": "2026-11-15T18:05:00Z",
-          "texto": "- Sirvieron hoy: Draglist (calificación del sábado 14 y reporte del 13), Racer, Speed Sport, Competition Plus, Speedway Media, Ocho Columnas.\n- Sin cobertura del domingo 15 en la búsqueda: no encontré resultados de finales de Pomona.\n- NHRA.com: el índice solo muestra noticias de septiembre; no sirvió para lo de hoy.\n- tiempo.com.mx: calendario Arrancones VIP solo hasta la novena fecha (20 sept).\n- Búsquedas genéricas de México: sin resultados de noviembre fuera de Chihuahua.",
+          "actualizado": "2026-11-16T13:28:00Z",
+          "texto": "- Sirvieron hoy: resúmenes de búsqueda de Dragzine, Competition Plus, Auto Action y Speed Sport (Pomona).\n- Bloqueadas desde esta sesión (no resuelven el dominio): draglist.com, competitionplus.com, dragzine.com, autoaction.com.au.\n- NHRA.com: sin noticias de hoy en la búsqueda.\n- Chihuahua: sin resultados de la onceava fecha. tiempo.com.mx solo llega a septiembre.\n- Búsqueda general de arrancones en México: nada de noviembre 2026.",
           "titulo": "Fuentes",
           "id": "fuentes"
         },
         {
-          "actualizado": "2026-11-15T18:05:00Z",
-          "texto": "- Domingo 15 nov, Pomona: sin resultados de eliminatorias finales en la búsqueda de hoy; revisar NHRA.com o Competition Plus para confirmar campeones.\n- Top Fuel: Langdon lidera a Kalitta por 107 puntos antes de Pomona; según Drag Racing List, 121 o más después de calificar asegura el título de Langdon. Confirmar cuál aplicó.\n- Pro Stock: Glenn necesita ganar la primera ronda del domingo para su bicampeonato.\n- Funny Car: Capps No. 1; Hagan noveno, Vandergriff a 39 puntos; sin resultado final.\n- Pro Stock Motorcycle: confirmar campeonato tras la final pospuesta de Herrera (Gadson llegaba con 55 puntos de ventaja).\n- Chihuahua, onceava fecha Arrancones VIP, domingo 15 nov (Stege vs Valles): ver resultados. La búsqueda de hoy no encontró cobertura; tiempo.com.mx solo llega a la novena fecha (20 sept).\n- Confirmar fecha de Chihuahua con fuente oficial; no lo reconfirmé hoy.",
+          "actualizado": "2026-11-16T13:28:00Z",
+          "texto": "- Chihuahua, onceava fecha Arrancones VIP (domingo 15 nov, Stege vs Valles): sin resultados en la búsqueda de hoy. Buscar en Heraldo de Chihuahua o Tiempo.\n- Confirmar fecha de Chihuahua con fuente oficial; no la reconfirmé.\n- Pomona: los resultados salieron en resúmenes de búsqueda, pero draglist, competitionplus, dragzine y autoaction no abrieron. Confirmar con una fuente abierta.\n- Pro Stock Motorcycle: la búsqueda dice que Herrera ganó el título; Gadson llegaba con 55 puntos de ventaja. Confirmar.\n- Pro Stock: la búsqueda dice que Glenn es campeón. Confirmar.\n- Temporada 2027: homenaje a John Force en cada fecha. Buscar fechas oficiales.",
           "titulo": "Pendientes",
           "id": "pendientes"
         },
         {
-          "actualizado": "2026-11-15T18:05:00Z",
-          "texto": "- 2026-11-15: Langdon con 107 puntos de ventaja antes de Pomona (Drag Racing List, 13 nov).\n- 2026-11-14: Herrera gana final pospuesta de Las Vegas (Speed Sport).\n- 2026-11-14: Kalitta provisional No. 1 en Top Fuel (Competition Plus).\n- 2026-11-14: Glenn provisional No. 1 en Pro Stock (Competition Plus).\n- 2026-11-14: Capps No. 1 en Funny Car; Hagan noveno (Racer).\n- 2026-11-14: Arrancones VIP Chihuahua, onceava fecha, domingo 15 nov (Ocho Columnas).",
+          "actualizado": "2026-11-16T13:28:00Z",
+          "texto": "- 2026-11-15: Langdon, campeón de Top Fuel por segunda vez (Dragzine).\n- 2026-11-15: Kalitta gana el evento de Top Fuel, 3.657 a 339.19 mph (Dragzine).\n- 2026-11-15: J.R. Todd, campeón de Funny Car; Hagan perdió en primera ronda (Competition Plus).\n- 2026-11-15: Glenn, campeón de Pro Stock (Dragzine).\n- 2026-11-15: Herrera, campeón de Pro Stock Motorcycle y ganador del evento (Competition Plus).\n- 2026-11-15: Crampton gana Top Alcohol Dragster (Auto Action).\n- 2026-11-15: Herrera gana la final pospuesta de Las Vegas en Pomona (Speed Sport).\n- 2026-11-15: Langdon con 107 puntos de ventaja antes de Pomona (Drag Racing List, 13 nov).\n- 2026-11-14: Kalitta provisional No. 1 en Top Fuel (Competition Plus).\n- 2026-11-14: Glenn provisional No. 1 en Pro Stock (Competition Plus).\n- 2026-11-14: Capps No. 1 en Funny Car; Hagan noveno (Racer).\n- 2026-11-14: Arrancones VIP Chihuahua, onceava fecha, domingo 15 nov (Ocho Columnas).",
           "titulo": "Ya lo conté",
           "id": "ya-contado"
         }
@@ -261,7 +413,7 @@
     },
     {
       "actividad": "",
-      "actualizado": "2026-11-15T18:30:00Z",
+      "actualizado": "2026-11-16T13:33:30Z",
       "area": "internet",
       "aspecto": "audifonos",
       "casa": "terrazas",
@@ -308,6 +460,162 @@
       ],
       "id": "pole",
       "reportes": [
+        {
+          "capsulas": [
+            {
+              "fuente": "Motorsport.com Latinoamérica",
+              "texto": "La carrera es el sábado 21 de noviembre a las 22:00 hora del centro de México (20:00 locales). Práctica el jueves 19 a las 18:30 y clasificación el viernes 20 a las 22:00.",
+              "tipo": "próxima carrera",
+              "titulo": "Las Vegas: sábado 21, 22:00 en CDMX",
+              "url": "https://lat.motorsport.com/f1/news/horarios-gp-las-vegas-2026-formula-1/10874562/"
+            },
+            {
+              "fuente": "The Race",
+              "texto": "Antonelli lidera el campeonato de pilotos con 111 puntos sobre Verstappen, según The Race.",
+              "tipo": "campeonato",
+              "titulo": "Antonelli manda en pilotos",
+              "url": "https://www.the-race.com/formula-1/f1-2026-brazilian-grand-prix-race-result/"
+            },
+            {
+              "fuente": "RaceFans",
+              "texto": "Mercedes ya tiene el título de constructores tras la carrera de São Paulo.",
+              "tipo": "campeonato",
+              "titulo": "Mercedes, campeón de constructores",
+              "url": "https://www.racefans.net/2026/11/08/2026-brazilian-grand-prix-race-result-and-championship-points/"
+            },
+            {
+              "fuente": "PlanetF1",
+              "texto": "1. Norris, 2. Verstappen (desde el 21º lugar), 3. Hadjar. Russell cuarto, Antonelli quinto, Piastri sexto.",
+              "tipo": "resultado",
+              "titulo": "Podio de São Paulo",
+              "url": "https://www.planetf1.com/news/2026-brazilian-grand-prix-race-report"
+            },
+            {
+              "fuente": "Crash.net",
+              "texto": "Cinco segundos por salida insegura, pero no perdió su lugar: cruzó en quinto.",
+              "tipo": "resultado",
+              "titulo": "Antonelli, quinto tras la sanción",
+              "url": "https://www.crash.net/f1/news/1110027/1/kimi-antonelli-and-mercedes-punished-unsafe-release-messy-brazil-gp"
+            },
+            {
+              "fuente": "Racer",
+              "texto": "Stella anticipa más mejoras para el GP de Las Vegas, en la pelea por mantener el impulso.",
+              "tipo": "equipos",
+              "titulo": "McLaren, novedades en Las Vegas",
+              "url": "https://racer.com/2026/11/11/more-new-mclaren-developments-for-las-vegas-gp-as-team-pushes-to-keep-momentum-building"
+            },
+            {
+              "fuente": "Motor.es",
+              "texto": "El personal de los equipos no podrá tener vínculos con gente ajena a la F1, ni siquiera en comedores compartidos.",
+              "tipo": "reglamento",
+              "titulo": "Equipos aislados desde 2027",
+              "url": "https://www.motor.es/formula-1/fia-impone-aislamiento-total-equipos-f1-comedores-compartidos-2026117146.html"
+            },
+            {
+              "texto": "Es el primer lugar de la parrilla. Se lo gana quien hace la vuelta más rápida en la clasificación.",
+              "tipo": "cómo funciona",
+              "titulo": "La pole"
+            },
+            {
+              "texto": "Avisa al piloto que otro auto viene a rebasarlo y debe cederle el paso. Ignorarla puede costar una sanción.",
+              "tipo": "cómo funciona",
+              "titulo": "La bandera azul"
+            },
+            {
+              "texto": "Cada compuesto agarra distinto y dura distinto. Elegirlos bien es parte de la estrategia de la carrera.",
+              "tipo": "cómo funciona",
+              "titulo": "Compuestos de neumáticos"
+            },
+            {
+              "texto": "Es la zona de cambio de neumáticos y ajustes. Cada parada cuesta tiempo, y por eso se planea con cuidado.",
+              "tipo": "cómo funciona",
+              "titulo": "Boxes"
+            },
+            {
+              "texto": "Marca el fin de la carrera. Quien la cruza primero gana, sin importar cuántas vueltas le hayan tomado.",
+              "tipo": "cómo funciona",
+              "titulo": "Bandera a cuadros"
+            }
+          ],
+          "cierre": "Bandera a cuadros por hoy. Nos vemos en la siguiente vuelta.",
+          "creado": "2026-11-16T13:31:00Z",
+          "enviado": "2026-11-16T13:33:00Z",
+          "envios": [
+            {
+              "para": "almacen",
+              "texto": "Van 6 noticias y 11 cápsulas; la principal es el horario de Las Vegas: sábado 21 a las 22:00 hora de CDMX.",
+              "tipo": "archivo",
+              "titulo": "Fórmula 1: resumen del 16 de noviembre de 2026"
+            },
+            {
+              "para": "noticias",
+              "texto": "- McLaren prepara novedades para Las Vegas (11 de noviembre)\n- Norris gana en Interlagos desde la pole (8 de noviembre)\n- Mercedes se queda con el campeonato de constructores (8 de noviembre)\n- Antonelli, con cinco segundos por salida insegura (tras el 8 de noviembre)\n- La FIA aísla a los equipos desde 2027 (octubre de 2026)\n- Diecinueve pilotos con asiento confirmado para 2027 (20 de octubre)",
+              "tipo": "noticias",
+              "titulo": "Fórmula 1: noticias para la pantalla"
+            },
+            {
+              "para": "calleros",
+              "texto": "No encontré noticias fechadas del 14 al 16 de noviembre; lo más reciente es del 11. Norris ganó en São Paulo y Mercedes ya tiene el campeonato de constructores. La próxima carrera es en Las Vegas: sábado 21 a las 22:00 hora de CDMX.",
+              "tipo": "nota",
+              "titulo": "Fórmula 1: lo más importante de hoy"
+            },
+            {
+              "para": "cerebro delta",
+              "texto": "La carrera de Las Vegas es el sábado 21 de noviembre a las 22:00 hora del centro de México (20:00 locales), según Motorsport.com Latinoamérica (16 de noviembre de 2026). ESPN da otro horario; confirmar en formula1.com.",
+              "tipo": "dato",
+              "titulo": "Dato para recordar: horario de Las Vegas",
+              "url": "https://lat.motorsport.com/f1/news/horarios-gp-las-vegas-2026-formula-1/10874562/"
+            }
+          ],
+          "fecha": "16 de noviembre de 2026",
+          "intro": "Buenos días desde el muro de boxes. Hoy no encontré notas de hoy ni de ayer; lo más reciente que confirmé es del 11 de noviembre. Lo que sí quedó resuelto: el horario de Las Vegas.",
+          "puntos": [
+            {
+              "cuando": "11 de noviembre",
+              "fuente": "Racer",
+              "resumen": "Andrea Stella, jefe de McLaren, dijo que habrá más mejoras en el GP de Las Vegas. Según GPFans, Red Bull y McLaren llevan actualizaciones para ese circuito.",
+              "titulo": "McLaren prepara novedades para Las Vegas",
+              "url": "https://racer.com/2026/11/11/more-new-mclaren-developments-for-las-vegas-gp-as-team-pushes-to-keep-momentum-building"
+            },
+            {
+              "cuando": "8 de noviembre",
+              "fuente": "PlanetF1",
+              "resumen": "Lando Norris ganó el GP de São Paulo saliendo desde la pole, en pista con lluvia y secado alternados. Max Verstappen fue segundo tras remontar desde el 21º lugar, e Isack Hadjar tercero.",
+              "titulo": "Norris gana en Interlagos desde la pole",
+              "url": "https://www.planetf1.com/news/2026-brazilian-grand-prix-race-report"
+            },
+            {
+              "cuando": "8 de noviembre",
+              "fuente": "RaceFans",
+              "resumen": "Con Russell cuarto y Antonelli quinto en São Paulo, Mercedes aseguró el título de constructores, según RaceFans y PlanetF1.",
+              "titulo": "Mercedes se queda con el campeonato de constructores",
+              "url": "https://www.racefans.net/2026/11/08/2026-brazilian-grand-prix-race-result-and-championship-points/"
+            },
+            {
+              "cuando": "tras la carrera del 8 de noviembre (fecha de la decisión sin confirmar)",
+              "fuente": "Crash.net",
+              "resumen": "Los comisarios castigaron a Mercedes y a Antonelli por una salida insegura cuando el Alpine de Colapinto se acercaba por la recta. Antonelli no perdió posiciones y terminó quinto.",
+              "titulo": "Antonelli, con cinco segundos por salida insegura",
+              "url": "https://www.crash.net/f1/news/1110027/1/kimi-antonelli-and-mercedes-punished-unsafe-release-messy-brazil-gp"
+            },
+            {
+              "cuando": "octubre de 2026",
+              "fuente": "Motor.es",
+              "resumen": "El Consejo Mundial aprobó que el personal de los equipos quede separado de gente ajena a la F1, incluso en comedores compartidos. Aplica desde 2027.",
+              "titulo": "La FIA aísla a los equipos desde 2027",
+              "url": "https://www.motor.es/formula-1/fia-impone-aislamiento-total-equipos-f1-comedores-compartidos-2026117146.html"
+            },
+            {
+              "cuando": "20 de octubre",
+              "fuente": "GPFans",
+              "resumen": "Según GPFans, a fines de octubre había 19 pilotos con asiento para 2027 y quedaban tres lugares por anunciar. Ocon ya confirmó que deja Haas al terminar la temporada.",
+              "titulo": "Diecinueve pilotos con asiento confirmado para 2027",
+              "url": "https://www.gpfans.com/en/f1-news/1091731/f1-grid-2027-october-2026-three-seats-remaining/"
+            }
+          ],
+          "titulo": "Sin noticias nuevas; Las Vegas ya tiene horario",
+          "id": "2026-11-16"
+        },
         {
           "capsulas": [
             {
@@ -450,20 +758,20 @@
       ],
       "memoria": [
         {
-          "actualizado": "2026-11-15T18:28:00Z",
-          "texto": "- Sirvieron: PlanetF1, RaceFans, The Race, Crash.net, Racer, Motor.es, GPFans, Fox Sports México, RacingNews365.\n- No abrieron: formula1.com y racingnews365.com (sin resolución DNS desde la sesión); las búsquedas en ellos sí devolvieron resúmenes.\n- Poco fiables: calendarios de Motor.es (mezclan circuitos) y OKDiario (nota vieja).\n- Notas sin fecha clara: RacingNews365 y GPFans sobre upgrades; las tomé con cautela.",
+          "actualizado": "2026-11-16T13:32:00Z",
+          "texto": "- Sirvieron hoy: Motorsport.com Latinoamérica, Telediario México, Mexican Times, Racer, PlanetF1, RaceFans, The Race, Crash.net, Motor.es, GPFans, RacingNews365.\n- Poco útiles hoy: búsquedas generales en español devolvieron agregadores y notas viejas (2024-2025); no las usé.\n- Poco fiables: ESPN Deportes (horario de Las Vegas distinto) y el resumen de puntos de un sitio que da 390 puntos a Antonelli; no lo usé.\n- Sin fecha clara: GPFans sobre Ferrari sin victoria y sobre upgrades de Red Bull; no los puse en el resumen.",
           "titulo": "Fuentes",
           "id": "fuentes"
         },
         {
-          "actualizado": "2026-11-15T18:28:00Z",
-          "texto": "- Confirmar horario de la carrera de Las Vegas en CDMX: Fox Sports da domingo 22 a las 4:00, pero no cuadra con Vegas.\n- Confirmar fechas de Las Vegas (21-22 nov) y Qatar (29 nov) en fuente oficial.\n- Sanción de Antonelli: fecha exacta de la decisión de los comisarios.\n- Upgrades de McLaren y Red Bull para Las Vegas: confirmar cuáles llegan.\n- Asientos 2027 sin confirmar (3 según GPFans, 20 oct): Haas, Racing Bulls, Aston Martin (Alonso, fuentes en conflicto).\n- Ver si hay noticias de hoy 15 de noviembre; no encontré ninguna.",
+          "actualizado": "2026-11-16T13:32:00Z",
+          "texto": "- Confirmar Qatar (29 nov) y Abu Dabi (6 dic) en fuente oficial; solo hay fechas de RacingNews365.\n- Sanción de Antonelli: fecha exacta de la decisión de los comisarios, sin confirmar.\n- Asientos 2027 sin confirmar: Haas, Racing Bulls y Aston Martin (fuentes en conflicto).\n- Upgrades de Red Bull para Las Vegas: sin confirmar en fuente de hoy; McLaren sí anunció novedades.\n- Horario de Las Vegas: resuelto por Motorsport.com, Telediario y Mexican Times (sábado 21, 22:00 CDMX). ESPN da 23:00; confirmar en formula1.com antes del viernes.\n- Ningún nota fechada del 14, 15 ni 16 de noviembre encontrada; volver a buscar mañana.",
           "titulo": "Pendientes",
           "id": "pendientes"
         },
         {
-          "actualizado": "2026-11-15T18:28:00Z",
-          "texto": "- 11 nov: McLaren prepara novedades para Las Vegas (Racer)\n- 8 nov: Norris gana en Interlagos desde la pole (PlanetF1)\n- 8 nov: Mercedes campeón de constructores (RaceFans)\n- 8 nov: Antonelli, 5 s por salida insegura (Crash.net)\n- oct: FIA aísla equipos desde 2027 (Motor.es)\n- 20 oct: 19 pilotos con asiento 2027 (GPFans)",
+          "actualizado": "2026-11-16T13:32:00Z",
+          "texto": "- 16 nov: horario de Las Vegas confirmado, sábado 21 a las 22:00 CDMX (Motorsport.com LatAm)\n- 11 nov: McLaren prepara novedades para Las Vegas (Racer)\n- 8 nov: Norris gana en Interlagos desde la pole (PlanetF1)\n- 8 nov: Mercedes campeón de constructores (RaceFans)\n- 8 nov: Antonelli, 5 s por salida insegura (Crash.net)\n- oct: FIA aísla equipos desde 2027 (Motor.es)\n- 20 oct: 19 pilotos con asiento 2027 (GPFans)",
           "titulo": "Ya lo conté",
           "id": "ya-contado"
         }
