@@ -46,7 +46,7 @@ Entre tarea y tarea no se quedan quietos: cada pocos minutos cambian de plan. A 
 
 ### Horario de la oficina
 
-La oficina abre de 6:00 a.m. a 7:30 p.m. (hora del aparato que la ve) y se cambia con el botón **Horario**. En el Artifact se guarda en la base (`oficina/horario`, `{ abre, cierra }`) y lo ven todos; en la página web se guarda en el aparato. **Abierta:** los jefes mandan a sus agentes y cada quien hace lo suyo. **Cerrada:** descansan, se pasean o acomodan cosas (`noche` de cada equipo en `EQUIPOS`), y la oficina se ve de noche: se oscurece y quedan prendidas lámparas en pasillos, cuartos, espacios libres y Ampliación (`lamparas()`); se prende y apaga poco a poco. Lo que una sesión o una tarea programada hace de verdad se muestra siempre, a la hora que sea. «Ver cómo se ve de noche» la oscurece 20 segundos para probar.
+La oficina abre de 6:00 a.m. a 7:30 p.m. (hora del aparato que la ve) y se cambia con el botón **Horario**. En el Artifact se guarda en la base (`oficina/horario`, `{ abre, cierra }`) y lo ven todos; en la página web se guarda en el aparato. **Abierta:** los jefes mandan a sus agentes y cada quien hace lo suyo. **Cerrada:** descansan, se pasean o acomodan cosas (`noche` de cada equipo en `EQUIPOS`), y la oficina se ve de noche: se oscurece y quedan prendidas lámparas de pared (`lamparas()`, salen del mapa: una cada ~5 casillas en cada pared de frente y una cada ~7 en las paredes de los lados de cuartos y pasillos altos; ninguna encima de la pantalla de noticias); se prende y apaga poco a poco. Lo que una sesión o una tarea programada hace de verdad se muestra siempre, a la hora que sea. «Ver cómo se ve de noche» la oscurece 20 segundos para probar.
 
 ### Modelo y esfuerzo en el gafete
 

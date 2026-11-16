@@ -3138,20 +3138,29 @@ function dibujar(t){
 }
 /* ---------- De noche: la oficina se oscurece y quedan prendidas las lámparas de pasillos y cuartos ---------- */
 let capaNoche = null, nivelNoche = 0;
-function lamparas(){   // [x, y, alcance] en pixeles de ahora
-  const L = [];
-  for (const y of [208, 432, 704, 1056]) for (let x = 56; x < W; x += 80) L.push([x, y, y === 704 || y === 1056 ? 46 : 58]);          // pasillos
-  for (const y of [536, 632]) L.push([240, y, 44]);                                                                                 // entre Calleros y el Cerebro
-  for (const y of [800, 912, 1000]){ L.push([200, y, 50]); L.push([312, y, 50]); }                                                  // gran pasillo, a los lados del túnel
-  for (const [nombre, A] of Object.entries(AREAS)){                                                                                 // cada cuarto
-    if (nombre === 'almacen') continue;
-    const cx = (A.x0 + A.x1 + 1) / 2 * T, cy = (A.y0 + A.y1 + 1) / 2 * T, ancho = (A.x1 - A.x0 + 1) * T, alto = (A.y1 - A.y0 + 1) * T;
-    if (alto > 200){ L.push([cx, cy - alto / 4, 74]); L.push([cx, cy + alto / 4, 74]); }
-    else if (ancho > 170){ L.push([cx - ancho / 4, cy, 70]); L.push([cx + ancho / 4, cy, 70]); }
-    else L.push([cx, cy, 72]);
+/* Lámparas de pared (apliques). Salen del mapa: en cada pared de frente que da a un cuarto o pasillo, una cada
+   ~5 casillas; y en las paredes de los lados de los cuartos y pasillos altos, una cada ~7. Cada una echa su luz
+   hacia adentro. [x de la luz, y de la luz, alcance, x del aplique, y del aplique, lado] en pixeles de ahora. */
+function lamparas(){
+  const L = [], piso = (x, y) => y >= 0 && y < ROWS && x >= 0 && x < COLS && CAMINABLE.has(MAPA[y][x]) && MAPA[y][x] !== 'D' && MAPA[y][x] !== 'E';
+  const repartir = (ini, n, paso, pon) => { const k = Math.max(1, Math.round(n / paso)); for (let i = 0; i < k; i++) pon(ini + (i + 0.5) * n / k); };
+  for (let y = 0; y < ROWS; y++) for (let x = 0; x < COLS; ){                       // paredes de frente
+    if (!(MAPA[y][x] === '=' && piso(x, y + 1))){ x++; continue; }
+    let n = 0; while (x + n < COLS && MAPA[y][x + n] === '=' && piso(x + n, y + 1)) n++;
+    const tapa = cx => cx * T > PANTALLA.x - 12 && cx * T < PANTALLA.x + PANTALLA.w + 12 && y * T > PANTALLA.y - 40 && y * T < PANTALLA.y + PANTALLA.h;   // no encima de la pantalla de noticias
+    repartir(x, n, 5, cx => { if (!tapa(cx)) L.push([cx * T, (y + 1) * T + 14, 54, cx * T, y * T + 5, 'frente']); });
+    x += n;
   }
-  for (const x of [88, 256, 424]) L.push([x, 73 * T, 50]);                                                                           // espacios libres: una sola, más tenue
-  for (const x of [120, 256, 400]) L.push([x, 85 * T, 56]);                                                                          // Ampliación: lámparas de obra
+  for (const lado of [-1, 1]) for (let x = 1; x < COLS - 1; x++) for (let y = 0; y < ROWS; ){   // paredes de los lados
+    const muro = c => c === '#' || c === undefined;
+    if (!(piso(x, y) && muro(MAPA[y][x + lado]))){ y++; continue; }
+    let n = 0; while (y + n < ROWS && piso(x, y + n) && muro(MAPA[y + n][x + lado])) n++;
+    if (n >= 9 || (n >= 5 && MAPA[y][x] === 'n')) repartir(y + 1, n - 1, 7, cy => {   // la Sala de Noticias, que tiene la pared ocupada, las lleva a los lados
+      const borde = lado < 0 ? x * T : (x + 1) * T;
+      L.push([borde - lado * 16, cy * T, 46, borde - lado * 2, cy * T, lado < 0 ? 'izq' : 'der']);
+    });
+    y += n;
+  }
   return L;
 }
 function armarNoche(){
@@ -3161,10 +3170,18 @@ function armarNoche(){
   x.globalCompositeOperation = 'destination-out';                     // cada lámpara abre su charco de luz, en tres escalones
   for (const [lx, ly, r] of L) for (const [f, a] of [[1, 0.3], [0.72, 0.36], [0.44, 0.5]]){ x.globalAlpha = a; x.beginPath(); x.arc(lx, ly, r * f, 0, 7); x.fill(); }
   x.globalCompositeOperation = 'source-over';
-  for (const [lx, ly, r] of L){                                       // luz cálida y la lámpara misma
+  for (const [lx, ly, r, fx, fy, lado] of L){
     x.globalAlpha = 0.1; x.fillStyle = '#ffd27a'; x.beginPath(); x.arc(lx, ly, r * 0.72, 0, 7); x.fill();
-    x.globalAlpha = 1; x.fillStyle = K; x.fillRect(Math.round(lx) - 3, Math.round(ly) - 2, 6, 4);
-    x.fillStyle = '#ffe9a0'; x.fillRect(Math.round(lx) - 2, Math.round(ly) - 1, 4, 2);
+    x.globalAlpha = 0.35; x.beginPath(); x.arc(fx, fy, 7, 0, 7); x.fill();                         // el resplandor en la pared
+    x.globalAlpha = 1; const X = Math.round(fx), Y = Math.round(fy);
+    if (lado === 'frente'){                                                                          // aplique visto de frente
+      x.fillStyle = K; x.fillRect(X - 4, Y - 3, 8, 7); x.fillStyle = '#8a6a3a'; x.fillRect(X - 1, Y + 3, 2, 2);
+      x.fillStyle = '#ffe9a0'; x.fillRect(X - 3, Y - 2, 6, 4); x.fillStyle = '#fff8dc'; x.fillRect(X - 2, Y - 2, 4, 1);
+    } else {                                                                                         // aplique de lado, pegado a la pared
+      const d = lado === 'izq' ? 1 : -1;
+      x.fillStyle = K; x.fillRect(lado === 'izq' ? X - 1 : X - 4, Y - 4, 5, 8);
+      x.fillStyle = '#ffe9a0'; x.fillRect(lado === 'izq' ? X : X - 3, Y - 3, 3, 6); x.fillStyle = '#fff8dc'; x.fillRect(lado === 'izq' ? X + 1 + d - 1 : X - 2, Y - 2, 1, 4);
+    }
   }
   return c;
 }
