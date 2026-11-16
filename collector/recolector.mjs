@@ -87,7 +87,7 @@ function modeloDe(nombre) {
 // Lee una transcripción de Claude Code y saca el monito que le toca, en el mismo
 // formato que ya usa la oficina (id, nombre, area, actividad, estado, modelo...).
 export function resumirTranscripcion(texto, idArchivo, ahora = Date.now()) {
-  let id = idArchivo, cwd = '', primerPrompt = '', modelo = null, ultra = false;
+  let id = idArchivo, cwd = '', primerPrompt = '', modelo = null, esfuerzo = null, ultra = false;
   const titulo = {};
   let ultimo = null;        // último mensaje de la conversación principal
   let herramienta = null;   // última herramienta que usó
@@ -113,6 +113,7 @@ export function resumirTranscripcion(texto, idArchivo, ahora = Date.now()) {
       d.esResultado = esResultado;
     } else {
       if (d.message?.model) modelo = modeloDe(d.message.model) || modelo;
+      if (typeof d.effort === 'string') esfuerzo = d.effort;                       // low, medium, high, xhigh o max
       for (const p of partes) if (p.type === 'tool_use') { herramienta = p; if (p.name === 'Workflow') ultra = true; }
       d.usaHerramienta = partes.some((p) => p.type === 'tool_use');
     }
@@ -138,7 +139,7 @@ export function resumirTranscripcion(texto, idArchivo, ahora = Date.now()) {
     proyecto: cwd ? path.basename(cwd.replace(/\\/g, '/')) : '',
     area, actividad, estado,
     modo: ultra && estado === 'trabajando' ? 'ultra' : 'normal',
-    modelo,
+    modelo, esfuerzo: esfuerzo || undefined,
     // `actualizado` es el latido (mientras trabaja, es ahora); `ultima_actividad`
     // es lo último que de verdad pasó y es lo que cuenta para el vencimiento.
     actualizado: new Date(estado === 'trabajando' ? ahora : ts).toISOString(),

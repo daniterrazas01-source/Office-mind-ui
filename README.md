@@ -44,6 +44,10 @@ El primero es **Nitro**: noticias de arrancones, diario a las 7:23 a.m. (hora de
 
 Entre tarea y tarea no se quedan quietos: cada pocos minutos cambian de plan. A veces hacen algo por su cuenta (el campo `rutina` de su ficha: lista de `{ area, actividad }`), a veces se quedan en su lugar y a veces se van a Descanso, donde también se pasean. Eso es ambiente; la tarea de verdad es la programada.
 
+### Modelo y esfuerzo en el gafete
+
+Todo monito dice en el renglón de abajo de su gafete con qué trabaja, por ejemplo «Opus en alto ▮▮▮▯▯», y con esfuerzo alto o más trae un resplandor a sus pies. Vale para cualquiera que mande los campos `modelo` y `esfuerzo` (`low`, `medium`, `high`, `xhigh`, `max`): las sesiones con aviso (tableta, relevo, laptop con `collector/`), las del pase, las del Artifact cuando Claude da el dato, y los monitos programados, que lo escriben en su ficha. Si falta el esfuerzo, el gafete deja lo de antes (aparato u horario).
+
 ### Equipos: quién manda a quién
 
 | Jefe (supervisor) | Su territorio | Su agente |
@@ -62,8 +66,8 @@ Lo que sí leen los monitos de verdad en su ronda es la nota de memoria `instruc
 
 Para agregar otro, desde cualquier sesión de Claude Code en la nube:
 
-1. Crear su ficha en la base del Artifact, colección `monitos`, con `ArtifactData`: `nombre`, `descripcion`, `casa` (cuarto donde vive: `terrazas`, `descanso`, `calleros`…), `aspecto` (`gorra_roja`, `lentes`, `audifonos`, `bufanda`, `moño`…), `modelo`, `horario` (texto para leer), `frases` (lo que dice de vez en cuando), `estado: "listo"`.
-2. Crear la tarea programada (`create_trigger`, sesión nueva en cada corrida) con un mensaje como el de Nitro: avisar `estado: "trabajando"` con su `area` y `actividad`, hacer el trabajo, guardar el resumen en `monitos/<id>/reportes/<AAAA-MM-DD>` (`titulo`, `fecha`, `intro`, `puntos[]` con `titulo`, `resumen`, `fuente`, `url`, `cierre`, `creado`) y terminar con `estado: "listo"`.
+1. Crear su ficha en la base del Artifact, colección `monitos`, con `ArtifactData`: `nombre`, `descripcion`, `casa` (cuarto donde vive: `terrazas`, `descanso`, `calleros`…), `aspecto` (`gorra_roja`, `lentes`, `audifonos`, `bufanda`, `moño`…), `modelo`, `esfuerzo` (`low`, `medium`, `high`, `xhigh` o `max`), `horario` (texto para leer), `frases` (lo que dice de vez en cuando), `estado: "listo"`.
+2. Crear la tarea programada (`create_trigger`, sesión nueva en cada corrida) con un mensaje como el de Nitro: avisar `estado: "trabajando"` con su `area` y `actividad` (y en ese mismo aviso su `esfuerzo`, que sale de `echo $CLAUDE_EFFORT`), hacer el trabajo, guardar el resumen en `monitos/<id>/reportes/<AAAA-MM-DD>` (`titulo`, `fecha`, `intro`, `puntos[]` con `titulo`, `resumen`, `fuente`, `url`, `cierre`, `creado`) y terminar con `estado: "listo"`.
 
 ## Memoria, archivo y pantalla
 

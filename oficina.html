@@ -1932,7 +1932,7 @@ function ponerNombre(a, nombre){
   a.elNombre.appendChild(document.createElement('b'));
   // Renglón de abajo: con qué trabaja ("Opus en alto" y sus rayitas) si se sabe; si no, en qué aparato está
   const conQue = m && a.esfuerzo ? m.nombre + ' en ' + a.esfuerzo[0] : a.tableta && m ? 'Modelo ' + m.nombre : '';
-  const abajo = [conQue || a.dispositivo, plazo].filter(Boolean).join(' · ');
+  const abajo = [conQue, !conQue || a.rol === 'programado' ? a.dispositivo : '', plazo].filter(Boolean).join(' · ');   // los de tarea programada conservan su horario
   if (abajo){
     const s = document.createElement('small'); s.textContent = abajo;
     if (conQue && a.esfuerzo){ const p = document.createElement('span'); p.className = 'pips'; p.style.color = m.etiqueta; p.textContent = ' ' + '▮'.repeat(a.esfuerzo[1]) + '▯'.repeat(5 - a.esfuerzo[1]); s.appendChild(p); }
@@ -2846,7 +2846,7 @@ function registroProgramado(m, ahora){
     estado: trabajando || libre.real ? 'trabajando' : libre.area === 'descanso' ? 'esperando' : (libre.actividad || libre.plan) ? 'por su cuenta' : nuevo ? 'terminado' : 'esperando',
     tarea: trabajando, encargo: libre.real ? plan.jefe : '', plan: trabajando ? '' : (libre.plan || libre.actividad || 'En su lugar'),
     tubo: enEstacion || (trabajando && ES_DEL_TUNEL.test(m.actividad || '')),
-    modelo: m.modelo, aspecto: m.aspecto, equipo: m.horario || 'Tarea programada',
+    modelo: m.modelo, esfuerzo: m.esfuerzo, aspecto: m.aspecto, equipo: m.horario || (m.jefe ? 'Agente de ' + m.jefe : 'Tarea programada'),
     actualizado: new Date(ahora).toISOString(), ultima_actividad: m.actualizado,
   };
 }
@@ -2871,7 +2871,7 @@ function fichaMonito(a, cual){
   const m = monitoPorId(a.monito); if (!m) return;
   const reportes = m.reportes || [], r = reportes.find(x => x.id === cual) || reportes[0];
   let html = (m.descripcion ? `<p>${esc(m.descripcion)}</p>` : '') +
-    [['Rol', m.horario ? '◆ Tarea programada (no se va)' : '◆ Agente de ' + (m.jefe || 'la oficina') + ' (no se va)'], ['Cuándo trabaja', m.horario || 'Cuando su jefe lo necesita'], ['Vive en', NOMBRE_AREA[m.casa] || 'Descanso'], ['Sección', m.seccion || '—'], ['Jefe', m.jefe || '—'],
+    [['Rol', m.horario ? '◆ Tarea programada (no se va)' : '◆ Agente de ' + (m.jefe || 'la oficina') + ' (no se va)'], ['Cuándo trabaja', m.horario || 'Cuando su jefe lo necesita'], ['Vive en', NOMBRE_AREA[m.casa] || 'Descanso'], ['Sección', m.seccion || '—'], ['Jefe', m.jefe || '—'], ['Modelo y esfuerzo', ((MODELOS[a.modelo] || {}).nombre || 'sin dato') + (a.esfuerzo ? ' en ' + a.esfuerzo[0] : ' (esfuerzo sin dato todavía)')],
      ['Ahora', a.enTarea ? 'En su tarea: ' + (a.textoPendiente || 'trabajando') : a.encargo ? (a.textoPendiente || 'Trabajando') + ' (encargo de ' + a.encargo + ', de su sesión)' : a.plan + ' (por su cuenta)'],
      ['Último resumen', reportes[0] ? (reportes[0].fecha || reportes[0].id) : 'todavía ninguno'],
      ['Memoria', (m.memoria || []).length + ' notas en el Centro de Pensado']]
@@ -2889,7 +2889,7 @@ function fichaAgente(a){
   const m = MODELOS[a.modelo];
   const filas = [['Rol', a.rol === 'supervisor' ? '★ Supervisor (no se va)' : 'Visitante'],
                  ['Persona', a.persona], ['Dispositivo', a.dispositivo || '—'], ['Área', NOMBRE_AREA[a.areaDestino] || '—'], ['Haciendo', a.rol === 'supervisor' && a.plan ? a.plan + ' (por su cuenta: ' + (a.ausente ? 'no tiene sesión abierta' : 'su sesión está en espera') + ')' : a.ausente ? 'Sin sesión abierta' : a.textoPendiente || '—'],
-                 ['Estado', a.estadoTxt || '—'], ['Modo', a.ultra ? 'ULTRA' : 'Normal'], ['Modelo', m ? m.nombre : 'sin dato todavía'],
+                 ['Estado', a.estadoTxt || '—'], ['Modo', a.ultra ? 'ULTRA' : 'Normal'], ['Modelo', m ? m.nombre : 'sin dato todavía'], ['Esfuerzo', a.esfuerzo ? a.esfuerzo[0] : 'sin dato todavía'],
                  ['Último aviso', a.ts ? hace(a.ts / 1000) : '—']];
   if (a.rol === 'supervisor' && a.sesionNombre && a.sesionNombre !== a.nombre) filas.splice(2, 0, ['Sesión', a.sesionNombre]);
   if (a.proyecto) filas.splice(2, 0, ['Proyecto', a.proyecto]);
