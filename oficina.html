@@ -441,7 +441,8 @@ const LUGARES = {
     L(3, 96, 'der', { sentado: true, puf: '#8a58cf' }),
     L(6, 96, 'izq', { sentado: true, puf: '#2bb3a3' }),
     L(5, 98, 'arriba', { sentado: true, puf: '#f2c230' }),
-    L(8, 93, 'arriba'),                                                // en su casillero
+    L(6, 94, 'arriba', { ox: 8, lavadora: 0 }),                       // frente a cada lavadora de memoria (adentro no se ve)
+    L(8, 94, 'arriba', { ox: 8, lavadora: 1 }),
   ],
   'terrazas': [                                                        // equipo DragTree
     L(6, 47, 'arriba', { oy: -3, sentado: true, silla: 'oficina' }),
@@ -908,18 +909,45 @@ function cuartoDeAgentes(){
     R(289 + dx, 273 + dy, 30, 13, K); R(290 + dx, 274 + dy, 28, 8, '#8b5a2b'); R(290 + dx, 274 + dy, 28, 1, '#a87040'); R(290 + dx, 282 + dy, 28, 3, '#6b4423');
     R(294 + dx, 276 + dy, 5, 4, '#f2efe6'); R(295 + dx, 276 + dy, 3, 1, '#6b3b1f'); R(306 + dx, 275 + dy, 8, 5, '#3f8f3f'); R(307 + dx, 275 + dy, 6, 1, '#6fcf7b');
   });
-  bloquear(8, 92, 9, 92);
-  mueble(92 * T + 15, () => {                                        // casilleros de los agentes
-    const x0 = 128, y0 = 1460;
-    R(x0, y0, 32, 28, K);
-    for (let i = 0; i < 3; i++){
-      const x = x0 + 1 + i * 10;
-      R(x, y0 + 1, 10, 26, ['#5b6f8a', '#6a5b8a', '#5b8a74'][i]); R(x, y0 + 1, 10, 1, '#8fa3bf'); R(x + 9, y0 + 1, 1, 26, K);
-      for (let j = 0; j < 3; j++) R(x + 2, y0 + 4 + j * 2, 6, 1, '#2a2f3a');
-      R(x + 7, y0 + 14, 1, 3, '#e6c229');
-    }
-  });
+  /* Dos lavadoras de memoria contra la pared. Quien se baña se mete y se le ve girando en la ventanita;
+     al salir, sale limpio y brillando. Diseño propio: cuerpo de metal, ventanita redonda, pantallita y un tanque
+     de burbujas arriba. */
+  bloquear(6, 92, 9, 93);
+  for (const k of [0, 1]) mueble(93 * T + 15, (t) => lavadora(k, 98 + k * 32, 93 * T + 15, t));
   planta(1, 99); planta(9, 99);
+}
+function quienSeLava(k){   // quién está adentro de la lavadora k (ya llegó y se metió)
+  const i = LUGARES.agentes.findIndex(l => l.lavadora === k), id = i >= 0 && OCUPA.agentes[i], a = id && agentes.get(id);
+  return a && a.fase === 'trabajando' && a.lugar && a.lugar.lavadora === k ? a : null;
+}
+function lavadora(k, x0, yb, t){
+  const a = quienSeLava(k), on = !!a, cx = x0 + 12, cy = yb - 12;
+  g.fillStyle = 'rgba(0,0,0,0.18)'; g.fillRect(x0 + 1, yb - 1, 28, 3);                                   // sombra
+  // tanque de burbujas (la memoria que se va)
+  R(x0 + 6, yb - 42, 16, 3, K); R(x0 + 7, yb - 41, 14, 1, '#7c8596');
+  R(x0 + 7, yb - 39, 14, 16, K); R(x0 + 8, yb - 38, 12, 14, '#d8f3ff');
+  const nivel = on ? 4 + Math.round(3 * Math.sin(t * 1.3)) : 6;
+  R(x0 + 8, yb - 38 + nivel, 12, 14 - nivel, '#5fd0e6'); R(x0 + 8, yb - 38 + nivel, 12, 1, '#a8ecf7');
+  R(x0 + 9, yb - 37, 1, 12, 'rgba(255,255,255,0.6)');
+  for (let i = 0; i < (on ? 4 : 1); i++){ const u = (t * (on ? 0.9 : 0.25) + i / 4 + k * 0.3) % 1; R(x0 + 11 + (i * 3) % 7, Math.round(yb - 25 - u * (13 - nivel)), 2, 2, '#ffffff'); }
+  R(x0 + 3, yb - 32, 4, 2, '#5d6878'); R(x0 + 3, yb - 32, 2, 9, '#5d6878');                       // tubo al cuerpo
+  // cuerpo
+  R(x0, yb - 24, 28, 24, K); R(x0 + 1, yb - 23, 26, 22, '#8d9ab0'); R(x0 + 1, yb - 23, 26, 1, '#bcc8da'); R(x0 + 1, yb - 4, 26, 3, '#5f6a7d');
+  R(x0 + 2, yb - 1, 3, 2, K); R(x0 + 23, yb - 1, 3, 2, K);                                            // patitas
+  // ventanita
+  disco(cx, cy, 9, K); disco(cx, cy, 8, '#c9d2e0'); disco(cx, cy, 6, K);
+  if (on){
+    disco(cx, cy, 5, '#3fb6d6');
+    const giro = t * 7, col = MODELOS[a.modelo] ? MODELOS[a.modelo].color : '#d97757';
+    const bx = Math.round(cx + Math.cos(giro) * 2), by = Math.round(cy + Math.sin(giro) * 2);   // el agente dando vueltas
+    disco(bx, by, 2, col); R(bx - 1, by - 1, 1, 1, K_OJO); R(bx + 1, by - 1, 1, 1, K_OJO);
+    for (let i = 0; i < 3; i++){ const an = -giro * 0.8 + i * 2.1; R(Math.round(cx + Math.cos(an) * 4), Math.round(cy + Math.sin(an) * 4), 1, 1, '#e8fbff'); }
+    for (let i = 0; i < 3; i++){ const u = (t * 0.8 + i / 3) % 1; g.globalAlpha = 1 - u; R(cx - 6 + i * 6, Math.round(yb - 26 - u * 10), 2, 2, '#e8fbff'); g.globalAlpha = 1; }   // espuma que sale
+  } else { disco(cx, cy, 5, '#22313f'); R(cx - 3, cy - 3, 2, 1, '#6f8aa3'); R(cx - 3, cy - 2, 1, 1, '#6f8aa3'); }
+  // pantallita y foquito
+  R(x0 + 22, yb - 21, 4, 9, K); R(x0 + 23, yb - 20, 2, 7, '#12202c');
+  if (on){ const f = Math.floor((t * 0.6) % 1 * 7); R(x0 + 23, yb - 14 - f, 2, f + 1, '#5dff7a'); }
+  R(x0 + 23, yb - 9, 2, 2, on ? (Math.floor(t * 3) % 2 ? '#5dff7a' : '#1f5a2a') : '#3a3f4d');
 }
 
 /* ---------- Sala de Noticias: una pantalla grande donde los monitos muestran lo que traen ---------- */
@@ -1920,6 +1948,16 @@ function dibujarAgente(a, t){
   if (a.ultra) chispas(x, by, y, m, t, a.semilla);
   if (a.fase === 'aviso') admiracion(x, by - (a.ultra ? 7 : 0));
   if (a.zzz && enLugar && !a.paseo) zetas(x, by, t, a.semilla);
+  if (a.limpioHasta && t < a.limpioHasta){                           // recién bañado: brillitos y burbujas de jabón
+    const queda = (a.limpioHasta - t) / 12;
+    for (let i = 0; i < 6; i++){
+      const u = (t * 0.7 + i / 6) % 1, an = i * 1.05 + t * 0.5, r = m.w / 2 + 3;
+      g.globalAlpha = queda * (1 - u);
+      const px = Math.round(x + Math.cos(an) * r), py = Math.round(by + 6 - u * 14 + Math.sin(an) * 3);
+      if (i % 2){ R(px, py, 1, 3, '#ffffff'); R(px - 1, py + 1, 3, 1, '#ffffff'); } else { R(px, py, 2, 2, '#bfefff'); R(px, py, 1, 1, '#ffffff'); }
+    }
+    g.globalAlpha = 1;
+  }
 }
 
 /* ---------- Agentes ---------- */
@@ -2017,6 +2055,7 @@ function ponerPuntos(a){
 
 function liberar(a){
   const l = a.lugar; if (!l) return;
+  if (l.lavadora != null && a.fase === 'trabajando') a.limpioHasta = performance.now() / 1000 + 12;   // sale de la lavadora: limpio
   if (l.idx >= 0){ if (OCUPA[l.area][l.idx] === a.id) OCUPA[l.area][l.idx] = null; }
   else EXTRA[l.area].delete(a.id);
   a.lugar = null;
@@ -2030,7 +2069,8 @@ function asignarLugar(a, area){
   a.enTubo = false;
   if (a.quiereTubo){ const i = lista.findIndex(l => l.tubo); if (i >= 0 && !occ[i]){ idx = i; a.enTubo = true; } }   // va a la estación del túnel
   if (idx < 0 && principal(a) && !occ[0]) idx = 0;
-  const puede = l => !l.tubo && (!l.jefe || a.rol === 'supervisor');
+  if (idx < 0 && a.quiereLavar){ const i = lista.findIndex((l, k) => l.lavadora != null && !occ[k]); if (i >= 0) idx = i; }   // a la lavadora que esté libre
+  const puede = l => !l.tubo && l.lavadora == null && (!l.jefe || a.rol === 'supervisor');
   for (let i = reservarPrincipal ? 1 : 0; idx < 0 && i < lista.length; i++) if (!occ[i] && puede(lista[i])) idx = i;
   if (idx < 0 && !occ[0] && puede(lista[0])) idx = 0;
   if (idx >= 0){ occ[idx] = a.id; a.lugar = lista[idx]; return; }
@@ -2262,7 +2302,9 @@ function procesar(datos){
     const quiereTubo = !!r.tubo || (!!ESTACIONES[area] && ES_DEL_TUNEL.test(String(r.actividad || '')));
     if (inactivo){ area = enTerrazas ? 'terrazas' : 'descanso'; texto = 'Esperando instrucciones'; }   // Terrazas espera en su cuarto
     else if (area === 'descanso' && !texto) texto = 'Esperando instrucciones';
-    const cambiaTubo = (quiereTubo && !inactivo && !!ESTACIONES[area]) !== !!a.quiereTubo;
+    const quiereLavar = !!r.lavar && area === 'agentes' && !inactivo, cambiaLavar = quiereLavar !== !!a.quiereLavar;
+    a.quiereLavar = quiereLavar;
+    const cambiaTubo = (quiereTubo && !inactivo && !!ESTACIONES[area]) !== !!a.quiereTubo || cambiaLavar;
     a.quiereTubo = quiereTubo && !inactivo && !!ESTACIONES[area];
     const estado = inactivo ? 'inactivo' : String(r.estado || 'trabajando').toLowerCase();
     a.elNombre.style.setProperty('--e', ESTADO_COLOR[estado] || ESTADO_COLOR.trabajando);
@@ -2469,7 +2511,8 @@ function ubicarVinetas(){
     if (a.medir){ a.bw = a.el.offsetWidth / escala; a.bh = a.el.offsetHeight / escala; a.medir = false; }
     const sentado = a.fase === 'trabajando' && a.lugar && a.lugar.sentado;
     const mm = modeloDe(a);
-    const cabeza = Math.round(a.y) - (sentado ? mm.h : mm.h + 2) - (a.ultra ? 10 : 3);
+    const enLavadora = a.fase === 'trabajando' && a.lugar && a.lugar.lavadora != null;   // adentro de la lavadora: el globo va arriba del tanque
+    const cabeza = enLavadora ? Math.round(a.y) - 58 : Math.round(a.y) - (sentado ? mm.h : mm.h + 2) - (a.ultra ? 10 : 3);
     const izq = Math.max(2, Math.min(W - 2 - a.bw, Math.round(a.x - a.bw / 2)));
     const abajo = cabeza - 5;
     lista.push({ a, izq, abajo, arriba: abajo - a.bh, cabeza });
@@ -2841,14 +2884,17 @@ function planDeNoche(casa, quien, ahora){   // fuera de horario: descansar, pase
 }
 const ES_DEL_TUNEL = /t[uú]nel|buz[oó]n/i;   // lo que se hace en la estación del túnel
 /* Un par de veces al día (a media mañana y a media tarde, a horas un poco distintas para cada uno) el agente se
-   va 25 minutos a su cuarto a refrescarse y descansar. Los jefes no lo llaman mientras tanto. */
-const DESCANSO_AGENTE_MIN = 25;
+   va 25 minutos a su cuarto: primero se mete a la lavadora de memoria y luego descansa. Los jefes no lo llaman
+   mientras tanto. Esto es de ambiente; la limpieza de verdad la hace su tarea programada (paso "Baño de memoria"). */
+const DESCANSO_AGENTE_MIN = 25, LAVADO_MIN = 6;
+const ES_LAVADO = /lav[aá]nd|ba[ñn]o de memoria|limpi[aá]ndo(me)? la memoria/i;
 function descansoDeAgente(m, ahora){
   const d = new Date(ahora), min = d.getHours() * 60 + d.getMinutes(), a = aMinutos(HORARIO.abre), c = aMinutos(HORARIO.cierra), h = hashTexto(m.id);
   const largo = (c - a + 1440) % 1440;
   for (const f of [0.3 + h * 0.08, 0.68 + h * 0.08]){
     const ini = (a + Math.floor(largo * f)) % 1440, pasado = (min - ini + 1440) % 1440;
-    if (pasado < DESCANSO_AGENTE_MIN) return { area: 'agentes', actividad: pasado < 8 ? 'Refrescándome un rato' : 'En mi descanso', pausa: true };
+    if (pasado < DESCANSO_AGENTE_MIN) return pasado < LAVADO_MIN ? { area: 'agentes', actividad: 'Lavándome la memoria', pausa: true, lavar: true }
+      : { area: 'agentes', actividad: pasado < LAVADO_MIN + 2 ? '¡Memoria limpia!' : 'En mi descanso', pausa: true };
   }
   return null;
 }
@@ -2952,13 +2998,14 @@ function registroProgramado(m, ahora){
   const orden = mio ? plan.orden : null;                             // lo que le encargó su jefe
   const libre = orden ? { area: orden.area, actividad: orden.actividad, orden: true, real: !!plan.real } : suelto;
   const enEstacion = !trabajando && ES_DEL_TUNEL.test(libre.actividad || '');   // en la estación dice lo que hace ahí
+  const lavar = trabajando ? normalizarArea(m.area) === 'agentes' && ES_LAVADO.test(m.actividad || '') : !!libre.lavar;   // a la lavadora de memoria
   return {
     id: 'monito-' + m.id, monito: m.id, nombre: m.nombre || m.id, rol: 'programado', fijo: true,
     area: trabajando ? (m.area || 'internet') : libre.area,
-    actividad: trabajando ? (m.actividad || 'Trabajando') : libre.plan ? '' : (enEstacion || libre.orden) ? libre.actividad : nuevo ? '¡Traigo resumen nuevo!' : (frase || libre.actividad || ''),
+    actividad: trabajando ? (m.actividad || 'Trabajando') : libre.plan ? '' : (enEstacion || libre.orden || libre.pausa) ? libre.actividad : nuevo ? '¡Traigo resumen nuevo!' : (frase || libre.actividad || ''),
     estado: trabajando || libre.real ? 'trabajando' : libre.area === 'descanso' ? 'esperando' : (libre.actividad || libre.plan) ? 'por su cuenta' : nuevo ? 'terminado' : 'esperando',
     tarea: trabajando, encargo: libre.real ? plan.jefe : '', plan: trabajando ? '' : (libre.plan || libre.actividad || 'En su lugar'),
-    tubo: enEstacion || (trabajando && ES_DEL_TUNEL.test(m.actividad || '')),
+    tubo: enEstacion || (trabajando && ES_DEL_TUNEL.test(m.actividad || '')), lavar,
     modelo: m.modelo, esfuerzo: m.esfuerzo, aspecto: m.aspecto, equipo: m.horario || (m.jefe ? 'Agente de ' + m.jefe : 'Tarea programada'),
     actualizado: new Date(ahora).toISOString(), ultima_actividad: m.actualizado,
   };
@@ -2987,7 +3034,8 @@ function fichaMonito(a, cual){
     [['Rol', m.horario ? '◆ Tarea programada (no se va)' : '◆ Agente de ' + (m.jefe || 'la oficina') + ' (no se va)'], ['Cuándo trabaja', m.horario || 'Cuando su jefe lo necesita'], ['Vive en', NOMBRE_AREA[m.casa] || 'Descanso'], ['Sección', m.seccion || '—'], ['Jefe', m.jefe || '—'], ['Modelo y esfuerzo', ((MODELOS[a.modelo] || {}).nombre || 'sin dato') + (a.esfuerzo ? ' en ' + a.esfuerzo[0] : ' (esfuerzo sin dato todavía)')],
      ['Ahora', a.enTarea ? 'En su tarea: ' + (a.textoPendiente || 'trabajando') : a.encargo ? (a.textoPendiente || 'Trabajando') + ' (encargo de ' + a.encargo + ', de su sesión)' : a.plan + ' (por su cuenta)'],
      ['Último resumen', reportes[0] ? (reportes[0].fecha || reportes[0].id) : 'todavía ninguno'],
-     ['Memoria', (m.memoria || []).length + ' notas en el Centro de Pensado']]
+     ['Memoria', (m.memoria || []).length + ' notas en el Centro de Pensado'],
+     ['Último baño de memoria', m.bano && m.bano.cuando ? fechaCorta(m.bano.cuando) + (m.bano.quite != null ? ` · quitó ${m.bano.quite} renglones, quedan ${m.bano.quedan}` : '') : 'todavía ninguno']]
       .map(([k, v]) => `<div class="fila"><span>${esc(k)}</span><span>${esc(v)}</span></div>`).join('');
   html += r ? htmlReporte(r) : '<p class="vacio" style="margin-top:14px">Todavía no trae ningún resumen. Aparecerá aquí cuando corra su tarea.</p>';
   if (reportes.length > 1) html += '<h4 style="margin:16px 0 8px">Resúmenes anteriores</h4>' +
@@ -3207,7 +3255,7 @@ function dibujar(t){
   const items = MUEBLES.slice();
   for (const a of agentes.values()) items.push({ sortY: a.y, a });
   items.sort((p, q) => p.sortY - q.sortY);
-  for (const it of items){ if (!it.a) it.dibujar(t); else if (!it.a.bajo) dibujarAgente(it.a, t); }
+  for (const it of items){ if (!it.a) it.dibujar(t); else if (!it.a.bajo && !(it.a.fase === 'trabajando' && it.a.lugar && it.a.lugar.lavadora != null)) dibujarAgente(it.a, t); }
   tallos();
   noche();
   if (zonaEncima){   // marco punteado sobre lo que se puede picar
