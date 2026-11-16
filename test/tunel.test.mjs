@@ -113,3 +113,44 @@ test('una noticia es de hoy si su resumen tiene menos de 24 horas', () => {
   assert.equal(esDeHoy('2026-11-14T13:23:00Z', ahora), false);
   assert.equal(esDeHoy(undefined, ahora), false);
 });
+
+// ---------- Secciones del noticiero ----------
+import { edadDias, secciones, turnoSeccion } from '../src/pantalla.js';
+
+const HOY = Date.parse('2026-11-16T15:00:00Z'), HECHO = '2026-11-16T13:30:00Z';
+
+test('la edad de una noticia sale de lo que escribió el monito', () => {
+  assert.ok(edadDias('hoy', HECHO, HOY) < 1);
+  assert.ok(edadDias('ayer', HECHO, HOY) >= 1 && edadDias('ayer', HECHO, HOY) < 2);
+  assert.equal(Math.floor(edadDias('14 de noviembre', HECHO, HOY)), 2);
+  assert.equal(Math.floor(edadDias('tras la carrera del 8 de noviembre (fecha sin confirmar)', HECHO, HOY)), 8);
+  assert.ok(edadDias('octubre de 2026 (fecha exacta sin confirmar)', HECHO, HOY) > 20);
+  assert.ok(edadDias('20 de diciembre', '2027-01-03T13:00:00Z', Date.parse('2027-01-03T14:00:00Z')) > 13, 'cruza el año');
+  assert.ok(edadDias('', HECHO, HOY) < 1);
+  assert.ok(edadDias('hoy', '2026-11-10T13:30:00Z', HOY) > 5, 'un "hoy" de un resumen viejo ya no es de hoy');
+});
+
+const DOS = [
+  { id: 'nitro', nombre: 'Nitro', seccion: 'Arrancones', horario: 'Diario', reportes: [{ id: '2026-11-16', creado: HECHO,
+    puntos: [{ titulo: 'vieja', cuando: '20 de octubre' }, { titulo: 'de ayer', cuando: 'ayer' }, { titulo: 'de hoy', cuando: 'hoy' }], capsulas: [{ titulo: 'c1' }, { titulo: 'c2' }] }] },
+  { id: 'pole', nombre: 'Pole', seccion: 'Fórmula 1', reportes: [{ id: '2026-11-16', creado: HECHO, puntos: [{ titulo: 'f1', cuando: 'hoy' }], capsulas: [] }] },
+];
+
+test('cada monito tiene su sección, con lo nuevo primero y lo viejo aparte', () => {
+  const secs = secciones(DOS, [{ titulo: 'aviso', texto: 'x' }], HOY);
+  assert.deepEqual(secs.map((s) => s.titulo), ['ARRANCONES', 'FÓRMULA 1', 'OFICINA']);
+  assert.deepEqual(secs[0].noticias.map((n) => n.titulo), ['de hoy', 'de ayer']);
+  assert.deepEqual(secs[0].viejas.map((n) => n.titulo), ['vieja']);
+  assert.deepEqual(secs[0].noticias.map((n) => n.tipo), ['NOTICIA DE HOY', 'NOTICIA DE AYER']);
+  assert.ok(!secs[0].items.some((x) => x.titulo === 'vieja'), 'lo viejo no sale en pantalla');
+  assert.deepEqual(secs[2].items.map((x) => x.tipo), ['AVISO', 'TAREA', 'TAREA']);
+});
+
+test('en pantalla las secciones salen por turnos y cada una lleva su cuenta', () => {
+  const secs = secciones(DOS, [{ titulo: 'aviso', texto: 'x' }], HOY);
+  const orden = Array.from({ length: 14 }, (_, v) => turnoSeccion(secs, v));
+  assert.deepEqual(orden.slice(0, 7).map((t) => secs[t.s].id), ['nitro', 'pole', 'nitro', 'pole', 'nitro', 'pole', 'oficina']);
+  assert.deepEqual(orden.filter((t) => secs[t.s].id === 'nitro').map((t) => t.i), [0, 1, 2, 3, 0, 1]);
+  assert.deepEqual(orden.filter((t) => secs[t.s].id === 'oficina').map((t) => t.i), [0, 1]);
+  assert.equal(turnoSeccion(secciones([], [], HOY), 3), null);
+});

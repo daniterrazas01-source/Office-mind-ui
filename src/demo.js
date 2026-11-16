@@ -16,7 +16,7 @@ export function estadoDemo() {
     demo: true,
     agentes: [
       v('calleros', 'Calleros', 'calleros', 'Revisando pendientes', 0.1, { modelo: 'opus', dispositivo: 'laptop-windows' }),
-      v('terrazas-demo', 'DragTree demo', 'terrazas', Math.floor(ahora / 40000) % 2 ? 'Buscando en internet' : 'Editando arbol.js', 0.1, { dispositivo: 'tableta-android', origen: 'tableta-android', persona: 'Alberto Terrazas' }),
+      v('terrazas-demo', 'DragTree demo', 'terrazas', 'Editando arbol.js', Math.floor(ahora / 600000) % 3 ? 5 : 0.1, { dispositivo: 'tableta-android', origen: 'tableta-android', persona: 'Alberto Terrazas' }),
       v('demo-1', 'Arreglar login', 'escritorio', 'Editando login.js', 0.1, { modelo: 'fable', modo: 'ultra' }),
       v('demo-2', 'Precios de envío', 'internet', 'Buscando en internet', 0.2, { modelo: 'haiku' }),
       v('demo-3', 'Resumen correos', 'biblioteca', 'Leyendo notas.md', 0.3),
@@ -27,7 +27,7 @@ export function estadoDemo() {
       v('demo-8', 'Sesión de ayer', 'descanso', 'Esperando instrucciones', 25 * 60, { actualizado: hace(25 * 60) }),
     ],
     monitos: [{
-      id: 'nitro', nombre: 'Nitro', casa: 'terrazas', aspecto: 'gorra_roja', modelo: 'sonnet', horario: 'Diario, 7:23 a.m.',
+      id: 'nitro', nombre: 'Nitro', seccion: 'Arrancones', casa: 'terrazas', aspecto: 'gorra_roja', modelo: 'sonnet', horario: 'Diario, 7:23 a.m.',
       descripcion: 'Reportero de arrancones. Cada mañana busca las noticias y te deja el resumen aquí. (Ejemplo.)',
       frases: ['¿Ya viste los tiempos de ayer?', 'Huele a llanta quemada…', '¡Luz verde!'],
       rutina: [{ area: 'terrazas', actividad: 'Revisando el carro' }, { area: 'biblioteca', actividad: 'Leyendo el reglamento' }, { area: 'centro de pensado', actividad: 'Pensando la nota de mañana' }, { area: 'terrazas', actividad: 'Revisando el buzón del túnel' }],

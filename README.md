@@ -44,6 +44,8 @@ El primero es **Nitro**: noticias de arrancones, diario a las 7:23 a.m. (hora de
 
 Entre tarea y tarea no se quedan quietos: cada pocos minutos cambian de plan. A veces hacen algo por su cuenta (el campo `rutina` de su ficha: lista de `{ area, actividad }`), a veces se quedan en su lugar y a veces se van a Descanso, donde también se pasean. Eso es ambiente; la tarea de verdad es la programada.
 
+El supervisor de la Oficina Terrazas (DragTree) es el **jefe** de los dos. Mientras su sesión no trabaja, no se queda quieto: cada pocos minutos revisa algo, se da una vuelta, llama a un monito para darle instrucciones (salen de su nota de pendientes) o lo manda a un cuarto. Es ambiente, sale del reloj. Lo que sí leen los monitos de verdad es la nota de memoria `instrucciones-del-jefe` de cada uno: ahí van las reglas de su sección.
+
 Para agregar otro, desde cualquier sesión de Claude Code en la nube:
 
 1. Crear su ficha en la base del Artifact, colección `monitos`, con `ArtifactData`: `nombre`, `descripcion`, `casa` (cuarto donde vive: `terrazas`, `descanso`, `calleros`…), `aspecto` (`gorra_roja`, `lentes`, `audifonos`, `bufanda`, `moño`…), `modelo`, `horario` (texto para leer), `frases` (lo que dice de vez en cuando), `estado: "listo"`.
@@ -55,7 +57,7 @@ Tres cuartos trabajan con lo que dejan los monitos programados. Los tres se pued
 
 - **Centro de Pensado (memoria).** La computadora guarda las notas de `monitos/<id>/memoria` (`pendientes`, `ya-contado`, `fuentes`). El monito las lee al empezar su tarea y las actualiza al terminar; así recuerda de un día para otro aunque cada corrida sea una sesión nueva.
 - **Almacén (archivo).** Guarda los resúmenes de cada día (`monitos/<id>/reportes/<AAAA-MM-DD>`). En los anaqueles hay una caja por día guardado.
-- **Sala de Noticias (pantalla).** Cambia cada 5 minutos, y una de cada dos veces muestra una noticia del día (las del último resumen; si tiene menos de 24 horas dice «NOTICIA DE HOY»). Lo demás se turna: cápsulas, tareas y pendientes de cada monito, y avisos de la oficina (colección `avisos`: `titulo`, `texto`, `creado`). Cada 20 minutos, el monito que trae la noticia la presenta un rato junto a la pantalla. El orden está en `src/pantalla.js`.
+- **Sala de Noticias (pantalla).** Va por **secciones**: una por monito (campo `seccion` de su ficha: Arrancones, Fórmula 1) y una de la Oficina (avisos de la colección `avisos` y tareas). Cambia cada 5 minutos, una sección a la vez: tres rondas de las secciones de los monitos y una de la Oficina. Dentro de cada sección salen primero las noticias más nuevas, alternadas con sus cápsulas. Una noticia con más de 7 días (según su campo `cuando`) ya no sale en pantalla; queda en «Noticias anteriores» de su sección al tocar la pantalla. De vez en cuando, el monito de la sección presenta su noticia junto a la pantalla. Las reglas están en `src/pantalla.js`, con pruebas.
 
 Para anunciar un cambio de la oficina en la pantalla, agrega un documento a `avisos` con `ArtifactData`.
 

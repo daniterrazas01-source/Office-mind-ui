@@ -206,7 +206,7 @@ import { aplicarReglas, textoPlazo } from './src/reglas.js';
 import { estadoDemo } from './src/demo.js';
 import { estadoDeSesiones, modeloDeRespuesta, conVisitas, areaDeTexto } from './src/sesiones.js';
 import { ESTACIONES, NODOS, RAMALES, ANCHOS, TRONCO, rutaTunel, largoRuta, puntoEnRuta, enviosLimpios } from './src/tunel.js';
-import { CADA_PANTALLA, turnos, turnoDe, esDeHoy } from './src/pantalla.js';
+import { CADA_PANTALLA, turnoDe, secciones, turnoSeccion } from './src/pantalla.js';
 (() => {
 'use strict';
 
@@ -2131,6 +2131,16 @@ function procesar(datos){
   if (datos && Array.isArray(datos.monitos)) MONITOS_DEMO = datos.monitos;
   if (datos && Array.isArray(datos.avisos)) AVISOS_DEMO = datos.avisos;
   if (datos && Array.isArray(datos.envios)) ENVIOS_DEMO = datos.envios;
+  PLAN_JEFE = null;
+  const jefe = monitosTodos().length ? lista.find(esJefe) : null;
+  if (jefe){                                                          // el jefe del equipo no se queda quieto mientras su sesión espera
+    const fresco = !jefe.ausente && ahora - (fecha(jefe.actualizado) || 0) < (EN_NUBE ? 420000 : SEGUNDOS_INACTIVO * 1000);
+    if (!(fresco && String(jefe.estado || '').toLowerCase() === 'trabajando')){
+      PLAN_JEFE = planDeJefe(ahora);
+      Object.assign(jefe, { area: PLAN_JEFE.area, actividad: PLAN_JEFE.actividad, plan: PLAN_JEFE.actividad, estado: 'por su cuenta', fijo: true, suelto: true,
+        ultima_actividad: jefe.ultima_actividad || jefe.actualizado, actualizado: new Date(ahora).toISOString() });
+    }
+  }
   for (const m of monitosTodos()) lista.push(registroProgramado(m, ahora));   // monitos con tarea programada: siempre están
   const raizTs = fecha(datos && datos.actualizado);
   ARCHIVOS = Array.isArray(datos && datos.archivos_recientes) ? datos.archivos_recientes.filter(f => f && f.nombre) : [];
@@ -2165,14 +2175,14 @@ function procesar(datos){
     a.callado = a.rol === 'visitante' && inactivo && ahora - a.ts > CALLADO_MIN * 60000;
     let area = normalizarArea(r.area) || 'escritorio';
     // El cuarto de la tableta es de su supervisor y de lo que la tableta reporta ahí; los demás visitantes usan toda la oficina
-    const enTerrazas = (r.fijo && area === 'terrazas') || (a.tableta && (a.rol === 'supervisor' || area === 'terrazas'));
+    const enTerrazas = !r.suelto && ((r.fijo && area === 'terrazas') || (a.tableta && (a.rol === 'supervisor' || area === 'terrazas')));
     if (enTerrazas) area = 'terrazas';
     // La tableta siempre dice "terrazas": mientras trabaja, sale al cuarto que le toca según lo que hace (leer, buscar en internet, pedir ayuda…)
     if (enTerrazas && a.tableta && !inactivo && String(r.estado || '').toLowerCase() === 'trabajando' && !/mensaje/i.test(String(r.actividad || ''))){
       const sale = areaDeTexto(r.actividad);
       if (sale !== 'escritorio') area = sale;
     }
-    else if (area === 'terrazas') area = 'escritorio';
+    else if (area === 'terrazas' && !r.suelto) area = 'escritorio';
     let texto = textoBreve(r.actividad);
     const quiereTubo = !!r.tubo || (!!ESTACIONES[area] && ES_DEL_TUNEL.test(String(r.actividad || '')));
     if (inactivo){ area = enTerrazas ? 'terrazas' : 'descanso'; texto = 'Esperando instrucciones'; }   // Terrazas espera en su cuarto
@@ -2644,54 +2654,49 @@ let AVISOS = [], AVISOS_DEMO = [];
 const avisosTodos = () => EN_CLAUDE && !DEMO ? AVISOS : AVISOS_DEMO;
 const notasDeMemoria = () => monitosTodos().reduce((n, m) => n + (m.memoria || []).length, 0);
 const diasArchivados = () => monitosTodos().reduce((n, m) => n + (m.reportes || []).length, 0);
-function cartelera(){
-  const tareas = [], oficina = [], porMonito = [], capsMonito = [];
-  for (const m of monitosTodos()){
-    const de = m.nombre || m.id, r = (m.reportes || [])[0], noticias = [], capsulas = [];
-    porMonito.push(noticias); capsMonito.push(capsulas);
-    if (r){
-      const hoy = esDeHoy(r.creado, Date.now());
-      for (const p of Array.isArray(r.puntos) ? r.puntos : []) noticias.push({ tipo: hoy ? 'NOTICIA DE HOY' : 'NOTICIA', noticia: true, cuando: p.cuando || (hoy ? '' : r.fecha || ''), titulo: p.titulo, texto: p.resumen, fuente: p.fuente, url: p.url, de });
-      for (const c of Array.isArray(r.capsulas) ? r.capsulas : []) capsulas.push({ tipo: String(c.tipo || 'cápsula').toUpperCase(), titulo: c.titulo, texto: c.texto, fuente: c.fuente, url: c.url, de });
-    }
-    const pend = (m.memoria || []).find(x => x.id === 'pendientes');
-    tareas.push({ tipo: 'TAREA', titulo: de + ': ' + (m.horario || 'tarea programada'), texto: pend && pend.texto ? 'Pendientes: ' + pend.texto : (m.descripcion || ''), de });
-  }
-  for (const a of avisosTodos().slice(0, 6)) oficina.push({ tipo: 'OFICINA', titulo: a.titulo, texto: a.texto, de: 'Oficina' });
-  const alternar = listas => { const out = []; for (let i = 0; listas.some(l => l[i]); i++) for (const l of listas) if (l[i]) out.push(l[i]); return out; };
-  const noticias = alternar(porMonito), capsulas = alternar(capsMonito);   // un monito y luego otro
-  const otros = [];                                                  // lo demás se va turnando: cápsula, tarea, aviso…
-  for (let i = 0; capsulas[i] || tareas[i] || oficina[i]; i++) for (const l of [capsulas, tareas, oficina]) if (l[i]) otros.push(l[i]);
-  return turnos(noticias, otros);                                    // noticia, otra cosa, noticia, otra cosa…
-}
-function enPantalla(ahora){
-  const items = cartelera(); if (!items.length) return null;
-  const tn = turnoDe(ahora, items.length);
-  return Object.assign({ i: tn.i, total: items.length, vuelta: tn.vuelta, cambia: tn.cambia }, items[tn.i]);
+const colorSeccion = sec => sec.id === 'oficina' ? '#6fd36f' : (ASPECTOS[sec.aspecto] || ASPECTOS.normal).etiqueta;
+const seccionesAhora = () => secciones(monitosTodos(), avisosTodos(), Date.now());
+function enPantalla(ahora){   // qué sección toca y qué cosa de ella
+  const secs = secciones(monitosTodos(), avisosTodos(), ahora), tn = turnoDe(ahora, 1), t = turnoSeccion(secs, tn.vuelta);
+  if (!t) return null;
+  const sec = secs[t.s];
+  return Object.assign({ i: t.i, total: sec.items.length, vuelta: tn.vuelta, cambia: tn.cambia, seccion: sec.titulo, sid: sec.id, color: colorSeccion(sec) }, sec.items[t.i]);
 }
 let firmaPantalla = '';
 function pintarPantalla(){
   const ahora = Date.now(), x = enPantalla(ahora);
   const sig = new Date(turnoDe(ahora, 1).cambia).toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' });
-  const firma = x ? x.i + '|' + x.titulo + '|' + x.texto + '|' + sig : 'nada';
+  const firma = x ? x.sid + '|' + x.i + '|' + x.titulo + '|' + x.texto + '|' + sig : 'nada';
   if (firma === firmaPantalla) return;
   firmaPantalla = firma;
-  $('ptTipo').textContent = x ? x.tipo + (x.cuando && !/^hoy$/i.test(String(x.cuando).trim()) ? ' · ' + String(x.cuando).toUpperCase() : '') + (x.de && x.tipo !== 'OFICINA' && x.tipo !== 'TAREA' ? ' · ' + String(x.de).toUpperCase() : '') : 'SALA DE NOTICIAS';
+  $('ptTipo').textContent = x ? x.seccion + ' · ' + x.tipo + (x.cuando ? ' · ' + String(x.cuando).toUpperCase() : '') : 'SALA DE NOTICIAS';
+  $('ptTipo').style.color = x ? x.color : '';
+  $('pantalla').style.borderTop = x ? `calc(var(--s)*1.5px) solid ${x.color}` : '';
   $('ptTitulo').textContent = x ? x.titulo || '' : 'Sin novedades por ahora';
   $('ptTexto').textContent = x ? x.texto || '' : 'Aquí saldrá lo que traigan los monitos.';
-  $('ptPie').textContent = x ? `${x.i + 1} de ${x.total} · cambia a las ${sig}` : '';
+  $('ptPie').textContent = x ? `${x.seccion} ${x.i + 1} de ${x.total} · cambia a las ${sig}` : '';
 }
-function tarjetaCartelera(x, ahora){
-  const u = enlaceSeguro(x.url), color = x.noticia ? '#d97757' : { TAREA: '#7fe7ff', OFICINA: '#6fd36f' }[x.tipo] || '#ffd34d';
-  return `<div class="tarjeta" style="border-left-color:${color}${ahora ? ';background:#352b42' : ''}"><i class="tipo">${esc(x.tipo)}${ahora ? ' · EN PANTALLA AHORA' : ''}</i><b>${esc(x.titulo || '')}</b><div>${esc(x.texto || '')}</div>` +
+function tarjetaCartelera(x, ahora, color){
+  const u = enlaceSeguro(x.url);
+  return `<div class="tarjeta" style="border-left-color:${x.noticia ? color : x.tipo === 'TAREA' ? '#7fe7ff' : x.tipo === 'AVISO' ? color : '#ffd34d'}${ahora ? ';background:#352b42' : ''}"><i class="tipo">${esc(x.tipo)}${x.cuando ? ' · ' + esc(String(x.cuando).toUpperCase()) : ''}${ahora ? ' · EN PANTALLA AHORA' : ''}</i><b>${esc(x.titulo || '')}</b><div>${esc(x.texto || '')}</div>` +
     (x.fuente || u ? `<div><i>Fuente: </i>${u ? `<a class="enlace" href="${esc(u)}" target="_blank" rel="noopener">${esc(x.fuente || u)}</a>` : esc(x.fuente)}</div>` : '') + '</div>';
 }
 function panelCartelera(){
-  const items = cartelera(), x = enPantalla(Date.now()), ya = new Set();
-  const unicos = items.map((it, i) => ({ it, i })).filter(o => !ya.has(o.it) && ya.add(o.it));   // las noticias se repiten en la pantalla; aquí salen una vez
-  abrirPanel('SALA DE NOTICIAS · CARTELERA', items.length
-    ? '<p>La pantalla cambia cada 5 minutos y una de cada dos veces sale una noticia del día. Esto es todo lo que hay para mostrar hoy.</p>' + unicos.map(o => tarjetaCartelera(o.it, x && items[x.i] === o.it)).join('')
-    : '<p class="vacio">Todavía no hay nada que mostrar. Aquí saldrán las noticias de los monitos, sus tareas y los cambios de la oficina.</p>');
+  const secs = seccionesAhora(), x = enPantalla(Date.now());
+  let html = '<p>Cada monito tiene su sección y la oficina la suya. La pantalla cambia cada 5 minutos, una sección a la vez. Las noticias con más de una semana ya no salen en pantalla: quedan al final de su sección.</p>', n = 0;
+  for (const sec of secs){
+    const color = colorSeccion(sec), ahora = it => !!x && x.sid === sec.id && sec.items[x.i] === it;
+    if (!sec.items.length && !sec.viejas.length) continue;
+    n++;
+    html += `<h4 style="margin:18px 0 8px;padding:6px 10px;background:${color};color:#17131d">${esc(sec.titulo)}${sec.id === 'oficina' ? '' : ' · ' + esc(sec.de)}${sec.fecha ? `<small style="float:right;font-weight:400">${esc(sec.fecha)}</small>` : ''}</h4>`;
+    if (sec.id === 'oficina') html += sec.items.map(it => tarjetaCartelera(it, ahora(it), color)).join('');
+    else {
+      html += sec.noticias.length ? sec.noticias.map(it => tarjetaCartelera(it, ahora(it), color)).join('') : '<p class="vacio">Sin noticias de esta semana.</p>';
+      if (sec.capsulas.length) html += '<p class="meta" style="margin:10px 0 6px">Cápsulas</p>' + sec.capsulas.map(it => tarjetaCartelera(it, ahora(it), color)).join('');
+      if (sec.viejas.length) html += `<details style="margin-top:8px"><summary class="meta" style="cursor:pointer">Noticias anteriores (${sec.viejas.length}): ya no salen en pantalla</summary>` + sec.viejas.map(it => tarjetaCartelera(it, false, '#6b6474')).join('') + '</details>';
+    }
+  }
+  abrirPanel('SALA DE NOTICIAS · CARTELERA', n ? html : '<p class="vacio">Todavía no hay nada que mostrar. Aquí saldrán las noticias de los monitos, sus tareas y los cambios de la oficina.</p>');
 }
 function panelMemoria(){
   let html = '<p>Aquí guardan los monitos lo que necesitan recordar de un día para otro. Lo leen en la computadora al empezar su tarea y lo actualizan al terminar.</p>', n = 0;
@@ -2729,10 +2734,35 @@ function ratoLibre(m, ahora){
   const propia = (Array.isArray(m.rutina) ? m.rutina : []).filter(x => x && x.area);
   const planes = propia.concat(propia, [{ area: m.casa || 'descanso', actividad: '' }, { area: 'descanso', actividad: 'Descansando un rato' }, { area: 'descanso', actividad: 'Descansando un rato' }]);
   const x = enPantalla(ahora);                                       // cada 20 minutos se para un rato junto a la pantalla a presentar su noticia
-  if (x && x.noticia && x.vuelta % 4 === 0 && ahora % CADA_PANTALLA < 150000 && x.de === (m.nombre || m.id))
+  if (x && x.noticia && x.vuelta % 3 === 0 && ahora % CADA_PANTALLA < 150000 && x.sid === m.id)
     return { area: 'noticias', actividad: '', plan: 'Presentando en la pantalla: ' + (x.titulo || '') };   // sin viñeta: la pantalla ya lo dice
   const turno = Math.floor(ahora / (RATO_MIN * 60000));
   return planes[Math.floor(azar(Math.floor(hashTexto(m.id) * 1e9) + turno * 7919)() * planes.length)];   // azar() revuelve bien turnos seguidos
+}
+/* El jefe del equipo: el supervisor de la Oficina Terrazas (DragTree). Mientras su sesión no está trabajando, no
+   se queda quieto: revisa lo del equipo, se da sus vueltas y les da instrucciones a los monitos o los manda a
+   algún cuarto. Es ambiente, igual que los ratos libres de los monitos: sale del reloj, no de la sesión. Lo que
+   les encarga sale de su nota de pendientes cuando la hay. */
+let PLAN_JEFE = null;
+const esJefe = r => r.rol === 'supervisor' && (esTableta(r) || /dragtree|terrazas/i.test(sinAcentos(r.nombre)));
+function planDeJefe(ahora){
+  const r = azar(424242 + Math.floor(ahora / (RATO_MIN * 60000)) * 104729);
+  const libres = monitosTodos().filter(m => !(m.estado === 'trabajando' && ahora - (fecha(m.actualizado) || 0) < 30 * 60000) && !ratoLibre(m, ahora).plan);
+  const tiro = r(), m = libres.length ? libres[Math.floor(r() * libres.length)] : null, cual = r();
+  if (m && tiro < 0.3){
+    const pend = ((m.memoria || []).find(x => x.id === 'pendientes') || {}).texto;
+    const primero = String(pend || '').split('\n').map(l => l.replace(/^[-•\s]+/, '').trim()).filter(Boolean)[0];
+    return { area: 'terrazas', actividad: `${m.nombre}: ${primero ? 'dale seguimiento a ' + primero.charAt(0).toLowerCase() + primero.slice(1) : '¿qué traes para hoy?'}`, monito: m.id,
+      orden: { area: 'terrazas', actividad: 'Recibiendo instrucciones del jefe' } };
+  }
+  if (m && tiro < 0.6){
+    const d = [['internet', 'busca qué hay de nuevo', 'Buscando lo que pidió el jefe'], ['biblioteca', 'revisa el reglamento', 'Revisando lo que pidió el jefe'],
+               ['noticias', 'checa cómo se ve el noticiero', 'Revisando el noticiero para el jefe'], ['centro de pensado', 'ordena tus notas', 'Ordenando mis notas para el jefe']][Math.floor(cual * 4)];
+    return { area: 'terrazas', actividad: `${m.nombre}, ${d[1]}`, monito: m.id, orden: { area: d[0], actividad: d[2] } };
+  }
+  const solo = [['terrazas', 'Revisando el trabajo del equipo'], ['noticias', 'Revisando el noticiero'], ['centro de pensado', 'Revisando la memoria del equipo'],
+                ['almacen', 'Revisando el archivo'], ['descanso', 'Tomando un café'], ['terrazas', 'Probando el árbol de luces'], ['internet', 'Viendo cómo va la competencia']][Math.floor(cual * 7)];
+  return { area: solo[0], actividad: solo[1] };
 }
 function registroProgramado(m, ahora){
   const visto = fecha(m.actualizado) || 0;
@@ -2740,12 +2770,14 @@ function registroProgramado(m, ahora){
   const ultimo = (m.reportes || [])[0], nuevo = !!ultimo && leidoDe(m.id) !== ultimo.id;
   const frases = Array.isArray(m.frases) ? m.frases : [];
   const seg = ahora / 1000, frase = frases.length && seg % 50 < 9 ? frases[Math.floor(seg / 50) % frases.length] : '';   // de vez en cuando dice algo suyo
-  const libre = ratoLibre(m, ahora);
+  const suelto = ratoLibre(m, ahora);
+  const orden = !trabajando && !suelto.plan && PLAN_JEFE && PLAN_JEFE.monito === m.id ? PLAN_JEFE.orden : null;   // lo que le encargó el jefe
+  const libre = orden ? { area: orden.area, actividad: orden.actividad, orden: true } : suelto;
   const enEstacion = !trabajando && ES_DEL_TUNEL.test(libre.actividad || '');   // en la estación dice lo que hace ahí
   return {
     id: 'monito-' + m.id, monito: m.id, nombre: m.nombre || m.id, rol: 'programado', fijo: true,
     area: trabajando ? (m.area || 'internet') : libre.area,
-    actividad: trabajando ? (m.actividad || 'Trabajando') : libre.plan ? '' : enEstacion ? libre.actividad : nuevo ? '¡Traigo resumen nuevo!' : (frase || libre.actividad || ''),
+    actividad: trabajando ? (m.actividad || 'Trabajando') : libre.plan ? '' : (enEstacion || libre.orden) ? libre.actividad : nuevo ? '¡Traigo resumen nuevo!' : (frase || libre.actividad || ''),
     estado: trabajando ? 'trabajando' : libre.area === 'descanso' ? 'esperando' : (libre.actividad || libre.plan) ? 'por su cuenta' : nuevo ? 'terminado' : 'esperando',
     tarea: trabajando, plan: trabajando ? '' : (libre.plan || libre.actividad || 'En su lugar'),
     tubo: enEstacion || (trabajando && ES_DEL_TUNEL.test(m.actividad || '')),
@@ -2774,7 +2806,7 @@ function fichaMonito(a, cual){
   const m = monitoPorId(a.monito); if (!m) return;
   const reportes = m.reportes || [], r = reportes.find(x => x.id === cual) || reportes[0];
   let html = (m.descripcion ? `<p>${esc(m.descripcion)}</p>` : '') +
-    [['Rol', '◆ Tarea programada (no se va)'], ['Cuándo trabaja', m.horario || '—'], ['Vive en', NOMBRE_AREA[m.casa] || 'Descanso'],
+    [['Rol', '◆ Tarea programada (no se va)'], ['Cuándo trabaja', m.horario || '—'], ['Vive en', NOMBRE_AREA[m.casa] || 'Descanso'], ['Sección', m.seccion || '—'], ['Jefe', m.jefe || '—'],
      ['Ahora', a.enTarea ? 'En su tarea: ' + (a.textoPendiente || 'trabajando') : a.plan + ' (por su cuenta)'],
      ['Último resumen', reportes[0] ? (reportes[0].fecha || reportes[0].id) : 'todavía ninguno'],
      ['Memoria', (m.memoria || []).length + ' notas en el Centro de Pensado']]
@@ -2791,7 +2823,7 @@ function fichaAgente(a){
   if (a.rol === 'programado') return fichaMonito(a);
   const m = MODELOS[a.modelo];
   const filas = [['Rol', a.rol === 'supervisor' ? '★ Supervisor (no se va)' : 'Visitante'],
-                 ['Persona', a.persona], ['Dispositivo', a.dispositivo || '—'], ['Área', NOMBRE_AREA[a.areaDestino] || '—'], ['Haciendo', a.ausente ? 'Sin sesión abierta' : a.textoPendiente || '—'],
+                 ['Persona', a.persona], ['Dispositivo', a.dispositivo || '—'], ['Área', NOMBRE_AREA[a.areaDestino] || '—'], ['Haciendo', a.rol === 'supervisor' && a.plan ? a.plan + ' (por su cuenta: ' + (a.ausente ? 'no tiene sesión abierta' : 'su sesión está en espera') + ')' : a.ausente ? 'Sin sesión abierta' : a.textoPendiente || '—'],
                  ['Estado', a.estadoTxt || '—'], ['Modo', a.ultra ? 'ULTRA' : 'Normal'], ['Modelo', m ? m.nombre : 'sin dato todavía'],
                  ['Último aviso', a.ts ? hace(a.ts / 1000) : '—']];
   if (a.rol === 'supervisor' && a.sesionNombre && a.sesionNombre !== a.nombre) filas.splice(2, 0, ['Sesión', a.sesionNombre]);
