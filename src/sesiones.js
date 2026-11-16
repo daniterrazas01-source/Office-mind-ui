@@ -102,6 +102,14 @@ export function modeloDeRespuesta(payload) {
   return ['haiku', 'sonnet', 'opus', 'fable'].find((m) => n.includes(m)) || null;
 }
 
+// Con qué esfuerzo corre la sesión (low, medium, high, xhigh, max), si los detalles lo dicen.
+export function esfuerzoDeRespuesta(payload) {
+  let texto;
+  try { texto = typeof payload === 'string' ? payload : JSON.stringify(payload); } catch { return null; }
+  const h = /effort[a-z_]*\\?"\s*:\s*\\?"(low|medium|high|xhigh|max)\b/i.exec(texto || '');
+  return h ? h[1].toLowerCase() : null;
+}
+
 // ---------- Sesiones con pase ----------
 // Una sesión que no sale sola en la lista (o que quiere decir mejor qué hace) se registra escribiendo un
 // documento en la colección "visitas": { nombre, area, actividad, estado, modelo, equipo, sesion, actualizado }.
@@ -123,7 +131,7 @@ export function agenteDeVisita(id, v, ahora = Date.now()) {
     estado: trabajando ? 'trabajando' : dicho.startsWith('esper') ? 'esperando' : 'terminado',
     modo: 'normal',
     modelo: ['haiku', 'sonnet', 'opus', 'fable'].find((m) => plano(v.modelo).includes(m)) || null,
-    equipo: limpio(v.equipo) || 'Con pase', dispositivo: 'pase', origen: 'pase', pase: true,
+    equipo: limpio(v.equipo) || 'Con pase', dispositivo: 'pase', origen: 'pase', pase: true, esfuerzo: limpio(v.esfuerzo) || undefined,
     actualizado: cuando, ultima_actividad: new Date(visto).toISOString(),
   };
 }

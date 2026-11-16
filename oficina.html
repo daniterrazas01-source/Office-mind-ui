@@ -69,6 +69,7 @@ body.sinTexto .vineta{display:none!important}
 .nombre{position:absolute;left:0;top:0;transform:translateX(-50%);white-space:nowrap;color:#fff;
   font-size:max(9px,calc(var(--s)*3.6px));line-height:1.25;padding:0 calc(var(--s)*1.5px);
   background:rgba(18,12,18,.8);border-left:calc(var(--s)*1.5px) solid var(--c,#d97757);z-index:2}
+.nombre .pips{letter-spacing:calc(var(--s)*-.3px);opacity:.95}
 .nombre i{font-style:normal;font-weight:700;margin-left:calc(var(--s)*1.5px)}
 .nombre .jefe{color:#ffd34d;margin-right:calc(var(--s)*1px)}
 .nombre .reloj{color:#7fe7ff;margin-right:calc(var(--s)*1px)}
@@ -204,7 +205,7 @@ textarea.campo{min-height:70px;resize:vertical}
 <script type="module">
 import { aplicarReglas, textoPlazo } from './src/reglas.js';
 import { estadoDemo } from './src/demo.js';
-import { estadoDeSesiones, modeloDeRespuesta, conVisitas, areaDeTexto } from './src/sesiones.js';
+import { estadoDeSesiones, modeloDeRespuesta, esfuerzoDeRespuesta, conVisitas, areaDeTexto } from './src/sesiones.js';
 import { ESTACIONES, NODOS, RAMALES, ANCHOS, TRONCO, rutaTunel, largoRuta, puntoEnRuta, enviosLimpios } from './src/tunel.js';
 import { CADA_PANTALLA, turnoDe, secciones, turnoSeccion } from './src/pantalla.js';
 (() => {
@@ -1835,6 +1836,12 @@ function dibujarAgente(a, t){
   if (a.fase === 'aviso' && a.tAviso > AVISO * 0.45) by -= 2;
   if (pose === 'hablar' && Math.floor(t * 2.2 + a.semilla * 5) % 2 === 0) by -= 1;
   if (a.ultra) aura(x, by, y, m, t, a.semilla);
+  else if (a.esfuerzo && a.esfuerzo[1] >= 3 && !a.zzz){                // esfuerzo alto o más: un resplandor a sus pies, más fuerte entre más alto
+    const n = a.esfuerzo[1] - 2, pulso = 0.5 + 0.5 * Math.sin(t * (2 + n));
+    g.globalAlpha = 0.16 + 0.08 * n + 0.1 * pulso; R(x - 7 - n, y - 1, 14 + n * 2, 3, m.etiqueta); R(x - 5 - n, y + 2, 10 + n * 2, 1, m.etiqueta);
+    for (let i = 0; i < n; i++){ const u = (t * 0.9 + i / n) % 1; g.globalAlpha = 0.8 * (1 - u); R(x - 6 + ((i * 5 + Math.floor(t)) % 12), Math.round(y - 3 - u * (m.h + 6)), 1, 2, m.etiqueta); }
+    g.globalAlpha = 1;
+  }
   if (!sentado){ g.fillStyle = 'rgba(0,0,0,0.22)'; g.fillRect(x - m.w / 2 + 2, y - 1, m.w - 3, 2); piernas(x, y, dir, paso, m); }
   if (m.capa) capaOpus(m, sx, by, dir, false);
   g.drawImage(CUERPOS[MODELOS[a.modelo] ? a.modelo : 'sonnet'][dir], sx, by);
@@ -1907,9 +1914,13 @@ function crearAgente(id, r){
   capa.append(a.elNombre, a.el);
   return a;
 }
+/* El esfuerzo con el que corre la sesión: se dice en el gafete ("Opus en alto") y se nota en el monito */
+const ESFUERZOS = { low: ['bajo', 1], medium: ['medio', 2], high: ['alto', 3], xhigh: ['extra alto', 4], max: ['máximo', 5],
+                    bajo: ['bajo', 1], medio: ['medio', 2], alto: ['alto', 3], extra: ['extra alto', 4], maximo: ['máximo', 5] };
+const esfuerzoDe = v => ESFUERZOS[sinAcentos(v).toLowerCase().trim().split(/\s+/)[0]] || null;
 function ponerNombre(a, nombre){
   const plazo = a.seVaPronto && a.vence ? 'se va ' + textoPlazo(a.vence - Date.now()) : '';
-  const clave = nombre + '|' + (a.modelo || '') + '|' + !!a.ultra + '|' + (a.dispositivo || '') + '|' + (a.rol || '') + '|' + plazo;
+  const clave = nombre + '|' + (a.modelo || '') + '|' + !!a.ultra + '|' + (a.dispositivo || '') + '|' + (a.rol || '') + '|' + plazo + '|' + (a.esfuerzo ? a.esfuerzo[0] : '');
   if (a.gafete === clave) return;
   a.gafete = clave; a.nombre = nombre; a.elNombre.textContent = nombre; a.medirNombre = true;
   a.elNombre.classList.toggle('pronto', !!plazo);
@@ -1919,8 +1930,14 @@ function ponerNombre(a, nombre){
   if (m){ const i = document.createElement('i'); i.textContent = m.nombre; i.style.color = m.etiqueta; a.elNombre.appendChild(i); }
   if (a.ultra){ const u = document.createElement('span'); u.className = 'ultra'; u.textContent = 'ULTRA'; a.elNombre.appendChild(u); }
   a.elNombre.appendChild(document.createElement('b'));
-  const abajo = [a.dispositivo, plazo].filter(Boolean).join(' · ');
-  if (abajo){ const s = document.createElement('small'); s.textContent = abajo; a.elNombre.appendChild(s); }
+  // Renglón de abajo: con qué trabaja ("Opus en alto" y sus rayitas) si se sabe; si no, en qué aparato está
+  const conQue = m && a.esfuerzo ? m.nombre + ' en ' + a.esfuerzo[0] : a.tableta && m ? 'Modelo ' + m.nombre : '';
+  const abajo = [conQue || a.dispositivo, plazo].filter(Boolean).join(' · ');
+  if (abajo){
+    const s = document.createElement('small'); s.textContent = abajo;
+    if (conQue && a.esfuerzo){ const p = document.createElement('span'); p.className = 'pips'; p.style.color = m.etiqueta; p.textContent = ' ' + '▮'.repeat(a.esfuerzo[1]) + '▯'.repeat(5 - a.esfuerzo[1]); s.appendChild(p); }
+    a.elNombre.appendChild(s);
+  }
   a.elNombre.style.setProperty('--c', a.tableta ? '#3ddc84' : ASPECTOS[a.aspecto].etiqueta);
 }
 function ponerTexto(a, texto, pop){
@@ -2157,6 +2174,7 @@ function procesar(datos){
     a.persona = r.persona || (a.tableta ? 'Alberto Terrazas' : 'Calleros');
     a.dispositivo = r.equipo ? String(r.equipo) : a.tableta ? 'Tableta Android' : (r.dispositivo || r.origen) ? 'Calleros — Laptop' : '';
     a.ultraPedido = String(r.modo || '').toLowerCase() === 'ultra' || !!r.ultra;
+    a.esfuerzo = esfuerzoDe(r.esfuerzo);
     const firma = (r.area || '') + '|' + (r.actividad || '') + '|' + (r.actualizado || '');
     if (firma !== a.firma){ a.firma = firma; a.vistoCambio = ahora; }
     const ts = r.ausente ? 0 : (fecha(r.actualizado) ?? raizTs ?? a.vistoCambio);
@@ -2250,9 +2268,10 @@ async function buscarModelos(){   // de a poquito: máximo 2 por vuelta, y solo 
     n++;
     try {
       const r = await mcp.callTool(CONECTOR, 'get_session', { session_id: a.sesionId }, { cache: false });
-      MODELOS_SESION.set(a.sesionId, { modelo: modeloDeRespuesta(r && r.payload !== undefined ? r.payload : r), visto: ahora });
+      const detalle = r && r.payload !== undefined ? r.payload : r;
+      MODELOS_SESION.set(a.sesionId, { modelo: modeloDeRespuesta(detalle), esfuerzo: esfuerzoDeRespuesta(detalle), visto: ahora });
     } catch (e) {
-      MODELOS_SESION.set(a.sesionId, { modelo: (g && g.modelo) || null, visto: ahora });
+      MODELOS_SESION.set(a.sesionId, { modelo: (g && g.modelo) || null, esfuerzo: (g && g.esfuerzo) || null, visto: ahora });
       if (e && !PASAJERO.has(e.code)){ conModelo = false; return; }
     }
   }
@@ -2320,7 +2339,9 @@ async function leerEstado(){
     if (DEMO) datos = estadoDemo();
     else if (EN_CLAUDE){
       if (!sesionesCrudas && !MONITOS.size && !VISITAS.length) return;   // todavía no llega nada
-      procesar(estadoDeSesiones(sesionesCrudas || [], Date.now(), id => (MODELOS_SESION.get(id) || {}).modelo || null));
+      const deSesiones = estadoDeSesiones(sesionesCrudas || [], Date.now(), id => (MODELOS_SESION.get(id) || {}).modelo || null);
+      for (const ag of deSesiones.agentes){ const g = MODELOS_SESION.get(ag.id); if (g && g.esfuerzo) ag.esfuerzo = g.esfuerzo; }
+      procesar(deSesiones);
       return;
     }
     else if (EN_NUBE){
@@ -2962,7 +2983,7 @@ const PASE = `Regístrate en mi oficina virtual para que yo vea en qué andas. H
 
 1. Usa la herramienta ArtifactData (si no la ves, cárgala con ToolSearch "select:ArtifactData") con url https://claude.ai/artifact/KbxrcsXckzZSE5F65iZwCE
 2. action "set", collection "visitas", doc_id: un nombre corto para ti, en minúsculas, con letras, números y guiones (por ejemplo "arreglo-login"). Datos:
-{ "nombre": "nombre corto de esta sesión (máximo 18 letras)", "area": "escritorio", "actividad": "qué estás haciendo (máximo 40 letras)", "estado": "trabajando", "modelo": "haiku, sonnet, opus o fable", "equipo": "Compu, Tablet, Teléfono o Nube", "sesion": "tu id de sesión si lo sabes (empieza con session_); si no lo sabes, quita este campo", "actualizado": "la hora de ahora en ISO 8601 UTC" }
+{ "nombre": "nombre corto de esta sesión (máximo 18 letras)", "area": "escritorio", "actividad": "qué estás haciendo (máximo 40 letras)", "estado": "trabajando", "modelo": "haiku, sonnet, opus o fable", "esfuerzo": "low, medium, high, xhigh o max, si lo sabes; si no, quita este campo", "equipo": "Compu, Tablet, Teléfono o Nube", "sesion": "tu id de sesión si lo sabes (empieza con session_); si no lo sabes, quita este campo", "actualizado": "la hora de ahora en ISO 8601 UTC" }
    "area" es el cuarto donde estás: "escritorio" si escribes o programas, "biblioteca" si lees o revisas, "internet" si buscas en la web, "sala de juntas" si coordinas ayudantes, "centro de pensado" si planeas.
 3. Cuando cambies de tarea, vuelve a avisar con action "update" y el "version" que te devolvió la escritura anterior como if_version: cambia "area", "actividad" y "actualizado". No avises más de una vez cada varios minutos.
 4. Cuando termines lo que te pedí, "update" con { "estado": "terminado", "actualizado": "la hora de ahora" }.

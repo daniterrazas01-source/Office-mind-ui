@@ -14,7 +14,7 @@ const json = (obj, status = 200) => new Response(JSON.stringify(obj), {
 });
 const HORAS_GUARDADO = 48;     // la página aplica el vencimiento de 24 h; aquí solo se limpia lo muy viejo
 const MAX_ARCHIVOS = 40;
-const CAMPOS = ['id', 'nombre', 'titulo', 'persona', 'proyecto', 'area', 'actividad', 'estado', 'modo', 'modelo', 'dispositivo', 'origen', 'equipo', 'ayudante_actividad', 'ayudante_area'];
+const CAMPOS = ['id', 'nombre', 'titulo', 'persona', 'proyecto', 'area', 'actividad', 'estado', 'modo', 'modelo', 'dispositivo', 'origen', 'equipo', 'ayudante_actividad', 'ayudante_area', 'esfuerzo'];
 
 export class Estado {
   constructor(state) { this.state = state; }

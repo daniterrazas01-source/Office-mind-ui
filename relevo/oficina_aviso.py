@@ -52,6 +52,9 @@ def corto(texto, palabras=10, letras=60):
     return t if len(t) <= letras else t[:letras - 1] + "…"
 
 
+ESFUERZO = [None]  # el esfuerzo con el que corre la sesión (low, medium, high, xhigh, max), leído junto con el modelo
+
+
 def titulo_y_modelo(ruta):
     """El título de la sesión y el modelo, sacados del final del transcript."""
     if not ruta:
@@ -73,8 +76,10 @@ def titulo_y_modelo(ruta):
                 titulo = None
             if titulo:
                 break
-    m = re.findall(r'"model"\s*:\s*"([^"]+)"', cola)
+    m = [x for x in re.findall(r'"model"\s*:\s*"([^"]+)"', cola) if not x.startswith("<")]
     modelo = next((x for x in ("haiku", "sonnet", "opus", "fable") if m and x in m[-1].lower()), None)
+    e = re.findall(r'"effort"\s*:\s*"([a-z]+)"', cola)
+    ESFUERZO[0] = e[-1] if e else (os.environ.get("CLAUDE_EFFORT") or "").lower() or None
     return titulo, modelo
 
 
@@ -140,6 +145,9 @@ def main():
              "dispositivo": c["dispositivo"], "origen": c["dispositivo"]}
     if g.get("modelo"):
         aviso["modelo"] = g["modelo"]
+    g["esfuerzo"] = ESFUERZO[0] or g.get("esfuerzo")
+    if g.get("esfuerzo"):
+        aviso["esfuerzo"] = g["esfuerzo"]
     ay = g.get("ayudante")
     if ay and estado == "trabajando" and time.time() - ay.get("visto", 0) < 180:
         aviso["ayudante_actividad"], aviso["ayudante_area"] = ay["actividad"], ay["area"]
