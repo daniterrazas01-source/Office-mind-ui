@@ -394,7 +394,7 @@ const LUGARES = {
     L(25, 16, 'arriba', {}),
   ],
   'calleros': [
-    L(6, 29, 'abajo', { oy: 4, sentado: true, silla: 'jefe' }),       // la silla del jefe
+    L(6, 29, 'abajo', { oy: 4, sentado: true, silla: 'jefe', jefe: true }),       // la silla del jefe: solo para el supervisor
     L(5, 32, 'arriba', { oy: -4, sentado: true, silla: 'madera' }),   // visitas
     L(7, 32, 'arriba', { oy: -4, sentado: true, silla: 'madera' }),
     L(11, 30, 'der'),                                                  // frente a la repisa de logros
@@ -1951,8 +1951,9 @@ function asignarLugar(a, area){
   a.enTubo = false;
   if (a.quiereTubo){ const i = lista.findIndex(l => l.tubo); if (i >= 0 && !occ[i]){ idx = i; a.enTubo = true; } }   // va a la estación del túnel
   if (idx < 0 && principal(a) && !occ[0]) idx = 0;
-  for (let i = reservarPrincipal ? 1 : 0; idx < 0 && i < lista.length; i++) if (!occ[i] && !lista[i].tubo) idx = i;
-  if (idx < 0 && !occ[0] && !lista[0].tubo) idx = 0;
+  const puede = l => !l.tubo && (!l.jefe || a.rol === 'supervisor');
+  for (let i = reservarPrincipal ? 1 : 0; idx < 0 && i < lista.length; i++) if (!occ[i] && puede(lista[i])) idx = i;
+  if (idx < 0 && !occ[0] && puede(lista[0])) idx = 0;
   if (idx >= 0){ occ[idx] = a.id; a.lugar = lista[idx]; return; }
   const usadas = new Set([...EXTRA[area].values()].map(c => c.ty * COLS + c.tx));
   const c = CANDIDATOS[area].find(c => !usadas.has(c.ty * COLS + c.tx)) || CANDIDATOS[area][0];
@@ -2131,16 +2132,7 @@ function procesar(datos){
   if (datos && Array.isArray(datos.monitos)) MONITOS_DEMO = datos.monitos;
   if (datos && Array.isArray(datos.avisos)) AVISOS_DEMO = datos.avisos;
   if (datos && Array.isArray(datos.envios)) ENVIOS_DEMO = datos.envios;
-  PLAN_JEFE = null;
-  const jefe = monitosTodos().length ? lista.find(esJefe) : null;
-  if (jefe){                                                          // el jefe del equipo no se queda quieto mientras su sesión espera
-    const fresco = !jefe.ausente && ahora - (fecha(jefe.actualizado) || 0) < (EN_NUBE ? 420000 : SEGUNDOS_INACTIVO * 1000);
-    if (!(fresco && String(jefe.estado || '').toLowerCase() === 'trabajando')){
-      PLAN_JEFE = planDeJefe(ahora);
-      Object.assign(jefe, { area: PLAN_JEFE.area, actividad: PLAN_JEFE.actividad, plan: PLAN_JEFE.actividad, estado: 'por su cuenta', fijo: true, suelto: true,
-        ultima_actividad: jefe.ultima_actividad || jefe.actualizado, actualizado: new Date(ahora).toISOString() });
-    }
-  }
+  organizarEquipos(lista, ahora);                                     // quién manda a quién ahorita
   for (const m of monitosTodos()) lista.push(registroProgramado(m, ahora));   // monitos con tarea programada: siempre están
   const raizTs = fecha(datos && datos.actualizado);
   ARCHIVOS = Array.isArray(datos && datos.archivos_recientes) ? datos.archivos_recientes.filter(f => f && f.nombre) : [];
@@ -2158,6 +2150,7 @@ function procesar(datos){
     const modelo = String(r.modelo || '').toLowerCase();
     a.modelo = MODELOS[modelo] ? modelo : null;
     a.tableta = esTableta(r);
+    a.encargo = r.encargo || ''; a.casa = r.casa || '';
     a.rol = r.rol; a.vence = r.vence || 0; a.seVaPronto = !!r.se_va_pronto; a.monito = r.monito || ''; a.enTarea = !!r.tarea; a.plan = r.plan || '';
     a.sesionId = String(r.sesion_id || r.id || ''); a.tePide = r.te_pide || ''; a.loUltimo = r.lo_ultimo || '';
     a.sesionNombre = r.sesion_nombre || ''; a.sesionesExtra = r.sesiones_extra || 0; a.proyecto = r.proyecto || '';
@@ -2739,30 +2732,80 @@ function ratoLibre(m, ahora){
   const turno = Math.floor(ahora / (RATO_MIN * 60000));
   return planes[Math.floor(azar(Math.floor(hashTexto(m.id) * 1e9) + turno * 7919)() * planes.length)];   // azar() revuelve bien turnos seguidos
 }
-/* El jefe del equipo: el supervisor de la Oficina Terrazas (DragTree). Mientras su sesión no está trabajando, no
-   se queda quieto: revisa lo del equipo, se da sus vueltas y les da instrucciones a los monitos o los manda a
-   algún cuarto. Es ambiente, igual que los ratos libres de los monitos: sale del reloj, no de la sesión. Lo que
-   les encarga sale de su nota de pendientes cuando la hay. */
-let PLAN_JEFE = null;
-const esJefe = r => r.rol === 'supervisor' && (esTableta(r) || /dragtree|terrazas/i.test(sinAcentos(r.nombre)));
-function planDeJefe(ahora){
-  const r = azar(424242 + Math.floor(ahora / (RATO_MIN * 60000)) * 104729);
-  const libres = monitosTodos().filter(m => !(m.estado === 'trabajando' && ahora - (fecha(m.actualizado) || 0) < 30 * 60000) && !ratoLibre(m, ahora).plan);
+/* Equipos. Cada supervisor de casa es el jefe de los monitos que viven en su cuarto:
+     DragTree  -> Oficina Terrazas y Centro de Pensado · su agente es Nitro (y Pole)
+     Calleros  -> Oficina Calleros y Cerebro Delta      · su agente es el que viva en la Oficina Calleros
+   Dos cosas distintas:
+   1. De verdad: cuando la sesión del jefe trabaja y usa un ayudante (subagente), ese trabajo lo hace su agente en
+      la oficina. Si el aviso de la sesión dice qué hace el ayudante (ayudante_actividad), el agente hace eso mismo
+      en el cuarto que toca; si solo se sabe que pidió ayuda, el agente se va con él a ayudarle.
+   2. De ambiente: mientras la sesión del jefe espera, no se queda quieto: revisa lo suyo, se pasea y le da
+      instrucciones a su agente o lo manda a un cuarto. Sale del reloj, no de la sesión. */
+const EQUIPOS = [
+  { casa: 'terrazas', es: r => esTableta(r) || /dragtree|terrazas/i.test(sinAcentos(r.nombre)),
+    solo: [['terrazas', 'Revisando el trabajo del equipo'], ['terrazas', 'Probando el árbol de luces'], ['centro de pensado', 'Revisando la memoria del equipo'], ['almacen', 'Revisando el archivo'],
+           ['noticias', 'Revisando el noticiero'], ['descanso', 'Tomando un café'], ['internet', 'Viendo cómo va la competencia']],
+    encargos: [['internet', 'busca qué hay de nuevo', 'Buscando lo que pidió el jefe'], ['biblioteca', 'revisa el reglamento', 'Revisando lo que pidió el jefe'],
+               ['noticias', 'checa cómo se ve el noticiero', 'Revisando el noticiero para el jefe'], ['centro de pensado', 'ordena tus notas', 'Ordenando mis notas para el jefe']] },
+  { casa: 'calleros', es: r => /calleros/i.test(sinAcentos(String(r.nombre || '') + ' ' + String(r.id || ''))),
+    solo: [['calleros', 'Revisando pendientes'], ['calleros', 'Firmando papeles'], ['cerebro delta', 'Consultando el Cerebro'], ['cerebro delta', 'Revisando las notas del Cerebro'],
+           ['sala de juntas', 'Preparando la junta'], ['biblioteca', 'Hojeando un libro'], ['escritorio', 'Viendo cómo va el trabajo'], ['internet', 'Leyendo las noticias'],
+           ['noticias', 'Viendo el noticiero'], ['descanso', 'Tomando un café']],
+    encargos: [['cerebro delta', 'busca esto en el Cerebro', 'Buscando en el Cerebro para el jefe'], ['biblioteca', 'tráeme ese libro', 'Buscando el libro que pidió el jefe'],
+               ['internet', 'investiga esto', 'Investigando lo que pidió el jefe'], ['calleros', 'ordena estos papeles', 'Ordenando papeles para el jefe']] },
+];
+const PLANES = new Map();   // casa del equipo -> lo que hace el jefe ahorita y, si hay, a quién manda
+const enSuTarea = (m, ahora) => m.estado === 'trabajando' && ahora - (fecha(m.actualizado) || 0) < 30 * 60000;
+const deEquipo = eq => monitosTodos().filter(m => (m.casa || '') === eq.casa);
+function planDeJefe(eq, ahora){   // de ambiente
+  const r = azar(424242 + Math.floor(hashTexto(eq.casa) * 1e6) + Math.floor(ahora / (RATO_MIN * 60000)) * 104729);
+  const libres = deEquipo(eq).filter(m => !enSuTarea(m, ahora) && !ratoLibre(m, ahora).plan);
   const tiro = r(), m = libres.length ? libres[Math.floor(r() * libres.length)] : null, cual = r();
   if (m && tiro < 0.3){
     const pend = ((m.memoria || []).find(x => x.id === 'pendientes') || {}).texto;
     const primero = String(pend || '').split('\n').map(l => l.replace(/^[-•\s]+/, '').trim()).filter(Boolean)[0];
-    return { area: 'terrazas', actividad: `${m.nombre}: ${primero ? 'dale seguimiento a ' + primero.charAt(0).toLowerCase() + primero.slice(1) : '¿qué traes para hoy?'}`, monito: m.id,
-      orden: { area: 'terrazas', actividad: 'Recibiendo instrucciones del jefe' } };
+    return { area: eq.casa, actividad: `${m.nombre || m.id}: ${primero ? 'dale seguimiento a ' + primero.charAt(0).toLowerCase() + primero.slice(1) : '¿qué traes para hoy?'}`, monito: m.id,
+      orden: { area: eq.casa, actividad: 'Recibiendo instrucciones del jefe' } };
   }
   if (m && tiro < 0.6){
-    const d = [['internet', 'busca qué hay de nuevo', 'Buscando lo que pidió el jefe'], ['biblioteca', 'revisa el reglamento', 'Revisando lo que pidió el jefe'],
-               ['noticias', 'checa cómo se ve el noticiero', 'Revisando el noticiero para el jefe'], ['centro de pensado', 'ordena tus notas', 'Ordenando mis notas para el jefe']][Math.floor(cual * 4)];
-    return { area: 'terrazas', actividad: `${m.nombre}, ${d[1]}`, monito: m.id, orden: { area: d[0], actividad: d[2] } };
+    const d = eq.encargos[Math.floor(cual * eq.encargos.length)];
+    return { area: eq.casa, actividad: `${m.nombre || m.id}, ${d[1]}`, monito: m.id, orden: { area: d[0], actividad: d[2] } };
   }
-  const solo = [['terrazas', 'Revisando el trabajo del equipo'], ['noticias', 'Revisando el noticiero'], ['centro de pensado', 'Revisando la memoria del equipo'],
-                ['almacen', 'Revisando el archivo'], ['descanso', 'Tomando un café'], ['terrazas', 'Probando el árbol de luces'], ['internet', 'Viendo cómo va la competencia']][Math.floor(cual * 7)];
+  const solo = eq.solo[Math.floor(cual * eq.solo.length)];
   return { area: solo[0], actividad: solo[1] };
+}
+function encargoReal(eq, jefe, ahora){   // de verdad: la sesión del jefe está usando un ayudante
+  const hace = String(jefe.ayudante_actividad || ''), visto = fecha(jefe.ayudante_visto) || fecha(jefe.actualizado) || 0;
+  const pide = /ayudante|agente|subagent|deleg/i.test(String(jefe.actividad || '')) || normalizarArea(jefe.area) === 'sala de juntas';
+  if (!(hace && ahora - visto < 8 * 60000) && !pide) return null;
+  const m = deEquipo(eq).find(x => !enSuTarea(x, ahora));
+  if (!m) return null;
+  const orden = hace ? { area: normalizarArea(jefe.ayudante_area) || areaDeTexto(hace), actividad: hace } : { area: 'sala de juntas', actividad: 'Ayudando a ' + (jefe.nombre || 'su jefe') };
+  if (orden.area === 'escritorio' && hace) orden.area = eq.casa;        // lo de escritorio lo hace en la oficina de su equipo
+  return { real: true, monito: m.id, orden, jefe: jefe.nombre || '' };
+}
+function organizarEquipos(lista, ahora){
+  PLANES.clear();
+  const tomados = new Set();
+  for (const eq of EQUIPOS){
+    const jefe = lista.find(r => r.rol === 'supervisor' && !tomados.has(r) && eq.es(r));
+    if (!jefe) continue;
+    tomados.add(jefe);
+    jefe.casa = eq.casa;
+    const fresco = !jefe.ausente && ahora - (fecha(jefe.actualizado) || 0) < (EN_NUBE ? 420000 : SEGUNDOS_INACTIVO * 1000);
+    if (fresco && String(jefe.estado || '').toLowerCase() === 'trabajando'){
+      const real = encargoReal(eq, jefe, ahora);
+      if (real){
+        PLANES.set(eq.casa, real);
+        if (jefe.ayudante_actividad && !/ayudante|agente/i.test(String(jefe.actividad || ''))) jefe.actividad = 'Coordinando a ' + ((monitoPorId(real.monito) || {}).nombre || 'su agente');
+      }
+      continue;
+    }
+    const plan = planDeJefe(eq, ahora);
+    PLANES.set(eq.casa, plan);
+    Object.assign(jefe, { area: plan.area, actividad: plan.actividad, plan: plan.actividad, estado: 'por su cuenta', fijo: true, suelto: true,
+      ultima_actividad: jefe.ultima_actividad || jefe.actualizado, actualizado: new Date(ahora).toISOString() });
+  }
 }
 function registroProgramado(m, ahora){
   const visto = fecha(m.actualizado) || 0;
@@ -2771,15 +2814,16 @@ function registroProgramado(m, ahora){
   const frases = Array.isArray(m.frases) ? m.frases : [];
   const seg = ahora / 1000, frase = frases.length && seg % 50 < 9 ? frases[Math.floor(seg / 50) % frases.length] : '';   // de vez en cuando dice algo suyo
   const suelto = ratoLibre(m, ahora);
-  const orden = !trabajando && !suelto.plan && PLAN_JEFE && PLAN_JEFE.monito === m.id ? PLAN_JEFE.orden : null;   // lo que le encargó el jefe
-  const libre = orden ? { area: orden.area, actividad: orden.actividad, orden: true } : suelto;
+  const plan = PLANES.get(m.casa || ''), mio = !!plan && plan.monito === m.id && !trabajando && (plan.real || !suelto.plan);
+  const orden = mio ? plan.orden : null;                             // lo que le encargó su jefe
+  const libre = orden ? { area: orden.area, actividad: orden.actividad, orden: true, real: !!plan.real } : suelto;
   const enEstacion = !trabajando && ES_DEL_TUNEL.test(libre.actividad || '');   // en la estación dice lo que hace ahí
   return {
     id: 'monito-' + m.id, monito: m.id, nombre: m.nombre || m.id, rol: 'programado', fijo: true,
     area: trabajando ? (m.area || 'internet') : libre.area,
     actividad: trabajando ? (m.actividad || 'Trabajando') : libre.plan ? '' : (enEstacion || libre.orden) ? libre.actividad : nuevo ? '¡Traigo resumen nuevo!' : (frase || libre.actividad || ''),
-    estado: trabajando ? 'trabajando' : libre.area === 'descanso' ? 'esperando' : (libre.actividad || libre.plan) ? 'por su cuenta' : nuevo ? 'terminado' : 'esperando',
-    tarea: trabajando, plan: trabajando ? '' : (libre.plan || libre.actividad || 'En su lugar'),
+    estado: trabajando || libre.real ? 'trabajando' : libre.area === 'descanso' ? 'esperando' : (libre.actividad || libre.plan) ? 'por su cuenta' : nuevo ? 'terminado' : 'esperando',
+    tarea: trabajando, encargo: libre.real ? plan.jefe : '', plan: trabajando ? '' : (libre.plan || libre.actividad || 'En su lugar'),
     tubo: enEstacion || (trabajando && ES_DEL_TUNEL.test(m.actividad || '')),
     modelo: m.modelo, aspecto: m.aspecto, equipo: m.horario || 'Tarea programada',
     actualizado: new Date(ahora).toISOString(), ultima_actividad: m.actualizado,
@@ -2806,8 +2850,8 @@ function fichaMonito(a, cual){
   const m = monitoPorId(a.monito); if (!m) return;
   const reportes = m.reportes || [], r = reportes.find(x => x.id === cual) || reportes[0];
   let html = (m.descripcion ? `<p>${esc(m.descripcion)}</p>` : '') +
-    [['Rol', '◆ Tarea programada (no se va)'], ['Cuándo trabaja', m.horario || '—'], ['Vive en', NOMBRE_AREA[m.casa] || 'Descanso'], ['Sección', m.seccion || '—'], ['Jefe', m.jefe || '—'],
-     ['Ahora', a.enTarea ? 'En su tarea: ' + (a.textoPendiente || 'trabajando') : a.plan + ' (por su cuenta)'],
+    [['Rol', m.horario ? '◆ Tarea programada (no se va)' : '◆ Agente de ' + (m.jefe || 'la oficina') + ' (no se va)'], ['Cuándo trabaja', m.horario || 'Cuando su jefe lo necesita'], ['Vive en', NOMBRE_AREA[m.casa] || 'Descanso'], ['Sección', m.seccion || '—'], ['Jefe', m.jefe || '—'],
+     ['Ahora', a.enTarea ? 'En su tarea: ' + (a.textoPendiente || 'trabajando') : a.encargo ? (a.textoPendiente || 'Trabajando') + ' (encargo de ' + a.encargo + ', de su sesión)' : a.plan + ' (por su cuenta)'],
      ['Último resumen', reportes[0] ? (reportes[0].fecha || reportes[0].id) : 'todavía ninguno'],
      ['Memoria', (m.memoria || []).length + ' notas en el Centro de Pensado']]
       .map(([k, v]) => `<div class="fila"><span>${esc(k)}</span><span>${esc(v)}</span></div>`).join('');

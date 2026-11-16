@@ -72,7 +72,7 @@ export function secciones(monitos, avisos, ahora){
     s.items = turnos(s.noticias, s.capsulas);
     out.push(s);
     const pend = (m.memoria || []).find((x) => x.id === 'pendientes');
-    tareas.push({ tipo: 'TAREA', titulo: `${de}: ${m.horario || 'tarea programada'}`, texto: pend && pend.texto ? `Pendientes: ${pend.texto}` : m.descripcion || '', de });
+    if (m.horario || (pend && pend.texto)) tareas.push({ tipo: 'TAREA', titulo: `${de}: ${m.horario || 'agente de ' + (m.jefe || 'la oficina')}`, texto: pend && pend.texto ? `Pendientes: ${pend.texto}` : m.descripcion || '', de });
   }
   const oficina = (Array.isArray(avisos) ? avisos : []).slice(0, 6).map((a) => ({ tipo: 'AVISO', titulo: a.titulo, texto: a.texto, de: 'Oficina' }));
   out.push({ id: 'oficina', titulo: 'OFICINA', de: 'Oficina', fecha: '', noticias: [], capsulas: [], viejas: [], items: oficina.concat(tareas) });

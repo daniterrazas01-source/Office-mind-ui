@@ -83,8 +83,7 @@ def main():
     if not c["url"]:
         return
     d = json.loads(sys.stdin.buffer.read().decode("utf-8-sig", "replace") or "{}")
-    if d.get("agent_id"):
-        return  # los ayudantes no salen como monitos aparte
+    de_ayudante = bool(d.get("agent_id"))  # lo hace un ayudante (subagente): no sale como monito aparte, se anota en su sesión
     if os.path.exists(os.path.join(str(d.get("cwd") or ""), ".claude", "hooks", "oficina_terrazas.py")):
         return  # este proyecto ya avisa a la oficina con su propio hook (dragtrim): no se duplica
     ses = re.sub(r"[^A-Za-z0-9]", "", str(d.get("session_id") or "x"))[:12] or "x"
@@ -97,6 +96,8 @@ def main():
 
     ev, tool, inp = d.get("hook_event_name"), d.get("tool_name") or "", d.get("tool_input") or {}
     area, actividad, estado, urgente, archivo = "escritorio", "Trabajando", "trabajando", False, None
+    if de_ayudante and ev != "PreToolUse":
+        return
     if ev == "PreToolUse":
         ruta = inp.get("file_path") or inp.get("notebook_path") or ""
         nombre = os.path.basename(str(ruta).replace("\\", "/")) if ruta else "un archivo"
@@ -118,7 +119,16 @@ def main():
     else:
         return
 
+    if de_ayudante:      # se manda como dato de la sesión: ella sigue "coordinando" y la oficina pone a su agente a hacerlo
+        g["ayudante"] = {"actividad": corto(actividad), "area": area, "visto": time.time()}
+        area, actividad, archivo = g.get("area") or "sala de juntas", g.get("actividad") or "Coordinando a su ayudante", None
+    elif estado == "trabajando":
+        g["area"], g["actividad"] = area, actividad
+    else:
+        g.pop("ayudante", None)
     if not urgente and time.time() - g.get("enviado", 0) < CADA:
+        with open(guarda, "w", encoding="utf-8") as f:
+            json.dump(g, f, ensure_ascii=False)
         return
     titulo, modelo = titulo_y_modelo(d.get("transcript_path"))
     g["titulo"], g["modelo"] = titulo or g.get("titulo"), modelo or g.get("modelo")
@@ -130,6 +140,9 @@ def main():
              "dispositivo": c["dispositivo"], "origen": c["dispositivo"]}
     if g.get("modelo"):
         aviso["modelo"] = g["modelo"]
+    ay = g.get("ayudante")
+    if ay and estado == "trabajando" and time.time() - ay.get("visto", 0) < 180:
+        aviso["ayudante_actividad"], aviso["ayudante_area"] = ay["actividad"], ay["area"]
     if c["equipo"]:
         aviso["equipo"] = c["equipo"]
     if archivo:

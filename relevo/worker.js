@@ -14,7 +14,7 @@ const json = (obj, status = 200) => new Response(JSON.stringify(obj), {
 });
 const HORAS_GUARDADO = 48;     // la página aplica el vencimiento de 24 h; aquí solo se limpia lo muy viejo
 const MAX_ARCHIVOS = 40;
-const CAMPOS = ['id', 'nombre', 'titulo', 'persona', 'proyecto', 'area', 'actividad', 'estado', 'modo', 'modelo', 'dispositivo', 'origen', 'equipo'];
+const CAMPOS = ['id', 'nombre', 'titulo', 'persona', 'proyecto', 'area', 'actividad', 'estado', 'modo', 'modelo', 'dispositivo', 'origen', 'equipo', 'ayudante_actividad', 'ayudante_area'];
 
 export class Estado {
   constructor(state) { this.state = state; }
@@ -35,6 +35,7 @@ export class Estado {
       const ahora = new Date().toISOString();
       const agente = { actualizado: ahora, ultima_actividad: ahora };
       for (const k of CAMPOS) if (typeof d[k] === 'string') agente[k] = d[k].slice(0, 200);
+      if (agente.ayudante_actividad) agente.ayudante_visto = ahora;   // lo que hace su ayudante (subagente), para que la oficina se lo encargue a su agente
       const agentes = (await this.state.storage.get('agentes')) || {};
       const limite = Date.now() - HORAS_GUARDADO * 3600e3;
       for (const [k, a] of Object.entries(agentes)) if (!(Date.parse(a.ultima_actividad || a.actualizado) > limite)) delete agentes[k];

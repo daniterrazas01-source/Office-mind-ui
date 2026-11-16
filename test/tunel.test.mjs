@@ -143,7 +143,7 @@ test('cada monito tiene su sección, con lo nuevo primero y lo viejo aparte', ()
   assert.deepEqual(secs[0].viejas.map((n) => n.titulo), ['vieja']);
   assert.deepEqual(secs[0].noticias.map((n) => n.tipo), ['NOTICIA DE HOY', 'NOTICIA DE AYER']);
   assert.ok(!secs[0].items.some((x) => x.titulo === 'vieja'), 'lo viejo no sale en pantalla');
-  assert.deepEqual(secs[2].items.map((x) => x.tipo), ['AVISO', 'TAREA', 'TAREA']);
+  assert.deepEqual(secs[2].items.map((x) => x.tipo), ['AVISO', 'TAREA']);   // Pole, sin horario ni pendientes, no anuncia tarea
 });
 
 test('en pantalla las secciones salen por turnos y cada una lleva su cuenta', () => {

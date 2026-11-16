@@ -44,7 +44,21 @@ El primero es **Nitro**: noticias de arrancones, diario a las 7:23 a.m. (hora de
 
 Entre tarea y tarea no se quedan quietos: cada pocos minutos cambian de plan. A veces hacen algo por su cuenta (el campo `rutina` de su ficha: lista de `{ area, actividad }`), a veces se quedan en su lugar y a veces se van a Descanso, donde también se pasean. Eso es ambiente; la tarea de verdad es la programada.
 
-El supervisor de la Oficina Terrazas (DragTree) es el **jefe** de los dos. Mientras su sesión no trabaja, no se queda quieto: cada pocos minutos revisa algo, se da una vuelta, llama a un monito para darle instrucciones (salen de su nota de pendientes) o lo manda a un cuarto. Es ambiente, sale del reloj. Lo que sí leen los monitos de verdad es la nota de memoria `instrucciones-del-jefe` de cada uno: ahí van las reglas de su sección.
+### Equipos: quién manda a quién
+
+| Jefe (supervisor) | Su territorio | Su agente |
+|---|---|---|
+| **DragTree** (sesión de la tableta, en la nube) | Oficina Terrazas y Centro de Pensado | **Nitro** (y Pole) |
+| **Calleros** (sesión de la computadora de Calleros) | Oficina Calleros y Cerebro Delta; se pasea por toda la oficina | El agente que vive en la Oficina Calleros (`monitos/ayudante-calleros`, nombre provisional) |
+
+Un monito es del equipo del jefe de su `casa`. Los equipos están en `EQUIPOS`, en `oficina.html`. Pasan dos cosas distintas:
+
+- **De verdad.** Cuando la sesión del jefe trabaja y usa un ayudante (subagente), ese trabajo lo hace su agente en la oficina. Si el aviso de la sesión trae `ayudante_actividad` y `ayudante_area` (lo que hace el ayudante), el agente hace eso mismo en el cuarto que toca y el jefe dice «Coordinando a …». Si solo se sabe que pidió ayuda («Pidiendo ayuda a un ayudante»), el agente se va con él: «Ayudando a DragTree». En la ficha del agente dice «encargo de …, de su sesión».
+- **De ambiente.** Mientras la sesión del jefe espera, no se queda quieto: revisa lo suyo, se pasea, llama a su agente para darle instrucciones (salen de su nota de pendientes) o lo manda a un cuarto. Sale del reloj, no de la sesión; la ficha dice «por su cuenta».
+
+Para que llegue el detalle del ayudante, el aviso de la sesión tiene que ser el de esta versión: `para-dragtrim/.claude/hooks/oficina_terrazas.py` (va en el repositorio `dragtrim`) y `relevo/oficina_aviso.py` (para el relevo de Cloudflare). El programa viejo de la laptop de Calleros no manda ese detalle: con él solo se ve cuando Calleros pide ayuda.
+
+Lo que sí leen los monitos de verdad en su ronda es la nota de memoria `instrucciones-del-jefe` de cada uno: ahí van las reglas de su sección.
 
 Para agregar otro, desde cualquier sesión de Claude Code en la nube:
 
