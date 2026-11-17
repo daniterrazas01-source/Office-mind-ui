@@ -2824,22 +2824,35 @@ function tarjetaCartelera(x, ahora, color){
   return `<div class="tarjeta" style="border-left-color:${x.noticia ? color : x.tipo === 'TAREA' ? '#7fe7ff' : x.tipo === 'AVISO' ? color : '#ffd34d'}${ahora ? ';background:#352b42' : ''}"><i class="tipo">${esc(x.tipo)}${x.cuando ? ' · ' + esc(String(x.cuando).toUpperCase()) : ''}${ahora ? ' · EN PANTALLA AHORA' : ''}</i><b>${esc(x.titulo || '')}</b><div>${esc(x.texto || '')}</div>` +
     (x.fuente || u ? `<div><i>Fuente: </i>${u ? `<a class="enlace" href="${esc(u)}" target="_blank" rel="noopener">${esc(x.fuente || u)}</a>` : esc(x.fuente)}</div>` : '') + '</div>';
 }
-function panelCartelera(){
-  const secs = seccionesAhora(), x = enPantalla(Date.now());
-  let html = '<p>Cada monito tiene su sección y la oficina la suya. La pantalla cambia cada 5 minutos, una sección a la vez. Las noticias con más de una semana ya no salen en pantalla: quedan al final de su sección.</p>', n = 0;
-  for (const sec of secs){
-    const color = colorSeccion(sec), ahora = it => !!x && x.sid === sec.id && sec.items[x.i] === it;
-    if (!sec.items.length && !sec.viejas.length) continue;
-    n++;
-    html += `<h4 style="margin:18px 0 8px;padding:6px 10px;background:${color};color:#17131d">${esc(sec.titulo)}${sec.id === 'oficina' ? '' : ' · ' + esc(sec.de)}${sec.fecha ? `<small style="float:right;font-weight:400">${esc(sec.fecha)}</small>` : ''}</h4>`;
-    if (sec.id === 'oficina') html += sec.items.map(it => tarjetaCartelera(it, ahora(it), color)).join('');
-    else {
-      html += sec.noticias.length ? sec.noticias.map(it => tarjetaCartelera(it, ahora(it), color)).join('') : '<p class="vacio">Sin noticias de esta semana.</p>';
-      if (sec.capsulas.length) html += '<p class="meta" style="margin:10px 0 6px">Cápsulas</p>' + sec.capsulas.map(it => tarjetaCartelera(it, ahora(it), color)).join('');
-      if (sec.viejas.length) html += `<details style="margin-top:8px"><summary class="meta" style="cursor:pointer">Noticias anteriores (${sec.viejas.length}): ya no salen en pantalla</summary>` + sec.viejas.map(it => tarjetaCartelera(it, false, '#6b6474')).join('') + '</details>';
-    }
+/* La cartelera con pestañas arriba: una por sección (Arrancones de Nitro, Fórmula 1 de Pole…) y la de la Oficina.
+   Se ve una a la vez; abre en la que está en pantalla ahorita (o en la última que elegiste en este aparato). */
+let pestanaCartelera = '';
+try { pestanaCartelera = localStorage.getItem('oficina.cartelera') || ''; } catch (e) {}
+function panelCartelera(cual){
+  const secs = seccionesAhora().filter(sec => sec.items.length || sec.viejas.length), x = enPantalla(Date.now());
+  if (!secs.length){ abrirPanel('SALA DE NOTICIAS', '<p class="vacio">Todavía no hay nada que mostrar. Aquí saldrán las noticias de los monitos, sus tareas y los cambios de la oficina.</p>'); return; }
+  const elegida = secs.find(sec => sec.id === cual) || secs.find(sec => sec.id === pestanaCartelera) || secs.find(sec => x && sec.id === x.sid) || secs[0];
+  const pestanas = '<div class="botones" role="tablist" aria-label="Secciones de la cartelera" style="position:sticky;top:-12px;z-index:1;background:#1f1927;padding:8px 0;margin:-4px 0 6px">' + secs.map(sec => {
+    const sel = sec === elegida, color = colorSeccion(sec), aire = x && x.sid === sec.id;
+    const nombre = sec.id === 'oficina' ? 'Oficina' : `${sec.de} · ${sec.titulo.charAt(0) + sec.titulo.slice(1).toLowerCase()}`;
+    const cuantas = sec.id === 'oficina' ? sec.items.length : sec.noticias.length;
+    return `<button class="boton" role="tab" aria-selected="${sel}" data-seccion="${esc(sec.id)}" style="${sel ? `background:${color};color:#17131d;font-weight:700` : `box-shadow:inset 0 -3px 0 ${color}`}">${esc(nombre)} <small style="opacity:.75">${cuantas}</small>${aire ? ' <span title="En pantalla ahora" style="color:' + (sel ? '#17131d' : '#ff5b5b') + '">●</span>' : ''}</button>`;
+  }).join('') + '</div>';
+  const sec = elegida, color = colorSeccion(sec), ahora = it => !!x && x.sid === sec.id && sec.items[x.i] === it;
+  let html = pestanas + `<h4 style="margin:6px 0 8px;padding:6px 10px;background:${color};color:#17131d">${esc(sec.titulo)}${sec.id === 'oficina' ? '' : ' · ' + esc(sec.de)}${sec.fecha ? `<small style="float:right;font-weight:400">${esc(sec.fecha)}</small>` : ''}</h4>`;
+  if (sec.id === 'oficina') html += sec.items.map(it => tarjetaCartelera(it, ahora(it), color)).join('');
+  else {
+    html += sec.noticias.length ? sec.noticias.map(it => tarjetaCartelera(it, ahora(it), color)).join('') : '<p class="vacio">Sin noticias de esta semana.</p>';
+    if (sec.capsulas.length) html += '<p class="meta" style="margin:10px 0 6px">Cápsulas</p>' + sec.capsulas.map(it => tarjetaCartelera(it, ahora(it), color)).join('');
+    if (sec.viejas.length) html += `<details style="margin-top:8px"><summary class="meta" style="cursor:pointer">Noticias anteriores (${sec.viejas.length}): ya no salen en pantalla</summary>` + sec.viejas.map(it => tarjetaCartelera(it, false, '#6b6474')).join('') + '</details>';
   }
-  abrirPanel('SALA DE NOTICIAS · CARTELERA', n ? html : '<p class="vacio">Todavía no hay nada que mostrar. Aquí saldrán las noticias de los monitos, sus tareas y los cambios de la oficina.</p>');
+  html += '<p class="meta" style="margin-top:14px">La pantalla cambia cada 5 minutos, una sección a la vez (● = la que está en pantalla). Las noticias con más de una semana ya no salen en pantalla: quedan al final de su sección.</p>';
+  abrirPanel('SALA DE NOTICIAS', html);
+  cuerpo.querySelectorAll('[data-seccion]').forEach(b => b.addEventListener('click', () => {
+    pestanaCartelera = b.dataset.seccion;
+    try { localStorage.setItem('oficina.cartelera', pestanaCartelera); } catch (e) {}
+    panelCartelera(pestanaCartelera);
+  }));
 }
 function panelMemoria(){
   let html = '<p>Aquí guardan los monitos lo que necesitan recordar de un día para otro. Lo leen en la computadora al empezar su tarea y lo actualizan al terminar.</p>', n = 0;
