@@ -433,14 +433,14 @@ const LUGARES = {
     L(30, 55, 'izq'),
     L(23, 56, 'izq', { tubo: true }),
   ],
-  'agentes': [                                                         // solo para los agentes: el sillón, los pufs y los casilleros
-    L(3, 93, 'abajo', { oy: -15, sentado: true }),
-    L(4, 93, 'abajo', { oy: -15, sentado: true }),
-    L(2, 93, 'abajo', { oy: -15, sentado: true }),
-    L(5, 93, 'abajo', { oy: -15, sentado: true }),
+  'agentes': [                                                         // solo para los agentes: el sillón, los pufs, la cama y las lavadoras
+    L(4, 98, 'arriba', { oy: 6, sentado: true }),                      // el sillón, al fondo, de espaldas, viendo hacia la puerta
+    L(5, 98, 'arriba', { oy: 6, sentado: true }),
+    L(3, 98, 'arriba', { oy: 6, sentado: true }),
+    L(6, 98, 'arriba', { oy: 6, sentado: true }),
     L(3, 96, 'der', { sentado: true, puf: '#8a58cf' }),
     L(6, 96, 'izq', { sentado: true, puf: '#2bb3a3' }),
-    L(5, 98, 'arriba', { sentado: true, puf: '#f2c230' }),
+    L(3, 93, 'abajo', { ox: -24, oy: -6, sentado: true, cama: true }), // en la cama (solo quien va a dormir)
     L(6, 94, 'arriba', { ox: 8, lavadora: 0 }),                       // frente a cada lavadora de memoria (adentro no se ve)
     L(8, 94, 'arriba', { ox: 8, lavadora: 1 }),
   ],
@@ -893,15 +893,33 @@ function mudar(){
 
 /* ---------- Cuarto de Agentes: solo para ellos. Ahí se toman su descanso un par de veces al día y en la noche ---------- */
 function cuartoDeAgentes(){
-  bloquear(2, 92, 5, 92);
-  mueble(92 * T + 15, () => {                                        // sillón largo contra la pared
-    const dx = -240, dy = 1232;
-    R(267 + dx, 236 + dy, 74, 21, K);
-    R(268 + dx, 237 + dy, 72, 8, '#2f6f86'); R(268 + dx, 237 + dy, 72, 1, '#4b93ad');
-    R(273 + dx, 245 + dy, 62, 10, '#367c95'); R(273 + dx, 245 + dy, 62, 1, '#5aa3bd');
-    R(288 + dx, 245 + dy, 1, 10, '#285d70'); R(304 + dx, 245 + dy, 1, 10, '#285d70'); R(320 + dx, 245 + dy, 1, 10, '#285d70');
-    R(268 + dx, 239 + dy, 5, 16, '#245468'); R(335 + dx, 239 + dy, 5, 16, '#245468');
-    R(276 + dx, 240 + dy, 8, 5, '#f2c230'); R(276 + dx, 240 + dy, 8, 1, '#ffd95a'); R(318 + dx, 240 + dy, 8, 5, '#d97757'); R(318 + dx, 240 + dy, 8, 1, '#f0a07f');
+  /* Cama junto a la entrada: cabecera contra la pared y cobija que tapa a quien duerme (se pinta después que él) */
+  bloquear(1, 92, 2, 93);
+  mueble(92 * T + 1, () => {
+    R(17, 1460, 30, 10, K); R(18, 1461, 28, 8, '#7a4b2e'); R(18, 1461, 28, 1, '#9a6a44'); R(22, 1463, 20, 1, '#5f3a22');
+    R(17, 1469, 30, 34, K); R(18, 1470, 28, 32, '#f1ece2');
+    R(21, 1472, 22, 8, '#ffffff'); R(21, 1479, 22, 1, '#d8d2c4');
+  });
+  mueble(93 * T + 15, () => {
+    R(18, 1486, 28, 16, '#5b7fc4'); R(18, 1486, 28, 2, '#8fb0ec'); R(18, 1488, 28, 1, '#4a6aa8');
+    for (let i = 0; i < 4; i++) R(21 + i * 7, 1492, 3, 3, '#7f9fe0');
+    R(17, 1502, 30, 2, K);
+  });
+  bloquear(3, 92);
+  mueble(92 * T + 15, () => {                                        // buró con lamparita
+    R(50, 1476, 12, 12, K); R(51, 1477, 10, 10, '#8b5a2b'); R(51, 1477, 10, 1, '#a87040'); R(53, 1482, 6, 1, '#6b4423');
+    R(53, 1467, 6, 5, K); R(54, 1468, 4, 3, '#ffe9a0'); R(55, 1472, 2, 4, K);
+  });
+  /* Sillón al fondo, de espaldas: se ve el respaldo y quien se sienta mira hacia la puerta */
+  bloquear(3, 99, 6, 99);
+  mueble(98 * T + 2, () => {                                         // asientos (atrás de quien se sienta)
+    R(45, 1576, 70, 12, K); R(46, 1577, 68, 10, '#367c95'); R(46, 1577, 68, 1, '#5aa3bd');
+    R(62, 1577, 1, 10, '#285d70'); R(79, 1577, 1, 10, '#285d70'); R(96, 1577, 1, 10, '#285d70');
+  });
+  mueble(99 * T + 15, () => {                                        // respaldo y brazos (delante de quien se sienta)
+    R(45, 1586, 70, 13, K); R(46, 1587, 68, 11, '#2f6f86'); R(46, 1587, 68, 1, '#4b93ad'); R(46, 1596, 68, 2, '#245468');
+    R(43, 1576, 6, 23, K); R(44, 1577, 4, 21, '#245468'); R(111, 1576, 6, 23, K); R(112, 1577, 4, 21, '#245468');
+    R(52, 1584, 8, 5, '#f2c230'); R(52, 1584, 8, 1, '#ffd95a'); R(100, 1584, 8, 5, '#d97757'); R(100, 1584, 8, 1, '#f0a07f');
   });
   bloquear(4, 96, 5, 96);
   mueble(96 * T + 14, () => {                                        // mesita de centro
@@ -1352,8 +1370,8 @@ function adornosFijos(){
     for (let i = 0; i < h; i += 6){ R(x, y + i, 1, Math.min(3, h - i), '#e6c229'); R(x + w, y + i, 1, Math.min(3, h - i), '#e6c229'); }
   };
   // Cuarto de Agentes: tapete redondo para estar
-  R(36, 1516, 108, 70, '#2a2f45'); R(38, 1518, 104, 66, '#c9a86a'); R(42, 1522, 96, 58, '#7a5a9a'); R(46, 1526, 88, 50, '#8f6bb0');
-  for (let i = 0; i < 6; i++) R(50 + i * 14, 1574, 6, 2, '#c9a86a');
+  R(36, 1508, 108, 62, '#2a2f45'); R(38, 1510, 104, 58, '#c9a86a'); R(42, 1514, 96, 50, '#7a5a9a'); R(46, 1518, 88, 42, '#8f6bb0');
+  for (let i = 0; i < 6; i++) R(50 + i * 14, 1564, 6, 2, '#c9a86a');
   // Oficina Terrazas: tapete verde tipo pasto
   R(40, 770, 96, 34, '#4f6d3c'); R(42, 772, 92, 30, '#6a8f50');
   for (let i = 0; i < 22; i++) R(46 + (i * 13) % 86, 775 + (i * 7) % 24, 1, 2, '#83a96a');
@@ -2070,7 +2088,8 @@ function asignarLugar(a, area){
   if (a.quiereTubo){ const i = lista.findIndex(l => l.tubo); if (i >= 0 && !occ[i]){ idx = i; a.enTubo = true; } }   // va a la estación del túnel
   if (idx < 0 && principal(a) && !occ[0]) idx = 0;
   if (idx < 0 && a.quiereLavar){ const i = lista.findIndex((l, k) => l.lavadora != null && !occ[k]); if (i >= 0) idx = i; }   // a la lavadora que esté libre
-  const puede = l => !l.tubo && l.lavadora == null && (!l.jefe || a.rol === 'supervisor');
+  if (idx < 0 && a.quiereCama){ const i = lista.findIndex((l, k) => l.cama && !occ[k]); if (i >= 0) idx = i; }   // a dormir, si la cama está libre
+  const puede = l => !l.tubo && l.lavadora == null && !l.cama && (!l.jefe || a.rol === 'supervisor');
   for (let i = reservarPrincipal ? 1 : 0; idx < 0 && i < lista.length; i++) if (!occ[i] && puede(lista[i])) idx = i;
   if (idx < 0 && !occ[0] && puede(lista[0])) idx = 0;
   if (idx >= 0){ occ[idx] = a.id; a.lugar = lista[idx]; return; }
@@ -2302,14 +2321,15 @@ function procesar(datos){
     const quiereTubo = !!r.tubo || (!!ESTACIONES[area] && ES_DEL_TUNEL.test(String(r.actividad || '')));
     if (inactivo){ area = enTerrazas ? 'terrazas' : 'descanso'; texto = 'Esperando instrucciones'; }   // Terrazas espera en su cuarto
     else if (area === 'descanso' && !texto) texto = 'Esperando instrucciones';
-    const quiereLavar = !!r.lavar && area === 'agentes' && !inactivo, cambiaLavar = quiereLavar !== !!a.quiereLavar;
-    a.quiereLavar = quiereLavar;
+    const quiereLavar = !!r.lavar && area === 'agentes' && !inactivo, quiereCama = area === 'agentes' && !inactivo && /durm/i.test(String(r.actividad || ''));
+    const cambiaLavar = quiereLavar !== !!a.quiereLavar || quiereCama !== !!a.quiereCama;
+    a.quiereLavar = quiereLavar; a.quiereCama = quiereCama;
     const cambiaTubo = (quiereTubo && !inactivo && !!ESTACIONES[area]) !== !!a.quiereTubo || cambiaLavar;
     a.quiereTubo = quiereTubo && !inactivo && !!ESTACIONES[area];
     const estado = inactivo ? 'inactivo' : String(r.estado || 'trabajando').toLowerCase();
     a.elNombre.style.setProperty('--e', ESTADO_COLOR[estado] || ESTADO_COLOR.trabajando);
     a.estadoTxt = estado;
-    a.zzz = (area === 'descanso' && (inactivo || estado === 'esperando')) || a.callado;
+    a.zzz = (area === 'descanso' && (inactivo || estado === 'esperando')) || a.callado || quiereCama;
     a.ultra = a.ultraPedido && !inactivo;
     ponerNombre(a, nombreVisible);
     if (nuevo){ if (primeraLectura) colocar(a, area, texto); else entrar(a, area, texto); }
@@ -2874,11 +2894,14 @@ function ponerHorario(h, guardar){
   }
   return true;
 }
-function planDeNoche(casa, quien, ahora){   // fuera de horario: descansar, pasearse (los de Descanso se pasean solos) o acomodar cosas
+/* Fuera de horario. Los jefes, mientras su sesión no trabaja, descansan o cierran lo suyo, y no le dan instrucciones
+   a nadie. Los agentes no hacen ninguna tarea: duermen, descansan en su cuarto o en Descanso (donde también se
+   pasean). Solo trabaja el agente que la sesión de su jefe esté usando de verdad (encargoReal). */
+const NOCHE_AGENTES = [['agentes', 'Durmiendo'], ['agentes', 'Durmiendo'], ['agentes', 'Descansando en mi cuarto'], ['descanso', 'Descansando'], ['descanso', 'Descansando']];
+function planDeNoche(casa, quien, ahora){
   const eq = EQUIPOS.find(e => e.casa === casa);
-  const base = eq ? eq.noche : [[casa || 'descanso', 'Acomodando sus cosas'], ['descanso', 'Descansando'], ['descanso', 'Descansando']];
-  const lista = String(quien).startsWith('jefe-') ? base               // los agentes, de noche, también se van a su cuarto
-    : base.filter(x => x[0] !== 'descanso').concat([['agentes', 'Descansando en mi cuarto'], ['agentes', 'Descansando en mi cuarto'], ['descanso', 'Descansando']]);
+  const lista = !String(quien).startsWith('jefe-') ? NOCHE_AGENTES
+    : eq ? eq.noche : [[casa || 'descanso', 'Cerrando lo suyo'], ['descanso', 'Descansando'], ['descanso', 'Descansando']];
   const p = lista[Math.floor(azar(Math.floor(hashTexto(String(quien)) * 1e9) + Math.floor(ahora / (2 * RATO_MIN * 60000)) * 7919)() * lista.length)];
   return { area: p[0], actividad: p[1], noche: true };
 }
@@ -2958,7 +2981,7 @@ function encargoReal(eq, jefe, ahora){   // de verdad: la sesión del jefe está
   const hace = String(jefe.ayudante_actividad || ''), visto = fecha(jefe.ayudante_visto) || fecha(jefe.actualizado) || 0;
   const pide = /ayudante|agente|subagent|deleg/i.test(String(jefe.actividad || '')) || normalizarArea(jefe.area) === 'sala de juntas';
   if (!(hace && ahora - visto < 8 * 60000) && !pide) return null;
-  const m = deEquipo(eq).find(x => !enSuTarea(x, ahora));
+  const m = deEquipo(eq).filter(x => !enSuTarea(x, ahora)).sort((p, q) => (q.principal ? 1 : 0) - (p.principal ? 1 : 0))[0];   // primero su agente principal
   if (!m) return null;
   const orden = hace ? { area: normalizarArea(jefe.ayudante_area) || areaDeTexto(hace), actividad: hace } : { area: 'sala de juntas', actividad: 'Ayudando a ' + (jefe.nombre || 'su jefe') };
   if (orden.area === 'escritorio' && hace) orden.area = eq.casa;        // lo de escritorio lo hace en la oficina de su equipo
@@ -3002,8 +3025,8 @@ function registroProgramado(m, ahora){
   return {
     id: 'monito-' + m.id, monito: m.id, nombre: m.nombre || m.id, rol: 'programado', fijo: true,
     area: trabajando ? (m.area || 'internet') : libre.area,
-    actividad: trabajando ? (m.actividad || 'Trabajando') : libre.plan ? '' : (enEstacion || libre.orden || libre.pausa) ? libre.actividad : nuevo ? '¡Traigo resumen nuevo!' : (frase || libre.actividad || ''),
-    estado: trabajando || libre.real ? 'trabajando' : libre.area === 'descanso' ? 'esperando' : (libre.actividad || libre.plan) ? 'por su cuenta' : nuevo ? 'terminado' : 'esperando',
+    actividad: trabajando ? (m.actividad || 'Trabajando') : libre.plan ? '' : (enEstacion || libre.orden || libre.pausa || libre.noche) ? libre.actividad : nuevo ? '¡Traigo resumen nuevo!' : (frase || libre.actividad || ''),
+    estado: trabajando || libre.real ? 'trabajando' : libre.area === 'descanso' || /durm/i.test(libre.actividad || '') ? 'esperando' : (libre.actividad || libre.plan) ? 'por su cuenta' : nuevo ? 'terminado' : 'esperando',
     tarea: trabajando, encargo: libre.real ? plan.jefe : '', plan: trabajando ? '' : (libre.plan || libre.actividad || 'En su lugar'),
     tubo: enEstacion || (trabajando && ES_DEL_TUNEL.test(m.actividad || '')), lavar,
     modelo: m.modelo, esfuerzo: m.esfuerzo, aspecto: m.aspecto, equipo: m.horario || (m.jefe ? 'Agente de ' + m.jefe : 'Tarea programada'),
