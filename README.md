@@ -137,6 +137,8 @@ El Artifact muestra solas las sesiones de Claude Code en la nube y las de Remote
 
 ## Cómo funciona
 
+- **Rendimiento con zoom:** el lienzo tiene un tope de ~8 millones de pixeles (`MAX_PIXELES`, hasta 3 por pixel del mapa; el navegador agranda el resto sin suavizar) y cada cuadro solo dibuja la parte que se ve (`leerVista()`), con un margen. El pellizco se aplica una vez por cuadro. Antes, con zoom el lienzo llegaba a 31 millones de pixeles y en el teléfono se trababa. `?depurar` guarda cuánto tarda cada cuadro en `oficinaDepurar.TIEMPOS`.
+
 - `oficina.html` es la oficina. Lee el estado cada 2 s en la laptop y cada 15 s desde el teléfono.
 - `src/reglas.js` decide quién se ve: supervisores fijos y visitantes sin vencer. Son funciones puras con pruebas en `test/`.
 - `src/sesiones.js` traduce la lista de sesiones de Claude Code a monitos; el Artifact la pide cada 30 s con el conector «Claude Code Remote» de quien lo abre. Solo lee.

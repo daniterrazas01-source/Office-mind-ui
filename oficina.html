@@ -2590,6 +2590,15 @@ function letrerosActivos(){
 
 /* ---------- Tamaño en pantalla ---------- */
 const escenario = document.getElementById('escenario'), mundo = document.getElementById('mundo');
+const MAX_PIXELES = 8e6;
+let vista = { x: 0, y: 0, w: W, h: H };   // la parte de la oficina que se ve ahorita (en pixeles del mapa)
+function leerVista(){   // se lee al empezar cada cuadro, antes de mover viñetas y gafetes
+  const m = 40 / escala + 24;                                             // un margen, para que al deslizar no se vea vacío
+  vista = { x: Math.max(0, escenario.scrollLeft / escala - LIENZO_OFF.x - m), y: Math.max(0, escenario.scrollTop / escala - LIENZO_OFF.y - m),
+            w: escenario.clientWidth / escala + 2 * m, h: escenario.clientHeight / escala + 2 * m };
+  vista.w = Math.min(W - vista.x, vista.w); vista.h = Math.min(H - vista.y, vista.h);
+}
+let LIENZO_OFF = { x: 0, y: 0 };
 function ajustarEscala(){
   const cab = document.querySelector('header').offsetHeight;
   escenario.style.top = (cab + 4) + 'px'; $('panel').style.top = innerWidth <= 760 ? '' : (cab + 4) + 'px';
@@ -2597,7 +2606,10 @@ function ajustarEscala(){
   const base = innerWidth <= 760 ? (escenario.clientWidth - 8) / W                    // teléfono vertical: el ancho completo
                                  : Math.min(aw / W, ah / (FILAS_ARRIBA * T));         // compu: la planta principal llena la pantalla
   escala = Math.max(0.4, base * zoom);
-  const kNuevo = Math.min(6, Math.max(1, Math.round(escala * (window.devicePixelRatio || 1))));   // el iPhone no aguanta lienzos gigantes
+  // Tope de pixeles del lienzo: con zoom crecía hasta 31 millones y en el teléfono se trababa. Los dibujos van en pixeles
+  // enteros, así que con 3 por pixel ya se ve nítido; lo demás lo agranda el navegador sin suavizar (pixelated).
+  const kTope = Math.max(1, Math.floor(Math.sqrt(MAX_PIXELES / (W * H))));
+  const kNuevo = Math.min(kTope, Math.max(1, Math.round(escala * (window.devicePixelRatio || 1))));
   if (kNuevo !== k || lienzo.width !== W * kNuevo){ k = kNuevo; lienzo.width = W * k; lienzo.height = H * k; }
   const cw = Math.round(W * escala), ch = Math.round(H * escala);
   lienzo.style.width = cw + 'px'; lienzo.style.height = ch + 'px';
@@ -2608,6 +2620,8 @@ function ajustarEscala(){
   $('vacia').style.top = (PY(262) * escala) + 'px';
   { const el = $('pantalla').style; el.left = (PANTALLA.x * escala) + 'px'; el.top = (PANTALLA.y * escala) + 'px'; el.width = (PANTALLA.w * escala) + 'px'; el.height = (PANTALLA.h * escala) + 'px'; }
   for (const a of agentes.values()){ a.medir = true; a.medirNombre = true; }
+  const re = escenario.getBoundingClientRect(), rl = lienzo.getBoundingClientRect();   // dónde empieza el lienzo dentro del escenario
+  LIENZO_OFF = { x: (rl.left - re.left + escenario.scrollLeft) / escala, y: (rl.top - re.top + escenario.scrollTop) / escala };
 }
 
 /* ---------- Barra de arriba ---------- */
@@ -3278,7 +3292,9 @@ escenario.addEventListener('touchmove', e => {
   if (!pinza || e.touches.length !== 2) return;
   e.preventDefault();
   const cx = (e.touches[0].clientX + e.touches[1].clientX) / 2, cy = (e.touches[0].clientY + e.touches[1].clientY) / 2;
-  zoomEn(pinza.z * distancia(e.touches) / pinza.d, cx, cy);
+  const z = pinza.z * distancia(e.touches) / pinza.d;
+  if (!pinza.pendiente) requestAnimationFrame(() => { const q = pinza && pinza.pendiente; if (q){ pinza.pendiente = null; zoomEn(q.z, q.cx, q.cy); } });
+  pinza.pendiente = { z, cx, cy };
 }, { passive: false });
 escenario.addEventListener('touchend', e => { if (e.touches.length < 2) pinza = null; });
 escenario.addEventListener('wheel', e => { if (e.ctrlKey){ e.preventDefault(); zoomEn(zoom * (e.deltaY < 0 ? 1.15 : 1 / 1.15), e.clientX, e.clientY); } }, { passive: false });
@@ -3289,12 +3305,14 @@ function dibujar(t){
   g = ctx;
   ctx.setTransform(k, 0, 0, k, 0, 0);
   ctx.imageSmoothingEnabled = false;
-  ctx.drawImage(estatica, 0, 0);
+  const v = vista, vx = Math.floor(v.x), vy = Math.floor(v.y), vw = Math.ceil(v.w) + 1, vh = Math.ceil(v.h) + 1;
+  ctx.save(); ctx.beginPath(); ctx.rect(vx, vy, vw, vh); ctx.clip();   // solo la parte que se ve
+  ctx.drawImage(estatica, vx, vy, vw, vh, vx, vy, vw, vh);
   enBandas(() => paredesAnimadas(t));
   ancho(t);
   dibujarViajes(t);            // lo que va por el periférico
-  const items = MUEBLES.slice();
-  for (const a of agentes.values()) items.push({ sortY: a.y, a });
+  const items = MUEBLES.filter(m => m.sortY > vy - 4 && m.sortY - 96 < vy + vh);   // lo que queda fuera de la vista no se pinta
+  for (const a of agentes.values()) if (a.y > vy - 4 && a.y - 80 < vy + vh) items.push({ sortY: a.y, a });
   items.sort((p, q) => p.sortY - q.sortY);
   for (const it of items){ if (!it.a) it.dibujar(t); else if (!it.a.bajo && !(it.a.fase === 'trabajando' && it.a.lugar && it.a.lugar.lavadora != null)) dibujarAgente(it.a, t); }
   tallos();
@@ -3304,6 +3322,7 @@ function dibujar(t){
     for (let i = 0; i < z.w; i += 4){ R(z.x + i, z.y, 2, 1, c); R(z.x + i, z.y + z.h - 1, 2, 1, c); }
     for (let i = 0; i < z.h; i += 4){ R(z.x, z.y + i, 1, 2, c); R(z.x + z.w - 1, z.y + i, 1, 2, c); }
   }
+  ctx.restore();
 }
 /* ---------- De noche: la oficina se oscurece y quedan prendidas las lámparas de pasillos y cuartos ---------- */
 let capaNoche = null, nivelNoche = 0;
@@ -3360,7 +3379,8 @@ function noche(){
   if (Math.abs(meta - nivelNoche) < 0.01) nivelNoche = meta;
   if (nivelNoche <= 0) return;
   if (!capaNoche) capaNoche = armarNoche();
-  ctx.globalAlpha = nivelNoche; ctx.drawImage(capaNoche, 0, 0); ctx.globalAlpha = 1;
+  const v = vista, vx = Math.floor(v.x), vy = Math.floor(v.y), vw = Math.ceil(v.w) + 1, vh = Math.ceil(v.h) + 1;
+  ctx.globalAlpha = nivelNoche; ctx.drawImage(capaNoche, vx, vy, vw, vh, vx, vy, vw, vh); ctx.globalAlpha = 1;
 }
 let anterior = 0;
 function bucle(ms){
@@ -3368,15 +3388,19 @@ function bucle(ms){
   if (anterior && ms - anterior < 1000 / FPS - 2) return;
   const dt = anterior ? Math.min(1, (ms - anterior) / 1000) : 0;   // según el reloj real, aunque el navegador vaya lento
   anterior = ms;
+  leerVista();
   pasear();
   for (const a of [...agentes.values()]) moverAgente(a, dt);
   letrerosActivos();
   ubicarVinetas();
+  const t0 = DEPURAR ? performance.now() : 0;
   dibujar(ms / 1000);
+  if (DEPURAR){ TIEMPOS.push(performance.now() - t0); if (TIEMPOS.length > 120) TIEMPOS.shift(); }
 }
 
 /* ?depurar: deja ver por dentro desde la consola (para pruebas) */
-if (new URLSearchParams(location.search).has('depurar')) window.oficinaDepurar = { agentes, monitosTodos, ratoLibre, registroProgramado, planDeNoche, abierta };
+const DEPURAR = new URLSearchParams(location.search).has('depurar'), TIEMPOS = [];
+if (DEPURAR) window.oficinaDepurar = { agentes, monitosTodos, ratoLibre, registroProgramado, planDeNoche, abierta, zoomEn, TIEMPOS, lienzo: () => [lienzo.width, lienzo.height, k] };
 
 /* ---------- Arranque ---------- */
 construirMuebles();
