@@ -1,5 +1,5 @@
 {
-  "actualizado": "2026-11-16T18:31:22Z",
+  "actualizado": "2026-11-17T03:20:06Z",
   "monitos": [
     {
       "actividad": "",
@@ -19,6 +19,7 @@
       "jefe": "DragTree",
       "modelo": "haiku",
       "nombre": "Nitro",
+      "principal": true,
       "rutina": [
         {
           "actividad": "Revisando el carro",
@@ -809,6 +810,7 @@
       "jefe": "Calleros",
       "modelo": "sonnet",
       "nombre": "Ayudante",
+      "principal": true,
       "rutina": [
         {
           "actividad": "Ordenando papeles",
@@ -841,6 +843,18 @@
     }
   ],
   "avisos": [
+    {
+      "creado": "2026-11-17T06:00:00Z",
+      "texto": "Al cerrar la oficina los agentes dejan sus tareas: duermen, descansan o se pasean. Solo trabaja el agente que la sesión de su jefe esté usando de verdad. El Cuarto de Agentes ya tiene cama.",
+      "titulo": "De noche, los agentes descansan",
+      "id": "2026-11-17-reglas-de-noche"
+    },
+    {
+      "creado": "2026-11-16T23:50:00Z",
+      "texto": "El Cuarto de Agentes tiene dos lavadoras. Los agentes se meten a limpiarse la memoria: Nitro y Pole recortan sus notas en cada ronda para empezar ligeros al día siguiente.",
+      "titulo": "Lavadoras de memoria",
+      "id": "2026-11-16-lavadoras"
+    },
     {
       "creado": "2026-11-16T15:00:00Z",
       "texto": "DragTree manda a Nitro desde la Oficina Terrazas y el Centro de Pensado. Calleros manda a su agente desde la Oficina Calleros y el Cerebro Delta. Cuando la sesión del jefe usa un ayudante, su agente hace ese trabajo en la oficina.",
@@ -894,6 +908,30 @@
       "texto": "Hay un túnel subterráneo entre la Oficina Terrazas y el Centro de Pensado, y un túnel central en el gran pasillo.",
       "titulo": "Túneles nuevos",
       "id": "2026-11-14-tuneles"
+    }
+  ],
+  "visitas": [
+    {
+      "actividad": "Registrándome en la oficina",
+      "actualizado": "2026-11-17T03:17:32Z",
+      "area": "escritorio",
+      "equipo": "Nube",
+      "estado": "trabajando",
+      "modelo": "sonnet",
+      "nombre": "oficina-ui",
+      "sesion": "session_01UYjNJmDK1nnFG3xMuMrLMm",
+      "id": "oficina-ui"
+    },
+    {
+      "actividad": "Agregando a Pole, el de Fórmula 1",
+      "actualizado": "2026-11-15T18:31:00Z",
+      "area": "escritorio",
+      "equipo": "Nube",
+      "estado": "terminado",
+      "modelo": "fable",
+      "nombre": "Constructor",
+      "sesion": "session_01UYjNJkrwugqvXcuETXn7g6",
+      "id": "constructor-oficina"
     }
   ]
 }
