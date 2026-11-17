@@ -1537,7 +1537,9 @@ function pintarBocas(){   // las terminales: una boca como las del túnel centra
     for (let i = 0; i < 7; i++) R(x - 1 + i * 5, yy + 32, 3, 2, i % 2 ? '#15161d' : '#e6c229');
   }
 }
+let PERIFERICO_PRENDIDO = true;   // se apaga cuando cierra la oficina (lo revisa barra() cada segundo)
 function ancho(t){   // lo que se mueve: flechas que corren por la banda y el brillo del vidrio
+  if (!PERIFERICO_PRENDIDO) t = 0;
   for (const [x0, y0, x1, y1, s, d] of ANCHOS){
     const largo = (s === 'v' ? y1 - y0 + 1 : x1 - x0 + 1) * T, c = '#2f6f8f';
     for (let k = 0; k * 24 < largo; k++){
@@ -1643,12 +1645,13 @@ function subterraneo(t){   // lucecitas bajo las losas de vidrio, y un brillo do
 }
 function tunel(t){
   const { x, y0, y1 } = TUNEL, largo = y1 - y0 - 12;
+  if (!PERIFERICO_PRENDIDO) t = 0;                                  // oficina cerrada: la banda quieta
   for (let k = 0; k < 13; k++){                                     // flechitas que bajan por la banda
     const y = Math.round(y0 + 4 + ((k * 24 + t * 30) % largo)), c = '#2f6f8f';
     R(x + 11, y, 2, 1, c); R(x + 19, y, 2, 1, c); R(x + 13, y + 1, 2, 1, c); R(x + 17, y + 1, 2, 1, c); R(x + 15, y + 2, 2, 1, c);
   }
   for (let y = y0 + 36, n = 0; y < y1 - 36; y += 16, n++){          // lucecitas de los rieles, en fila
-    const on = (n - Math.floor(t * 6)) % 5 === 0;
+    const on = PERIFERICO_PRENDIDO && (n - Math.floor(t * 6)) % 5 === 0;
     R(x + 1, y, 2, 2, on ? '#7fe7ff' : '#2a4a5a'); R(x + 29, y, 2, 2, on ? '#7fe7ff' : '#2a4a5a');
   }
   g.fillStyle = 'rgba(143,211,255,0.07)'; g.fillRect(x + 4, y0 + 32, 24, y1 - y0 - 64);   // cubierta de vidrio
@@ -2151,7 +2154,7 @@ function casillaInicio(a){
 function construirRuta(a, inicio, lugar){
   const pts = [], c0 = { x: inicio.x * T + 8, y: inicio.y * T + 13 };
   if (Math.hypot(c0.x - a.x, c0.y - a.y) > 0.5) pts.push(c0);
-  const celdas = buscarCamino(inicio, { x: lugar.tx, y: lugar.ty }, a.rol === 'supervisor' || a.rol === 'programado');   // los que nunca se van pueden usar el periférico
+  const celdas = buscarCamino(inicio, { x: lugar.tx, y: lugar.ty }, (a.rol === 'supervisor' || a.rol === 'programado') && (abierta(Date.now()) || a.estadoTxt === 'trabajando'));   // los que nunca se van usan el periférico; de noche solo quien trabaja de verdad
   for (let i = 1; i < celdas.length; i++){
     const p = celdas[i - 1], c = celdas[i], n = celdas[i + 1];
     const salto = Math.abs(c.x - p.x) + Math.abs(c.y - p.y) > 1;       // de una escotilla a la otra: ese tramo va por abajo
@@ -2610,6 +2613,7 @@ function ajustarEscala(){
 /* ---------- Barra de arriba ---------- */
 const $ = id => document.getElementById(id);
 function barra(){
+  PERIFERICO_PRENDIDO = abierta(Date.now()) || VIAJES.length > 0;   // si algo ya iba en camino al cerrar, termina su viaje
   pintarPantalla();
   revisarEnvios();
   $('reloj').textContent = new Date().toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
@@ -2744,6 +2748,7 @@ function revisarEnvios(){
   for (const k of Object.keys(ESTACIONES)) SIN_LEER[k] = 0;
   for (const e of lista) if (e.creado > leidoBuzon(e.para)) SIN_LEER[e.para]++;
   const salen = [];
+  if (!abierta(ahora)){ if (lista.length || performance.now() > 20000) primerosEnvios = false; return; }   // oficina cerrada: el periférico no mueve nada
   for (const e of lista){
     if (YA_VIAJO.has(e.id)) continue;
     YA_VIAJO.add(e.id);
