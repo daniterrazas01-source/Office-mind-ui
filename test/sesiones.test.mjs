@@ -111,3 +111,18 @@ test('una visita que dice de qué sesión es no se duplica', () => {
   assert.equal(b.area, 'internet');
   assert.equal(b.actividad, 'Buscando texturas');
 });
+
+test('una sesión con pase puede pasearse por la oficina hasta 3 horas', () => {
+  const a = agenteDeVisita('reg', { nombre: 'Registro', area: 'noticias', actividad: 'Viendo el noticiero', estado: 'paseando', actualizado: '2026-11-14T10:00:00Z' }, AHORA);
+  assert.equal(a.area, 'noticias');
+  assert.equal(a.actividad, 'Viendo el noticiero');
+  assert.equal(a.estado, 'por su cuenta');
+  assert.equal(a.actualizado, new Date(AHORA).toISOString());
+  const vieja = agenteDeVisita('reg', { nombre: 'Registro', area: 'noticias', estado: 'paseando', actualizado: '2026-11-14T08:00:00Z' }, AHORA);
+  assert.equal(vieja.area, 'descanso');
+  const base = estadoDeSesiones({ ccr: { data: lista } }, AHORA).agentes;
+  const junto = conVisitas(base, [{ id: 'm', sesion: 'session_b', area: 'biblioteca', actividad: 'Hojeando libros', estado: 'paseando', actualizado: '2026-11-14T11:00:00Z' }], AHORA);
+  const b = junto.find((x) => x.id === 'session_b');
+  assert.equal(b.area, 'biblioteca');
+  assert.equal(b.estado, 'por su cuenta');
+});

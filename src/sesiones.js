@@ -114,6 +114,7 @@ export function esfuerzoDeRespuesta(payload) {
 // Una sesión que no sale sola en la lista (o que quiere decir mejor qué hace) se registra escribiendo un
 // documento en la colección "visitas": { nombre, area, actividad, estado, modelo, equipo, sesion, actualizado }.
 const MEDIA_HORA = 30 * 60000;   // lo que se le cree a un "trabajando" sin que lo vuelva a decir
+const TRES_HORAS = 3 * 3600000;  // y a un "paseando" (la sesión anda por la oficina porque se lo pidieron)
 
 export function agenteDeVisita(id, v, ahora = Date.now()) {
   if (!v || typeof v !== 'object') return null;
@@ -121,14 +122,15 @@ export function agenteDeVisita(id, v, ahora = Date.now()) {
   if (Number.isNaN(visto)) return null;
   const dicho = plano(v.estado);
   const trabajando = dicho.startsWith('trabaj') && ahora - visto < MEDIA_HORA;
+  const paseando = !trabajando && dicho.startsWith('pase') && ahora - visto < TRES_HORAS;
   const titulo = limpio(v.nombre || v.titulo) || 'Sesión con pase';
-  const cuando = new Date(trabajando ? ahora : visto).toISOString();
+  const cuando = new Date(trabajando || paseando ? ahora : visto).toISOString();
   return {
     id: limpio(v.sesion) || `visita-${id}`,
     nombre: recortar(titulo, 18), titulo,
-    area: trabajando ? (limpio(v.area) || areaDeTexto(v.actividad)) : 'descanso',
-    actividad: trabajando ? (limpio(v.actividad) || 'Trabajando') : 'Esperando instrucciones',
-    estado: trabajando ? 'trabajando' : dicho.startsWith('esper') ? 'esperando' : 'terminado',
+    area: trabajando ? (limpio(v.area) || areaDeTexto(v.actividad)) : paseando ? (limpio(v.area) || 'descanso') : 'descanso',
+    actividad: trabajando ? (limpio(v.actividad) || 'Trabajando') : paseando ? (limpio(v.actividad) || 'Paseando por la oficina') : 'Esperando instrucciones',
+    estado: trabajando ? 'trabajando' : paseando ? 'por su cuenta' : dicho.startsWith('esper') ? 'esperando' : 'terminado', paseo: paseando,
     modo: 'normal',
     modelo: ['haiku', 'sonnet', 'opus', 'fable'].find((m) => plano(v.modelo).includes(m)) || null,
     equipo: limpio(v.equipo) || 'Con pase', dispositivo: 'pase', origen: 'pase', pase: true, esfuerzo: limpio(v.esfuerzo) || undefined,
@@ -146,7 +148,7 @@ export function conVisitas(agentes, visitas, ahora = Date.now()) {
     if (!a) continue;
     if (donde.has(a.id)) {
       const i = donde.get(a.id);
-      if (a.estado === 'trabajando') out[i] = { ...out[i], area: a.area, actividad: a.actividad, estado: 'trabajando', actualizado: a.actualizado, ultima_actividad: a.actualizado, modelo: out[i].modelo || a.modelo };
+      if (a.estado === 'trabajando' || a.paseo) out[i] = { ...out[i], area: a.area, actividad: a.actividad, estado: a.estado, actualizado: a.actualizado, ultima_actividad: a.actualizado, modelo: out[i].modelo || a.modelo };
     } else { donde.set(a.id, out.length); out.push(a); }
   }
   return out;

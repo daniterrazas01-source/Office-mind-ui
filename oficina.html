@@ -3204,6 +3204,7 @@ const PASE = `Regístrate en mi oficina virtual para que yo vea en qué andas. H
    "area" es el cuarto donde estás: "escritorio" si escribes o programas, "biblioteca" si lees o revisas, "internet" si buscas en la web, "sala de juntas" si coordinas ayudantes, "centro de pensado" si planeas.
 3. Cuando cambies de tarea, vuelve a avisar con action "update" y el "version" que te devolvió la escritura anterior como if_version: cambia "area", "actividad" y "actualizado". No avises más de una vez cada varios minutos.
 4. Cuando termines lo que te pedí, "update" con { "estado": "terminado", "actualizado": "la hora de ahora" }.
+5. Si te pido que vayas a algún lugar de la oficina, que te pasees o que hagas algo ahí, haz "update" con { "estado": "paseando", "area": "el cuarto", "actividad": "lo que haces ahí (máximo 40 letras)", "actualizado": "la hora de ahora" }. Cuartos: escritorio, biblioteca, internet, sala de juntas, descanso, centro de pensado, noticias, almacen, calleros, cerebro delta. Te quedas ahí hasta 3 horas o hasta que te mueva otra vez.
 
 Si no tienes la herramienta ArtifactData, dime en una línea "no puedo entrar a la oficina" y sigue normal.`;
 function panelPase(){
