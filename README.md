@@ -54,7 +54,19 @@ Debajo de la Ampliación hay un pasillo más (el 5) y tres cuartos. El de la izq
 - **De ambiente:** los primeros 6 minutos de cada uno de los dos descansos del día («Lavándome la memoria», luego «¡Memoria limpia!» y «En mi descanso»).
 - **De verdad:** el paso 4B «Baño de memoria» de la tarea de Nitro y de Pole. Cada ronda ya empieza sin contexto (sesión nueva); lo que se arrastra de un día a otro son sus notas de memoria, que leen al empezar. En el baño las recortan («Ya lo conté»: últimos 7 días, máximo 15; «Pendientes»: lo abierto, máximo 8; «Fuentes»: máximo 6; «Instrucciones del jefe» no se toca) y anotan en su ficha `bano: { cuando, quite, quedan }`, que sale en la ficha del monito («Último baño de memoria»). Mientras su aviso diga `area: "agentes"` y «Lavándome la memoria», el monito está en la lavadora.
 
-Un encargo de verdad de su jefe le gana al baño de ambiente. Los otros dos cuartos están libres. `?depurar` deja ver por dentro desde la consola (`window.oficinaDepurar`).
+Un encargo de verdad de su jefe le gana al baño de ambiente. El cuarto de en medio es el Taller (abajo) y el de la derecha sigue libre.
+
+### Taller y el droide Rolo
+
+Junto al Cuarto de Agentes está el **Taller** (`taller`, piso `w`, `tallerDeDroides()`): la casa de los droides. Tiene dos bases de carga con su gabinete (la de Rolo y una libre, con «+», para el próximo droide), la **máquina de reparación** (dos postes, viga y un brazo que suelda), la **compactadora** (donde se tira la basura; su número es lo que hay en la papelera), una mesa de trabajo con un domo de repuesto y, en la pared, el tablero de herramientas y la pantallita con la batería.
+
+**Rolo** es un droide rodante (esfera que rueda con paneles que giran y un domo con lente; diseño y nombre propios, inspirado en los droides de bola). No viene en los datos: vive en la página (`crearDroide()`, `droide()`, `dibujarDroide()`); su lógica pura está en `src/droide.js` (con pruebas). Qué hace:
+- **Patrulla** pasillos y cuartos (menos el Cuarto de Agentes), pita (notitas ♪) y escanea; a veces revisa sus refacciones en la mesa.
+- **Limpia** tres veces al día: 10:00 a.m., 3:00 p.m. y media hora antes de cerrar (`rondas()`); si nadie tenía la oficina abierta a esa hora, lo hace en cuanto alguien la abra. Va a la Sala de Noticias y al Almacén, aspira la basura (se ven montoncitos de papel cuando hay) y la lleva a la compactadora. Basura (`basura()`): avisos de la oficina con más de 4 días; resúmenes de los monitos con más de 7 días; envíos con más de 3 días. **Nunca tira** lo que menciona un proyecto protegido (de inicio Drag Tree, Calleros y Cerebro Delta; se cambian en su panel).
+- Lo que tira va a la **papelera** (colección `papelera`, con los datos completos): se puede **rescatar** 7 días desde su panel (y ya no lo vuelve a tirar, `perdonados`); después la compactadora lo borra para siempre en su siguiente ronda.
+- **Se recarga** en su base cuando baja de 25 % de batería; a la **1:00 p.m.** pasa 10 minutos en la máquina de reparación; **de noche hiberna** en su base (lente apagada, zZ).
+
+Su panel (tocar a Rolo, su base, la compactadora o la máquina) muestra qué hace, lo que va a recoger, «Mandarlo a limpiar ahora», los proyectos protegidos y la papelera. Su configuración va en el documento `oficina/droide` (`protegidos`, `ultimaLimpieza`, `perdonados`, `bitacora`). En la página web (sin base) lo que recoge solo se esconde en ese aparato; se tira de verdad cuando la oficina se abre en Claude. `?depurar` deja ver por dentro desde la consola (`window.oficinaDepurar`).
 
 ### Modelo y esfuerzo en el gafete
 

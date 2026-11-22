@@ -174,7 +174,7 @@ textarea.campo{min-height:70px;resize:vertical}
 <header>
   <div class="titulo"><span class="logo"></span>OFICINA · MONITOREO</div>
   <div class="senal" id="senal"><span class="punto"></span><span id="senalTexto">Conectando…</span></div>
-  <nav class="pisos"><button data-fila="0">Planta principal</button><button data-fila="21">Calleros · Cerebro</button><button data-fila="37">Terrazas · Pensado</button><button data-fila="59">Espacios libres</button><button data-fila="72">Ampliación</button><button data-fila="86">Cuarto de agentes</button><a id="irPase" href="#pase" role="button">＋ Sesión</a><a id="irTexto" href="#texto" role="button" title="Tamaño del texto de los monitos">Aa</a><a id="irHorario" href="#horario" role="button" title="Horario de la oficina">Horario</a><a id="irClaude" href="https://claude.ai/artifact/KbxrcsXckzZSE5F65iZwCE" target="_blank" rel="noopener" hidden>Todas mis sesiones ↗</a></nav>
+  <nav class="pisos"><button data-fila="0">Planta principal</button><button data-fila="21">Calleros · Cerebro</button><button data-fila="37">Terrazas · Pensado</button><button data-fila="59">Espacios libres</button><button data-fila="72">Ampliación</button><button data-fila="86">Agentes · Taller</button><a id="irPase" href="#pase" role="button">＋ Sesión</a><a id="irTexto" href="#texto" role="button" title="Tamaño del texto de los monitos">Aa</a><a id="irHorario" href="#horario" role="button" title="Horario de la oficina">Horario</a><a id="irClaude" href="https://claude.ai/artifact/KbxrcsXckzZSE5F65iZwCE" target="_blank" rel="noopener" hidden>Todas mis sesiones ↗</a></nav>
   <div class="derecha"><span id="ultimo"></span><span id="cuantos"></span><span id="reloj"></span></div>
 </header>
 <div id="tip"></div>
@@ -208,6 +208,7 @@ import { estadoDemo } from './src/demo.js';
 import { estadoDeSesiones, modeloDeRespuesta, esfuerzoDeRespuesta, conVisitas, areaDeTexto } from './src/sesiones.js';
 import { ESTACIONES, NODOS, RAMALES, ANCHOS, TRONCO, rutaTunel, largoRuta, puntoEnRuta, enviosLimpios } from './src/tunel.js';
 import { CADA_PANTALLA, turnoDe, secciones, turnoSeccion } from './src/pantalla.js';
+import { PROTEGIDOS, listaProtegidos, basura, idPapelera, paraCompactar, rondas, tocaLimpiar, enMantenimiento, DIAS_PAPELERA } from './src/droide.js';
 (() => {
 'use strict';
 
@@ -320,10 +321,10 @@ const MAPA = (() => {
   // ---- Hasta abajo: la Ampliación, una zona grande en obra, sin cuartos (a = piso de obra) ----
   llenar(1, 74, 30, 74, '='); llenar(1, 75, 30, 86, 'a');
   for (const x of [4, 5, 15, 16, 25, 26]){ m[73][x] = 'D'; m[74][x] = 'D'; }
-  // ---- Debajo de la Ampliación: pasillo 5 y tres cuartos más. g = Cuarto de Agentes (solo para los agentes) ----
+  // ---- Debajo de la Ampliación: pasillo 5 y tres cuartos más. g = Cuarto de Agentes (solo para los agentes), w = Taller de los droides ----
   llenar(1, 87, 30, 87, '='); llenar(1, 88, 30, 89, 'h');
   llenar(1, 91, 9, 91, '='); llenar(11, 91, 20, 91, '='); llenar(22, 91, 30, 91, '=');
-  llenar(1, 92, 9, 99, 'g'); llenar(11, 92, 20, 99, 'v'); llenar(22, 92, 30, 99, 'v');
+  llenar(1, 92, 9, 99, 'g'); llenar(11, 92, 20, 99, 'w'); llenar(22, 92, 30, 99, 'v');
   for (const x of [4, 5, 15, 16, 25, 26]){ m[87][x] = 'D'; m[90][x] = 'D'; m[91][x] = 'D'; }
   // Pasillos 1 y 2 más anchos: se repite su última fila
   const ancho = [];
@@ -333,7 +334,7 @@ const MAPA = (() => {
   });
   return ancho;
 })();
-const CAMINABLE = new Set(['h', 'b', 'e', 'i', 'j', 'd', 'D', 'E', 'c', 'x', 'v', 't', 'k', 'n', 'a', 'g']);
+const CAMINABLE = new Set(['h', 'b', 'e', 'i', 'j', 'd', 'D', 'E', 'c', 'x', 'v', 't', 'k', 'n', 'a', 'g', 'w']);
 /* Túnel subterráneo: una escotilla en la Oficina Terrazas y otra en el Centro de Pensado (filas de antes) */
 const ESCOTILLAS = [{ x: 9, y: 45 }, { x: 22, y: 45 }];
 const BLOQUEO = new Set();
@@ -353,6 +354,7 @@ const AREAS = {
   'centro de pensado': { letrero: 'CENTRO DE PENSADO', x0: 22, y0: 43, x1: 27, y1: 50, lx: 394, ly: 664, pose: 'leer' },
   'almacen':        { letrero: 'ALMACÉN',        x0: 28, y0: 44, x1: 30, y1: 50, lx: 472, ly: 659, pose: 'leer' },
   'agentes':        { letrero: 'CUARTO DE AGENTES', x0: 1, y0: 92, x1: 9, y1: 99, lx: 80, ly: 1448, pose: 'descansar' },
+  'taller':         { letrero: 'TALLER',         x0: 11, y0: 92, x1: 20, y1: 99, lx: 256, ly: 1448, pose: 'parado' },
   'noticias':       { letrero: 'NOTICIAS',       x0: 22, y0: 55, x1: 30, y1: 58, lx: 416, ly: 823, pose: 'leer' },
 };
 const L = (tx, ty, dir, extra = {}) => Object.assign({ tx, ty, ox: 0, oy: 0, dir, sentado: false, silla: null }, extra);
@@ -444,6 +446,11 @@ const LUGARES = {
     L(6, 94, 'arriba', { ox: 8, lavadora: 0 }),                       // frente a cada lavadora de memoria (adentro no se ve)
     L(8, 94, 'arriba', { ox: 8, lavadora: 1 }),
   ],
+  'taller': [                                                          // de visita con el droide (sus lugares son aparte)
+    L(16, 94, 'abajo'),
+    L(15, 96, 'der'),
+    L(20, 95, 'izq'),
+  ],
   'terrazas': [                                                        // equipo DragTree
     L(6, 47, 'arriba', { oy: -3, sentado: true, silla: 'oficina' }),
     L(8, 47, 'arriba', { oy: -3, sentado: true, silla: 'oficina' }),
@@ -466,6 +473,7 @@ function normalizarArea(a){
   if (s.includes('almacen') || s.includes('archivero') || s.includes('archivo')) return 'almacen';
   if (s.includes('noticia') || s.includes('pantalla') || s.includes('cartelera')) return 'noticias';
   if (s.includes('agentes') || s.includes('ayudantes')) return 'agentes';
+  if (s.includes('taller') || s.includes('droide')) return 'taller';
   if (s.includes('junta') || s === 'sala' || s.includes('reunion')) return 'sala de juntas';
   if (s.startsWith('escritorio') || s === 'computadora') return 'escritorio';
   if (s.startsWith('biblio')) return 'biblioteca';
@@ -968,6 +976,427 @@ function lavadora(k, x0, yb, t){
   R(x0 + 23, yb - 9, 2, 2, on ? (Math.floor(t * 3) % 2 ? '#5dff7a' : '#1f5a2a') : '#3a3f4d');
 }
 
+/* ---------- Taller: la casa de los droides ----------
+   Aquí vive el droide: se recarga y hiberna en su base, se arregla en la máquina de reparación y tira la basura en
+   la compactadora (la papelera). Hay una segunda base, libre, para el próximo droide. Medidas de antes. */
+const DROIDE = { id: 'droide-rolo', nombre: 'Rolo' };
+let rolo = null;                      // el droide (vive en el mapa de agentes, pero no viene en los datos)
+const SITIOS = {};                    // dónde se para el droide para cada cosa
+const enSitio = s => !!rolo && rolo.fase === 'trabajando' && rolo.lugar === s;
+function tallerDeDroides(){
+  /* En la pared: tablero de herramientas sobre la mesa, y la pantallita con la batería del droide */
+  mueble(92 * T - 1, (t) => {
+    R(290, 1457, 44, 14, K); R(291, 1458, 42, 12, '#c9a06a');
+    for (let i = 0; i < 10; i++) for (let j = 0; j < 3; j++) R(293 + i * 4, 1460 + j * 4, 1, 1, '#8b6a3e');
+    R(294, 1459, 4, 2, '#b8c0c8'); R(295, 1461, 2, 8, '#b8c0c8');                       // llave
+    R(302, 1459, 2, 5, '#d97757'); R(302, 1464, 2, 5, '#b8c0c8');                       // desarmador
+    R(308, 1459, 7, 3, '#5d6878'); R(311, 1462, 2, 7, '#8b5a2b');                       // martillo
+    R(319, 1460, 9, 7, K); R(320, 1461, 7, 5, '#e0b93a'); R(322, 1462, 3, 3, K); R(323, 1463, 1, 1, '#e0b93a');   // rollo de cinta
+    const b = rolo ? rolo.d.bateria : 0, carga = rolo && (rolo.d.estado === 'cargando' || rolo.d.estado === 'hibernando') && enSitio(SITIOS.base);
+    R(211, 1457, 26, 14, K); R(212, 1458, 24, 12, '#12202c');
+    R(214, 1460, 16, 7, '#3a4652'); R(230, 1462, 2, 3, '#3a4652');                    // la pila
+    const n = Math.round(b / 100 * 14), col = b < 25 ? '#ff6b5b' : '#5dff7a';
+    R(215, 1461, n, 5, col);
+    if (carga && Math.floor(t * 2) % 2) R(215 + n, 1461, Math.min(1, 14 - n), 5, col);
+  });
+  /* Compactadora: aquí tira el droide lo que recoge. El número es lo que hay en la papelera */
+  bloquear(11, 92, 12, 93);
+  mueble(93 * T + 15, (t) => {
+    const prensa = rolo && rolo.d.estado === 'tirando' && enSitio(SITIOS.tirar);
+    g.fillStyle = 'rgba(0,0,0,0.2)'; g.fillRect(178, 1502, 30, 3);
+    R(177, 1477, 30, 26, K); R(178, 1478, 28, 24, '#5d6878'); R(178, 1478, 28, 1, '#8d9ab0');
+    for (let i = 0; i < 7; i++) R(178 + i * 4, 1496, 2, 4, i % 2 ? '#2a2a2a' : '#e0b93a');
+    R(180, 1468, 24, 10, K); R(181, 1469, 22, 8, '#7c8596'); R(183, 1471, 18, 5, '#1c1e26');   // boca de arriba
+    const py = prensa ? 1471 + Math.round(Math.abs(Math.sin(t * 3)) * 4) : 1471;
+    R(183, py, 18, 2, '#e0b93a'); R(191, 1466, 2, py - 1465, K);
+    R(195, 1481, 10, 8, K); R(196, 1482, 8, 6, '#12202c');
+    numerito(197, 1483, String(Math.min(99, PAPELERA.length)), PAPELERA.length ? '#ffd34d' : '#5dff7a');
+    R(181, 1482, 10, 10, K); R(182, 1483, 8, 8, '#3fb6d6'); R(184, 1485, 1, 4, '#e8fbff'); R(187, 1484, 1, 6, '#e8fbff'); R(186, 1488, 4, 1, '#e8fbff');   // reciclar
+    R(204, 1474, 2, 2, prensa ? (Math.floor(t * 4) % 2 ? '#ff8f6b' : '#5a1e1e') : '#3a3f4d');
+  });
+  /* Mesa de trabajo: refacciones y un domo de repuesto */
+  bloquear(18, 92, 20, 92);
+  mueble(92 * T + 15, () => {
+    R(289, 1474, 46, 7, K); R(290, 1475, 44, 4, '#8b5a2b'); R(290, 1475, 44, 1, '#a87040'); R(290, 1479, 44, 1, '#6b4423');
+    R(291, 1481, 3, 6, K); R(330, 1481, 3, 6, K);
+    R(297, 1467, 12, 8, K); R(298, 1468, 10, 6, '#f2efe6'); R(298, 1471, 10, 1, '#2bb3a3'); R(301, 1469, 3, 2, K);   // domo de repuesto
+    R(312, 1470, 6, 5, K); R(313, 1471, 4, 3, '#9aa3ad');                                                            // engrane
+    R(320, 1466, 12, 9, K); R(321, 1467, 10, 7, '#c0392b'); R(321, 1467, 10, 1, '#e0644f'); R(324, 1464, 4, 2, K);  // caja de herramientas
+  });
+  /* Bases de carga: la de Rolo y una libre para el próximo droide. El gabinete les da la corriente */
+  bloquear(11, 97, 11, 98);
+  mueble(98 * T, (t) => {                                              // en el piso, debajo del droide
+    const estado = rolo ? rolo.d.estado : '', aqui = enSitio(SITIOS.base);
+    for (const [cx, mia] of [[200, true], [232, false]]){
+      R(192, 1588, cx - 192, 1, '#1c1e26');
+      R(cx - 8, 1575, 16, 10, K); R(cx - 7, 1576, 14, 8, '#3a3f4d');
+      let c = '#2a3a33';
+      if (mia && aqui && estado === 'cargando') c = Math.floor(t * 3) % 2 ? '#5dff7a' : '#2fb36b';
+      else if (mia && aqui && estado === 'hibernando') c = (0.5 + 0.5 * Math.sin(t * 1.2)) > 0.5 ? '#3fb6d6' : '#2a7f99';
+      else if (!mia) c = '#4a3a2a';
+      R(cx - 6, 1577, 12, 6, c); R(cx - 4, 1578, 8, 4, '#2a2e38');
+      if (!mia){ R(cx - 1, 1579, 3, 1, '#d97757'); R(cx, 1578, 1, 3, '#d97757'); }              // "+": para el que sigue
+    }
+  });
+  mueble(98 * T + 15, (t) => {                                         // el gabinete
+    const aqui = enSitio(SITIOS.base), estado = rolo ? rolo.d.estado : '';
+    R(177, 1546, 15, 40, K); R(178, 1547, 13, 38, '#4a5568'); R(178, 1547, 13, 1, '#6b7890');
+    R(182, 1551, 5, 7, '#ffd34d'); R(184, 1551, 3, 3, '#4a5568'); R(182, 1555, 3, 3, '#4a5568');                // rayo
+    R(181, 1562, 3, 3, aqui && estado === 'cargando' ? (Math.floor(t * 3) % 2 ? '#5dff7a' : '#1f5a2a') : aqui ? '#3fb6d6' : '#3a3f4d');
+    R(186, 1562, 3, 3, '#3a3f4d');
+    for (let i = 0; i < 4; i++) R(180, 1570 + i * 3, 9, 1, '#2f3a4c');
+  });
+  /* Máquina de reparación: dos postes, una viga y un brazo que suelda; el droide entra por abajo */
+  bloquear(17, 96, 19, 96); bloquear(17, 97); bloquear(19, 97);
+  mueble(96 * T, (t) => {
+    const trabaja = rolo && rolo.d.estado === 'reparando' && enSitio(SITIOS.repara);
+    R(273, 1556, 46, 12, K); R(274, 1557, 44, 10, '#3a3f4d'); R(274, 1557, 44, 1, '#5d6878');
+    for (let i = 0; i < 7; i++) R(276 + i * 6, 1565, 3, 2, '#e0b93a');
+    R(273, 1520, 5, 40, K); R(274, 1521, 3, 38, '#8d9ab0'); R(314, 1520, 5, 40, K); R(315, 1521, 3, 38, '#8d9ab0');
+    R(271, 1516, 50, 6, K); R(272, 1517, 48, 4, '#e0b93a'); R(272, 1517, 48, 1, '#ffd95a');
+    for (let i = 0; i < 6; i++) R(276 + i * 8, 1518, 3, 3, '#2a2a2a');
+    R(294, 1513, 5, 3, K); R(295, 1514, 3, 1, trabaja ? (Math.floor(t * 4) % 2 ? '#ff8f6b' : '#ffd34d') : '#5a4a2a');
+  });
+  mueble(97 * T + 15, (t) => {                                         // el brazo, delante del droide
+    const trabaja = rolo && rolo.d.estado === 'reparando' && enSitio(SITIOS.repara);
+    const tx = trabaja ? Math.round(296 + Math.sin(t * 2.3) * 6) : 296, ty = trabaja ? Math.round(1540 + Math.sin(t * 3.1) * 2) : 1530;
+    const cx = Math.round((296 + tx) / 2 + (trabaja ? 3 : 0)), cy = Math.round((1522 + ty) / 2);
+    linea(296, 1522, cx, cy, K); linea(297, 1522, cx + 1, cy, '#8d9ab0');
+    linea(cx, cy, tx, ty, K); linea(cx + 1, cy, tx + 1, ty, '#8d9ab0');
+    R(cx - 1, cy - 1, 3, 3, K); R(cx, cy, 1, 1, '#e0b93a');
+    R(tx - 1, ty, 4, 3, K); R(tx, ty + 1, 2, 2, trabaja ? '#bff6ff' : '#5d6878');
+    if (trabaja) for (let i = 0; i < 4; i++){
+      const u = (t * 2.5 + i / 4) % 1, an = i * 1.7 + t * 9;
+      g.globalAlpha = 1 - u; R(Math.round(tx + 1 + Math.cos(an) * u * 7), Math.round(ty + 3 + Math.sin(an) * u * 5 + u * 4), 1, 1, i % 2 ? '#ffd34d' : '#ffffff'); g.globalAlpha = 1;
+    }
+  });
+  planta(20, 99);
+  zonaLectura(176, 1544, 72, 44, () => `Base de carga de ${DROIDE.nombre} (y una libre para el próximo droide)`, () => panelDroide());
+  zonaLectura(176, 1464, 32, 40, () => `Compactadora: ${PAPELERA.length} en la papelera`, () => panelDroide('papelera'));
+  zonaLectura(268, 1510, 56, 60, 'Máquina de reparación de droides', () => panelDroide());
+  zonaLectura(208, 1456, 30, 16, () => `Batería de ${DROIDE.nombre}: ${rolo ? Math.round(rolo.d.bateria) : 0}%`, () => panelDroide());
+}
+
+/* ---------- La basura: lo viejo que se junta en la Sala de Noticias y en el Almacén ---------- */
+const PILAS = { noticias: { x: 448, y: 908 }, almacen: { x: 474, y: 798 } };   // medidas de antes
+const RECOGIDO = new Set();           // lo que el droide ya recogió: deja de verse aunque la base tarde en avisar
+let PAPELERA = [], PERDONADOS = new Set(), DB = null, dbDroide = null, cacheBasura = null, cacheBasuraT = 0;
+let DROIDE_CFG = { protegidos: PROTEGIDOS.slice(), ultimaLimpieza: null, perdonados: [], bitacora: [] };
+const tiraDeVerdad = () => EN_CLAUDE && !DEMO && !!DB;   // en Claude se tira de la base; en la web solo se esconde en este aparato
+function basuraAhora(){
+  const ahora = Date.now();
+  if (cacheBasura && ahora - cacheBasuraT < 2000) return cacheBasura;
+  const b = basura({ avisos: avisosTodos(), monitos: monitosTodos(), envios: enviosCrudos().filter(e => !RECOGIDO.has('envios/' + e.id)) }, ahora, DROIDE_CFG.protegidos);
+  const queda = x => !PERDONADOS.has(x.ruta);
+  cacheBasura = { noticias: b.noticias.filter(queda), almacen: b.almacen.filter(queda) }; cacheBasuraT = ahora;
+  return cacheBasura;
+}
+const OFFS_PILA = [[0, 0], [-6, 1], [5, -1], [-2, -3], [8, 2], [-9, -2], [3, 3], [-5, 4], [10, -2], [1, -6]];
+function pilasDeBasura(){
+  for (const [cuarto, p] of Object.entries(PILAS)){
+    mueble(p.y + 3, (t) => {
+      const n = Math.min(OFFS_PILA.length, basuraAhora()[cuarto].length);
+      for (let i = n - 1; i >= 0; i--){
+        const [dx, dy] = OFFS_PILA[i], x = p.x + dx, y = p.y + dy;
+        if (cuarto === 'noticias' && i % 2 === 0){ R(x - 4, y - 3, 9, 5, K); R(x - 3, y - 2, 7, 3, '#e9e4d6'); R(x - 2, y - 1, 5, 1, '#9a9488'); R(x - 3, y - 2, 2, 1, '#d97757'); }   // periódico doblado
+        else if (cuarto === 'almacen' && i % 3 === 0){ R(x - 3, y - 3, 6, 5, K); R(x - 2, y - 2, 4, 3, '#c79a5b'); R(x - 2, y - 2, 4, 1, '#dab06f'); }   // cajita
+        else { R(x - 2, y - 3, 5, 5, K); R(x - 1, y - 2, 3, 3, '#f7f3ea'); R(x, y - 2, 1, 1, '#c9c2b0'); R(x + 1, y, 1, 1, '#d8d2c4'); }      // bola de papel
+      }
+      if (n >= 5){ const a = t * 5; R(Math.round(p.x + Math.cos(a) * 6), Math.round(p.y - 9 + Math.sin(a * 1.7) * 2), 1, 1, K); }   // una mosca
+    });
+    zonaLectura(p.x - 14, p.y - 9, 28, 16, () => { const n = basuraAhora()[cuarto].length; return n ? `Basura vieja: ${n} (la recoge ${DROIDE.nombre})` : 'Limpio'; }, () => panelDroide());
+  }
+}
+/* Tirar: a la papelera (se puede rescatar 7 días) y se borra de su lugar */
+async function aLaPapelera(items){
+  const cuando = new Date().toISOString();
+  for (const it of items) RECOGIDO.add(it.ruta);
+  cacheBasura = null; cacheEnvios = null; firmaPantalla = '';
+  if (!tiraDeVerdad()){
+    for (const it of items) PAPELERA.unshift({ id: idPapelera(it.ruta), ruta: it.ruta, tipo: it.tipo, titulo: it.titulo, de: it.de, tirado: cuando });
+    guardarDroideLocal(); return;
+  }
+  for (const it of items){
+    try {
+      await DB.doc('papelera/' + idPapelera(it.ruta)).set({ ruta: it.ruta, tipo: it.tipo, titulo: String(it.titulo || '').slice(0, 160), de: String(it.de || ''),
+        creado: new Date(it.creado).toISOString(), tirado: cuando, datos: it.datos });
+      await DB.doc(it.ruta).delete();
+    } catch (e) { RECOGIDO.delete(it.ruta); cacheBasura = null; }   // si no se pudo, se queda donde estaba
+  }
+}
+async function compactar(){   // lo que lleva más de 7 días en la papelera se borra para siempre
+  const viejos = paraCompactar(PAPELERA, Date.now());
+  if (!viejos.length) return 0;
+  if (tiraDeVerdad()) for (const p of viejos){ try { await DB.doc('papelera/' + p.id).delete(); } catch (e) {} }
+  else { const fuera = new Set(viejos.map(p => p.id)); PAPELERA = PAPELERA.filter(p => !fuera.has(p.id)); guardarDroideLocal(); }
+  return viejos.length;
+}
+async function rescatar(id){
+  const p = PAPELERA.find(x => x.id === id); if (!p) return;
+  if (tiraDeVerdad()){
+    if (!p.datos) return;
+    await DB.doc(p.ruta).set(p.datos);
+    await DB.doc('papelera/' + p.id).delete();
+  } else PAPELERA = PAPELERA.filter(x => x.id !== id);
+  RECOGIDO.delete(p.ruta); PERDONADOS.add(p.ruta);                     // ya no lo vuelve a tirar
+  DROIDE_CFG.perdonados = [...PERDONADOS].slice(-200);
+  cacheBasura = null; cacheEnvios = null; firmaPantalla = '';
+  guardarDroide();
+}
+function aplicarCfg(v){
+  if (!v || typeof v !== 'object') return;
+  DROIDE_CFG = { protegidos: Array.isArray(v.protegidos) ? v.protegidos.map(String) : PROTEGIDOS.slice(), ultimaLimpieza: v.ultimaLimpieza || null,
+    perdonados: Array.isArray(v.perdonados) ? v.perdonados.map(String) : [], bitacora: Array.isArray(v.bitacora) ? v.bitacora.slice(0, 12) : [] };
+  PERDONADOS = new Set(DROIDE_CFG.perdonados); cacheBasura = null;
+}
+function guardarDroideLocal(){
+  if (DEMO) return;
+  try {
+    localStorage.setItem('oficina.droide', JSON.stringify(DROIDE_CFG));
+    if (!tiraDeVerdad()) localStorage.setItem('oficina.droide.papelera', JSON.stringify({ recogido: [...RECOGIDO].slice(-300), papelera: PAPELERA.slice(0, 100) }));
+  } catch (e) {}
+}
+function guardarDroide(){
+  if (tiraDeVerdad() && dbDroide) dbDroide.set(DROIDE_CFG).catch(() => {});
+  guardarDroideLocal();
+}
+try {
+  aplicarCfg(JSON.parse(localStorage.getItem('oficina.droide') || 'null'));
+  const v = JSON.parse(localStorage.getItem('oficina.droide.papelera') || 'null');
+  if (v && !EN_CLAUDE && !DEMO){ for (const r of v.recogido || []) RECOGIDO.add(String(r)); PAPELERA = Array.isArray(v.papelera) ? v.papelera : []; }
+} catch (e) {}
+function escucharDroide(db){
+  DB = db;
+  for (const r of [...RECOGIDO]) RECOGIDO.delete(r);                 // en Claude manda la base
+  dbDroide = db.doc('oficina/droide');
+  dbDroide.onSnapshot(snap => { if (snap.exists) aplicarCfg(snap.data()); }, () => {});
+  db.collection('papelera').onSnapshot(ps => {
+    PAPELERA = ps.docs.map(x => Object.assign({ id: x.id }, x.data())).sort((p, q) => String(q.tirado || '').localeCompare(String(p.tirado || '')));
+  }, () => {});
+}
+
+/* ---------- El droide: Rolo, una unidad rodante ----------
+   Rueda por toda la oficina como cualquier droide: patrulla, escanea, pita. Tres veces al día (10 a.m., 3 p.m. y
+   media hora antes de cerrar) recoge la basura vieja de la Sala de Noticias y del Almacén y la lleva a la
+   compactadora del Taller. Se recarga cuando le baja la batería, a la 1 p.m. pasa a mantenimiento, y de noche
+   hiberna en su base. */
+const minutosDelDia = t => { const d = new Date(t); return d.getHours() * 60 + d.getMinutes(); };
+const FRASES_DROIDE = ['Bip-bup ♪', 'Patrullando la oficina', 'Escaneando… todo en orden', 'Bzzt… ¿y esto?', '♪ biri-bip', 'Revisando los pasillos', 'Bip. Sin basura por aquí', 'Midiendo el polvo… bip', '¡Bip-bip! Hola'];
+const ESTADO_DROIDE = { hibernando: 'Hibernando', cargando: 'Cargando', paseando: 'Patrullando', aspirando: 'Limpiando', tirando: 'Compactando', reparando: 'En mantenimiento' };
+const VISITA_DROIDE = ['biblioteca', 'escritorio', 'internet', 'sala de juntas', 'descanso', 'calleros', 'cerebro delta', 'centro de pensado', 'noticias', 'terrazas', 'taller'];
+function sitio(tx, ty, dir, area){ return { droide: true, area, idx: -1, tx, ty, x: tx * T + 8, y: ty * T + 13, dir, sentado: false, silla: null }; }
+function crearDroide(){
+  SITIOS.base = sitio(12, FILA(98), 'abajo', 'taller'); SITIOS.repara = sitio(18, FILA(97), 'abajo', 'taller');
+  SITIOS.tirar = sitio(13, FILA(93), 'izq', 'taller'); SITIOS.banco = sitio(19, FILA(93), 'arriba', 'taller');
+  SITIOS.noticias = Object.assign(sitio(26, FILA(56), 'der', 'noticias'), { pila: { x: PILAS.noticias.x, y: PY(PILAS.noticias.y) } });
+  SITIOS.almacen = Object.assign(sitio(29, FILA(48), 'abajo', 'almacen'), { pila: { x: PILAS.almacen.x, y: PY(PILAS.almacen.y) } });
+  rolo = crearAgente(DROIDE.id, { nombre: DROIDE.nombre, aspecto: 'normal' });
+  Object.assign(rolo, { droide: true, rol: 'droide', vel: 1.35, estadoTxt: 'droide', modelo: null, nombre: DROIDE.nombre });
+  rolo.d = { estado: abierta(Date.now()) ? 'cargando' : 'hibernando', bateria: 55 + Math.round(hashTexto(new Date().toDateString()) * 40), hasta: 0, quieto: 4,
+             ronda: [], lleva: 0, cuarto: null, mantHoy: '', gafete: '', viaje: 1, llego: 1, forzar: false, aspira: 0, recogio: 0 };
+  agentes.set(rolo.id, rolo);
+  rolo.lugar = SITIOS.base; rolo.x = SITIOS.base.x; rolo.y = SITIOS.base.y; rolo.dir = 'abajo'; rolo.fase = 'trabajando'; rolo.areaDestino = 'taller';
+  rolo.d.hasta = performance.now() / 1000 + 4;
+  ponerTexto(rolo, rolo.d.estado === 'cargando' ? 'Cargando batería' : 'Hibernando… zZ', false);
+  rolo.textoPendiente = rolo.elTexto.textContent;
+  gafeteDroide();
+}
+function gafeteDroide(){
+  const d = rolo.d, b = Math.round(d.bateria), clave = d.estado + '|' + Math.round(b / 5);
+  if (d.gafete === clave) return;
+  d.gafete = clave;
+  const el = rolo.elNombre; el.textContent = '';
+  const ic = document.createElement('span'); ic.className = 'reloj'; ic.textContent = '◉';
+  const tipo = document.createElement('i'); tipo.textContent = 'Droide'; tipo.style.color = '#7fe7ff';
+  el.append(ic, DROIDE.nombre, tipo, document.createElement('b'));
+  const s = document.createElement('small'); s.textContent = (ESTADO_DROIDE[d.estado] || 'Patrullando') + ' · ' + b + '% ';
+  const p = document.createElement('span'); p.className = 'pips'; p.style.color = b < 25 ? '#ff6b5b' : '#5dff7a';
+  const n = Math.max(1, Math.ceil(b / 20)); p.textContent = '▮'.repeat(n) + '▯'.repeat(5 - n); s.appendChild(p); el.appendChild(s);
+  el.style.setProperty('--c', '#2bb3a3');
+  el.style.setProperty('--e', d.estado === 'hibernando' ? ESTADO_COLOR.inactivo : d.estado === 'aspirando' || d.estado === 'tirando' ? ESTADO_COLOR.trabajando : ESTADO_COLOR['por su cuenta']);
+  rolo.medirNombre = true;
+}
+function droideA(s, estado, texto, quieto, cuarto){   // manda al droide a un sitio; al llegar dice `texto` y se queda `quieto` segundos
+  const d = rolo.d, inicio = casillaInicio(rolo);
+  liberar(rolo);
+  rolo.lugar = s; rolo.areaDestino = s.area; rolo.textoPendiente = texto;
+  d.estado = estado; d.quieto = quieto; d.cuarto = cuarto || null; d.viaje++; d.gafete = '';
+  rolo.ruta = construirRuta(rolo, inicio, s);
+  if (rolo.ruta.length){ rolo.fase = 'caminando'; ponerPuntos(rolo); } else { rolo.fase = 'trabajando'; ponerTexto(rolo, texto, true); }
+}
+const quiereLimpiar = ahora => rolo.d.forzar || (abierta(ahora) && tocaLimpiar(ahora, HORARIO, DROIDE_CFG.ultimaLimpieza, basuraAhora().noticias.length + basuraAhora().almacen.length > 0, minutosDelDia));
+function urgente(ahora){
+  const d = rolo.d, ocupado = d.estado === 'aspirando' || d.estado === 'tirando' || d.ronda.length || d.lleva;
+  if (ocupado) return false;
+  if (d.forzar) return true;
+  if (!abierta(ahora)) return d.estado !== 'hibernando';
+  if (d.estado === 'hibernando') return true;                           // ya abrió: a despertar
+  if (d.estado === 'paseando') return quiereLimpiar(ahora) || d.bateria < 15 || (enMantenimiento(ahora, minutosDelDia) && d.mantHoy !== new Date(ahora).toDateString());
+  return false;
+}
+function alLlegar(seg){
+  const d = rolo.d;
+  if (d.estado === 'aspirando'){
+    const items = basuraAhora()[d.cuarto] || [];
+    if (!items.length){ ponerTexto(rolo, 'Aquí ya está limpio ♪', true); d.hasta = seg + 2; return; }
+    d.lleva += items.length; d.recogio += items.length; d.aspira = seg;
+    rolo.textoPendiente = `Aspirando ${items.length} ${items.length === 1 ? 'cosa vieja' : 'cosas viejas'}`; ponerTexto(rolo, rolo.textoPendiente, true);
+    aLaPapelera(items);
+  } else if (d.estado === 'tirando'){
+    const n = d.lleva; d.lleva = 0; d.forzar = false;
+    compactar().then(c => {
+      DROIDE_CFG.ultimaLimpieza = new Date().toISOString();
+      DROIDE_CFG.bitacora = [{ cuando: DROIDE_CFG.ultimaLimpieza, recogio: n, compacto: c }].concat(DROIDE_CFG.bitacora).slice(0, 12);
+      guardarDroide();
+    });
+    rolo.textoPendiente = n ? `¡Listo! ${n} a la papelera` : '¡Todo limpio! ♪'; ponerTexto(rolo, rolo.textoPendiente, true);
+  }
+}
+function siguiente(seg, ahora){
+  const d = rolo.d, b = basuraAhora();
+  while (d.ronda.length){
+    const cuarto = d.ronda.shift(), n = b[cuarto].length;
+    if (n) return droideA(SITIOS[cuarto], 'aspirando', 'Escaneando la basura…', 4.5, cuarto);
+  }
+  if (d.lleva) return droideA(SITIOS.tirar, 'tirando', 'A la compactadora…', 5);
+  if (quiereLimpiar(ahora)){
+    d.ronda = ['noticias', 'almacen'].filter(c => b[c].length);
+    if (d.ronda.length) return siguiente(seg, ahora);
+    d.forzar = false;
+    DROIDE_CFG.ultimaLimpieza = new Date(ahora).toISOString(); guardarDroide();
+    rolo.textoPendiente = '¡Todo limpio! ♪'; ponerTexto(rolo, rolo.textoPendiente, true); d.hasta = seg + 4; return;
+  }
+  if (!abierta(ahora)){
+    if (d.estado === 'hibernando' && enSitio(SITIOS.base)){ d.hasta = seg + 30; return; }
+    return droideA(SITIOS.base, 'hibernando', 'Hibernando… zZ', 30);
+  }
+  if (d.bateria < 25) return droideA(SITIOS.base, 'cargando', 'Cargando batería', 3600);
+  const hoy = new Date(ahora).toDateString();
+  if (enMantenimiento(ahora, minutosDelDia) && d.mantHoy !== hoy){
+    d.mantHoy = hoy;
+    return droideA(SITIOS.repara, 'reparando', 'En mantenimiento: ajustando el giroscopio', Math.max(30, (13 * 60 + 10 - minutosDelDia(ahora)) * 60));
+  }
+  if (d.estado === 'cargando' && enSitio(SITIOS.base) && d.bateria < 100){ d.hasta = seg + 5; return; }   // termina de cargar
+  const r = Math.random();
+  if (r < 0.15) return droideA(SITIOS.banco, 'paseando', 'Revisando sus refacciones', entre(10, 25));
+  let destino;
+  if (r < 0.55 && PUNTOS_PASEO.length){ const [tx, ty, dir] = PUNTOS_PASEO[Math.floor(Math.random() * PUNTOS_PASEO.length)]; destino = sitio(tx, ty, dir, 'pasillo'); }
+  else {
+    const area = VISITA_DROIDE[Math.floor(Math.random() * VISITA_DROIDE.length)], cands = CANDIDATOS[area] || [];
+    const c = cands[Math.floor(Math.random() * Math.min(cands.length, 8))];
+    if (c) destino = sitio(c.tx, c.ty, ['abajo', 'izq', 'der'][Math.floor(Math.random() * 3)], area);
+  }
+  if (!destino) destino = SITIOS.banco;
+  d.nota = seg;
+  droideA(destino, 'paseando', FRASES_DROIDE[Math.floor(Math.random() * FRASES_DROIDE.length)], entre(6, 16));
+}
+let revisionDroide = 0;
+function droide(dt){
+  if (!rolo) return;
+  const d = rolo.d, seg = performance.now() / 1000, ahora = Date.now(), enBase = enSitio(SITIOS.base);
+  if (enBase && (d.estado === 'cargando' || d.estado === 'hibernando')) d.bateria = Math.min(100, d.bateria + dt * (d.estado === 'cargando' ? 6 : 2) / 60);
+  else if (d.estado !== 'reparando') d.bateria = Math.max(3, d.bateria - dt * (rolo.fase === 'caminando' ? 1.6 : 0.6) / 60);
+  if (seg - revisionDroide > 1){
+    revisionDroide = seg;
+    gafeteDroide();
+    if (enBase && d.estado === 'cargando'){
+      if (d.bateria >= 100) d.hasta = 0;
+      const txt = 'Cargando batería ' + Math.floor(d.bateria / 5) * 5 + '%';
+      if (txt !== rolo.textoPendiente){ rolo.textoPendiente = txt; ponerTexto(rolo, txt, false); }
+    }
+    if (urgente(ahora)){ d.hasta = 0; if (rolo.fase === 'caminando') return siguiente(seg, ahora); }
+  }
+  if (rolo.fase !== 'trabajando') return;
+  if (d.llego !== d.viaje){ d.llego = d.viaje; d.hasta = seg + d.quieto; alLlegar(seg); }
+  if (seg >= d.hasta) siguiente(seg, ahora);
+}
+function dibujarDroide(a, t){
+  const d = a.d, x = Math.round(a.x), y = Math.round(a.y), seg = performance.now() / 1000;
+  const camina = a.fase === 'caminando', quieto = a.fase === 'trabajando';
+  const duerme = quieto && d.estado === 'hibernando' && a.lugar === SITIOS.base;
+  const bote = camina && Math.floor(a.recorrido / 6) % 2 ? 1 : 0;
+  const cx = x, cy = y - 8 - bote;                                     // el cuerpo: una esfera grande que rueda
+  g.fillStyle = 'rgba(0,0,0,0.25)'; g.fillRect(x - 7, y - 1, 14, 2);
+  disco(cx, cy, 8, K); disco(cx, cy, 7, '#f2efe6');
+  g.save(); g.beginPath(); g.arc(cx + 0.5, cy + 0.5, 7.2, 0, 7); g.clip();      // paneles que ruedan con él
+  const hor = a.dir === 'izq' || a.dir === 'der', sg = a.dir === 'izq' || a.dir === 'arriba' ? -1 : 1, giro = a.recorrido / 6 * sg;
+  if (hor) R(cx - 8, cy, 16, 1, '#b9b4a8'); else R(cx, cy - 8, 1, 16, '#b9b4a8');
+  for (let i = 0; i < 3; i++){
+    const an = giro + i * 2.094, s = Math.sin(an), c = Math.cos(an);
+    if (c < -0.2) continue;                                            // del otro lado de la esfera
+    const r = c > 0.6 ? 4 : c > 0.15 ? 3 : 2, px = Math.round(hor ? cx + s * 6 : cx), py = Math.round(hor ? cy : cy + s * 6);
+    disco(px, py, r, '#2b8fb3'); disco(px, py, r - 1, '#d6dde6'); if (r > 2) disco(px, py, 1, '#2b8fb3');
+  }
+  g.restore();
+  R(cx - 5, cy - 5, 2, 2, '#ffffff'); R(cx - 6, cy - 3, 1, 2, '#ffffff');
+  const lean = camina ? (a.dir === 'izq' ? -2 : a.dir === 'der' ? 2 : 0) : 0, hx = cx + lean, hy = cy - 8 + (duerme ? 1 : 0);   // la cabeza: un domo chico encima
+  R(hx - 3, hy - 6, 7, 1, K); R(hx - 5, hy - 5, 11, 6, K); R(hx - 4, hy + 1, 9, 1, K);
+  R(hx - 2, hy - 5, 5, 1, '#f2efe6'); R(hx - 4, hy - 4, 9, 3, '#f2efe6'); R(hx - 4, hy - 1, 9, 1, '#2b8fb3'); R(hx - 3, hy, 7, 1, '#9aa3ad');
+  if (a.dir !== 'arriba'){
+    const ox = a.dir === 'izq' ? -3 : a.dir === 'der' ? 1 : -1;
+    const lente = duerme ? '#26323d' : d.bateria < 15 && Math.floor(t * 2) % 2 ? '#ff5b5b' : '#7fe7ff';
+    R(hx + ox - 1, hy - 4, 4, 3, K); R(hx + ox, hy - 3, 1, 1, lente);
+    if (a.dir === 'abajo') R(hx + 3, hy - 2, 1, 1, K);
+  }
+  R(hx + 2, hy - 10, 1, 4, K); R(hx - 1, hy - 8, 1, 2, K);
+  R(hx + 2, hy - 11, 1, 1, duerme ? '#555b66' : Math.floor(t * 2) % 2 ? '#ff8f6b' : '#e05a3a');
+  if (duerme) zetas(hx, hy - 6, t, a.semilla);
+  if (quieto && d.estado === 'cargando' && a.lugar === SITIOS.base && Math.floor(t * 2) % 2){ R(cx + 7, cy - 10, 2, 3, '#ffd34d'); R(cx + 6, cy - 8, 2, 3, '#ffd34d'); }
+  if (quieto && d.estado === 'paseando' && seg - (d.nota || 0) < 40){                  // pitidos: notitas que suben
+    const u = (t * 0.6) % 1; g.globalAlpha = 1 - u;
+    const nx = Math.round(hx + 6 + u * 4), ny = Math.round(hy - 8 - u * 10);
+    R(nx, ny, 1, 4, '#ffffff'); R(nx - 2, ny + 3, 2, 2, '#ffffff'); R(nx + 1, ny, 2, 1, '#ffffff');
+    g.globalAlpha = 1;
+  }
+  if (quieto && d.estado === 'aspirando' && d.cuarto && seg - d.aspira < 4){            // la basura vuela hacia el droide
+    const p = SITIOS[d.cuarto].pila;
+    for (let i = 0; i < 6; i++){
+      const u = ((seg - d.aspira) * 1.3 + i / 6) % 1, an = u * 6 + i;
+      const px = Math.round(p.x + (cx - p.x) * u + Math.cos(an) * 3 * (1 - u)), py = Math.round(p.y + (cy - p.y) * u + Math.sin(an) * 3 * (1 - u));
+      R(px, py, 2, 2, i % 2 ? '#f7f3ea' : '#c79a5b');
+    }
+    g.globalAlpha = 0.35; R(Math.min(cx, p.x), cy - 1, Math.abs(cx - p.x), 1, '#bff6ff'); g.globalAlpha = 1;
+  }
+}
+
+/* El panel del droide: qué hace, qué va a recoger, qué proyectos nunca tira y la papelera (para rescatar algo) */
+const horaDeMin = m => horaBonita(String(Math.floor(m / 60)).padStart(2, '0') + ':' + String(m % 60).padStart(2, '0'));
+function listaBasura(items){
+  return items.length ? items.slice(0, 20).map(x => `<div class="tarjeta" style="border-left-color:#9aa3ad"><i class="tipo">${esc(x.tipo.toUpperCase())} · ${esc(x.de)} · ${esc(fechaCorta(new Date(x.creado).toISOString()))}</i><b>${esc(x.titulo)}</b></div>`).join('') +
+    (items.length > 20 ? `<p class="meta">…y ${items.length - 20} más.</p>` : '') : '<p class="vacio">Limpio.</p>';
+}
+function panelDroide(foco){
+  if (!rolo) return;
+  const d = rolo.d, b = basuraAhora(), n = b.noticias.length + b.almacen.length, real = tiraDeVerdad();
+  const filas = [['Qué es', 'Droide rodante de limpieza y mantenimiento'], ['Vive en', 'Taller'], ['Ahora', ESTADO_DROIDE[d.estado] || 'Patrullando'], ['Batería', Math.round(d.bateria) + '%'],
+    ['Rondas de limpieza', rondas(HORARIO).map(horaDeMin).join(', ')], ['Mantenimiento', '1:00 p.m. (10 minutos)'],
+    ['Última limpieza', DROIDE_CFG.ultimaLimpieza ? fechaCorta(DROIDE_CFG.ultimaLimpieza) : 'todavía ninguna']];
+  let html = `<p>${esc(DROIDE.nombre)} rueda por toda la oficina, pita y escanea. En sus rondas recoge lo viejo de la Sala de Noticias (avisos de más de 4 días) y del Almacén (resúmenes de más de una semana y envíos de más de 3 días) y lo lleva a la compactadora del Taller. Lo que habla de un proyecto protegido nunca lo tira. De noche hiberna en su base.</p>` +
+    filas.map(([k, v]) => `<div class="fila"><span>${esc(k)}</span><span>${esc(v)}</span></div>`).join('');
+  html += `<h4 style="margin:16px 0 8px">Para recoger ahorita (${n})</h4><p class="meta" style="margin:0 0 6px">Sala de Noticias</p>` + listaBasura(b.noticias) + '<p class="meta" style="margin:10px 0 6px">Almacén</p>' + listaBasura(b.almacen);
+  html += `<div class="botones"><button class="boton principal" id="droideLimpia"${n ? '' : ' disabled'}>Mandarlo a limpiar ahora</button></div>`;
+  html += `<h4 style="margin:16px 0 8px">Proyectos que nunca tira</h4><p class="meta" style="margin:0 0 6px">Si una noticia, aviso o resumen menciona alguno, se queda. Sepáralos con comas.</p>
+    <input id="droideProtegidos" type="text" value="${esc(DROIDE_CFG.protegidos.join(', '))}" style="width:100%;box-sizing:border-box;padding:8px;font:inherit;background:#17131d;color:#f3eee6;border:1px solid #5a4f6a">
+    <div class="botones"><button class="boton" id="droideGuardar">Guardar</button></div>`;
+  html += `<h4 id="droidePapelera" style="margin:16px 0 8px">Papelera (${PAPELERA.length})</h4><p class="meta" style="margin:0 0 6px">Lo que tiró ${esc(DROIDE.nombre)}. Se puede rescatar durante ${DIAS_PAPELERA} días; después la compactadora lo borra para siempre.</p>`;
+  html += PAPELERA.length ? PAPELERA.slice(0, 40).map(p => {
+    const se = new Date((Date.parse(p.tirado) || Date.now()) + DIAS_PAPELERA * 86400000).toISOString();
+    return `<div class="tarjeta" style="border-left-color:#6b6474"><i class="tipo">${esc(String(p.tipo || '').toUpperCase())}${p.de ? ' · ' + esc(p.de) : ''} · se borra ${esc(fechaCorta(se))}</i><b>${esc(p.titulo || p.ruta)}</b>${!real || p.datos ? `<div class="botones" style="margin-top:6px"><button class="boton" data-rescatar="${esc(p.id)}">Rescatar</button></div>` : ''}</div>`;
+  }).join('') : '<p class="vacio">Vacía.</p>';
+  if (!real) html += `<p class="meta" style="margin-top:14px">${DEMO ? 'Datos de ejemplo: lo que recoge solo se esconde aquí.' : 'En esta página lo que recoge solo se esconde en este aparato. Se tira de verdad cuando abres la oficina en Claude («Todas mis sesiones»).'}</p>`;
+  if (DROIDE_CFG.bitacora.length) html += '<h4 style="margin:16px 0 8px">Últimas limpiezas</h4>' + DROIDE_CFG.bitacora.slice(0, 6).map(x => `<div class="fila"><span>${esc(fechaCorta(x.cuando))}</span><span>${x.recogio || 0} a la papelera${x.compacto ? ` · ${x.compacto} borrados` : ''}</span></div>`).join('');
+  abrirPanel(DROIDE.nombre.toUpperCase() + ' · DROIDE', html);
+  $('droideLimpia').addEventListener('click', () => { d.forzar = true; cerrarPanel(); });
+  $('droideGuardar').addEventListener('click', () => {
+    DROIDE_CFG.protegidos = listaProtegidos($('droideProtegidos').value); cacheBasura = null; guardarDroide(); panelDroide();
+  });
+  cuerpo.querySelectorAll('[data-rescatar]').forEach(bt => bt.addEventListener('click', async () => {
+    bt.disabled = true; bt.textContent = 'Rescatando…';
+    try { await rescatar(bt.dataset.rescatar); panelDroide('papelera'); } catch (e) { bt.textContent = 'No se pudo'; }
+  }));
+  if (foco === 'papelera') $('droidePapelera').scrollIntoView();
+}
+
 /* ---------- Sala de Noticias: una pantalla grande donde los monitos muestran lo que traen ---------- */
 const PANTALLA = { x: 364, y: 832, w: 120, h: 48 };
 function salaDeNoticias(){
@@ -1170,10 +1599,12 @@ function construirMuebles(){
   centroDePensado();
   salaDeNoticias();
   caballete(5, 68, 'espacio-d'); caballete(13, 68, 'espacio-e'); caballete(25, 68, 'espacio-f');
-  caballete(13, 95, 'espacio-g'); caballete(25, 95, 'espacio-h');
-  caja(19, 98); caja(20, 98, true); cubeta(29, 93); caja(23, 98);
+  caballete(25, 95, 'espacio-h');
+  cubeta(29, 93); caja(23, 98);
   planta(1, 88); caja(30, 88); caja(30, 89, true);                                      // pasillo 5
   cuartoDeAgentes();
+  tallerDeDroides();
+  pilasDeBasura();
   /* Ampliación (hasta abajo): pura obra */
   caja(2, 76); caja(3, 76, true); caja(2, 77); escalera(6, 76); cubeta(8, 77); caja(28, 85); caja(29, 85, true); caja(29, 84);
   escalera(27, 76); cubeta(22, 85); caja(12, 85); cubeta(4, 84); caja(20, 76); caja(21, 76, true);
@@ -1191,7 +1622,7 @@ function construirMuebles(){
 /* ---------- Capa fija: pisos, paredes y adornos que no se mueven ---------- */
 const estatica = document.createElement('canvas'); estatica.width = W; estatica.height = H;
 const CARA = { biblioteca: '#d4c3a0', escritorio: '#e2d4b4', internet: '#b8c3d4', pasillo: '#dccfb2', sala: '#ccd2dc', descanso: '#ead3ae',
-               calleros: '#d8c39b', cerebro: '#3a3157', vacio: '#cfcbc2', agentes: '#9fb1c9', terrazas: '#e9d9bd', pensado: '#3b5166', noticias: '#4a4f66' };
+               calleros: '#d8c39b', cerebro: '#3a3157', vacio: '#cfcbc2', agentes: '#9fb1c9', taller: '#8f98a3', terrazas: '#e9d9bd', pensado: '#3b5166', noticias: '#4a4f66' };
 function caraDe(x, y){
   if (y === 1) return x <= 9 ? CARA.biblioteca : x <= 20 ? CARA.escritorio : CARA.internet;
   if (y === 10 || y === 22 || y === 38 || y === 60) return CARA.pasillo;
@@ -1200,7 +1631,7 @@ function caraDe(x, y){
   if (y === 52) return CARA.noticias;
   if (y === 64 || y === 74) return CARA.vacio;
   if (y === 87) return CARA.pasillo;
-  if (y === 91) return x <= 9 ? CARA.agentes : CARA.vacio;
+  if (y === 91) return x <= 9 ? CARA.agentes : x <= 20 ? CARA.taller : CARA.vacio;
   return x <= 14 ? CARA.sala : CARA.descanso;
 }
 function baldosa(x, y){
@@ -1286,6 +1717,12 @@ function baldosa(x, y){
     case 'g':   // Cuarto de Agentes: alfombra azul suave
       R(px, py, T, T, ((x + y) & 1) ? '#4a5a78' : '#465673');
       if ((x * 3 + y * 5) % 4 === 0) R(px + 6, py + 6, 2, 2, '#56688a');
+      break;
+    case 'w':   // Taller: concreto pulido, con juntas y una franja de seguridad junto a la pared
+      R(px, py, T, T, ((x + y) & 1) ? '#7c838c' : '#788089');
+      R(px, py + T - 1, T, 1, '#6a7179'); R(px + T - 1, py, 1, T, '#6a7179');
+      if ((x * 5 + y * 3) % 7 === 0) R(px + 5, py + 7, 2, 1, '#8b939c');
+      if (y === 92) for (let i = 0; i < T; i += 4) R(px + i, py, 2, 2, (i + x * T) % 8 ? '#e0b93a' : '#2a2a2a');
       break;
     case 'v':   // concreto sin terminar
       R(px, py, T, T, ((x + y) & 1) ? '#a8a59e' : '#a39f98');
@@ -2076,6 +2513,7 @@ function ponerPuntos(a){
 
 function liberar(a){
   const l = a.lugar; if (!l) return;
+  if (l.droide){ a.lugar = null; return; }                            // los lugares del droide no se apartan
   if (l.lavadora != null && a.fase === 'trabajando') a.limpioHasta = performance.now() / 1000 + 12;   // sale de la lavadora: limpio
   if (l.idx >= 0){ if (OCUPA[l.area][l.idx] === a.id) OCUPA[l.area][l.idx] = null; }
   else EXTRA[l.area].delete(a.id);
@@ -2223,6 +2661,7 @@ function pasear(){
   let paseando = 0; const tomados = new Set();
   for (const a of agentes.values()) if (a.paseo){ paseando++; tomados.add(a.lugar ? a.lugar.ty * COLS + a.lugar.tx : -1); }
   for (const a of agentes.values()){
+    if (a.droide) continue;                                             // el droide anda por su cuenta
     if (a.paseo){
       if (a.areaDestino !== 'descanso' || a.fase === 'saliendo'){ a.paseo = null; continue; }   // le llegó trabajo: ya va a su cuarto
       if (a.fase === 'trabajando' && ahora >= a.paseo.hasta){                                    // ya miró un rato: regresa a Descanso
@@ -2251,7 +2690,7 @@ function pasear(){
 function moverAgente(a, dt){
   if (a.fase === 'aviso'){ a.tAviso -= dt; if (a.tAviso <= 0) a.fase = 'caminando'; return; }
   if (a.fase !== 'caminando' && a.fase !== 'saliendo') return;
-  let resto = VELOCIDAD * dt * (a.ruta[0] && a.ruta[0].tubo ? 2.4 : 1);   // por el periférico va más rápido
+  let resto = VELOCIDAD * (a.vel || 1) * dt * (a.ruta[0] && a.ruta[0].tubo ? 2.4 : 1);   // por el periférico va más rápido
   while (resto > 0 && a.ruta.length){
     const p = a.ruta[0], dx = p.x - a.x, dy = p.y - a.y, d = Math.hypot(dx, dy);
     if (d > 0.01) a.dir = Math.abs(dx) > Math.abs(dy) ? (dx < 0 ? 'izq' : 'der') : (dy < 0 ? 'arriba' : 'abajo');
@@ -2340,7 +2779,7 @@ function procesar(datos){
     else if (area !== a.areaDestino || cambiaTubo) irA(a, area, texto);
     else if (texto !== a.textoPendiente){ a.textoPendiente = texto; if (a.fase === 'trabajando') ponerTexto(a, texto, true); }
   }
-  for (const a of agentes.values()) if (!vistos.has(a.id) && a.fase !== 'saliendo') salir(a);
+  for (const a of agentes.values()) if (!vistos.has(a.id) && a.fase !== 'saliendo' && !a.droide) salir(a);   // el droide no viene en los datos: vive aquí
   ultimoReporte = masReciente;
   primeraLectura = false;
 }
@@ -2444,6 +2883,7 @@ async function conectarClaude(){
   window.claude.use('db').then(db => {
     if (!db) return;
     escucharMonitos(db);
+    escucharDroide(db);
     dbHorario = db.doc('oficina/horario');
     dbHorario.onSnapshot(snap => { const h = snap.exists ? snap.data() : null; if (horarioValido(h)) ponerHorario(h, false); }, () => {});
     dbPines = db.doc('oficina/supervisores');
@@ -2535,7 +2975,7 @@ function ubicarVinetas(){
     const sentado = a.fase === 'trabajando' && a.lugar && a.lugar.sentado;
     const mm = modeloDe(a);
     const enLavadora = a.fase === 'trabajando' && a.lugar && a.lugar.lavadora != null;   // adentro de la lavadora: el globo va arriba del tanque
-    const cabeza = enLavadora ? Math.round(a.y) - 58 : Math.round(a.y) - (sentado ? mm.h : mm.h + 2) - (a.ultra ? 10 : 3);
+    const cabeza = a.droide ? Math.round(a.y) - 29 : enLavadora ? Math.round(a.y) - 58 : Math.round(a.y) - (sentado ? mm.h : mm.h + 2) - (a.ultra ? 10 : 3);
     const izq = Math.max(2, Math.min(W - 2 - a.bw, Math.round(a.x - a.bw / 2)));
     const abajo = cabeza - 5;
     lista.push({ a, izq, abajo, arriba: abajo - a.bh, cabeza });
@@ -2631,7 +3071,7 @@ function barra(){
   pintarPantalla();
   revisarEnvios();
   $('reloj').textContent = new Date().toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-  const n = [...agentes.values()].filter(a => a.fase !== 'saliendo').length;
+  const n = [...agentes.values()].filter(a => a.fase !== 'saliendo' && !a.droide).length;
   $('cuantos').textContent = (n === 0 ? 'sin agentes' : n === 1 ? '1 agente' : n + ' agentes') + (abierta(Date.now()) ? ' · abierta hasta ' + horaBonita(HORARIO.cierra) : ' · cerrada, abre ' + horaBonita(HORARIO.abre));
   const senal = $('senal'), st = $('senalTexto');
   if (location.protocol === 'file:'){ senal.className = 'senal mal'; st.textContent = 'Abre con iniciar_oficina.bat'; }
@@ -2665,7 +3105,7 @@ function obsidianURL(boveda, ruta){ return 'obsidian://open?vault=' + encodeURIC
 
 /* Ficha de un monito (solo lectura) */
 const NOMBRE_AREA = { escritorio: 'Escritorio', biblioteca: 'Biblioteca', internet: 'Internet', 'sala de juntas': 'Sala de juntas',
-                      descanso: 'Descanso', calleros: 'Oficina Calleros', 'cerebro delta': 'Cerebro Delta', terrazas: 'Oficina Terrazas', 'centro de pensado': 'Centro de Pensado', almacen: 'Almacén', noticias: 'Sala de Noticias', agentes: 'Cuarto de Agentes' };
+                      descanso: 'Descanso', taller: 'Taller', calleros: 'Oficina Calleros', 'cerebro delta': 'Cerebro Delta', terrazas: 'Oficina Terrazas', 'centro de pensado': 'Centro de Pensado', almacen: 'Almacén', noticias: 'Sala de Noticias', agentes: 'Cuarto de Agentes' };
 function fechaCorta(s){
   const v = typeof s === 'number' ? s * (s < 1e12 ? 1000 : 1) : Date.parse(s);
   if (!v || isNaN(v)) return '—';
@@ -2684,7 +3124,9 @@ function listaArchivos(lista){
    del Artifact y aquí se lee. Nunca se van: viven en su cuarto, salen a trabajar cuando les toca y avisan
    cuando traen resumen nuevo.   monitos/<id> = quién es · monitos/<id>/reportes/<fecha> = sus resúmenes */
 const MONITOS = new Map(); let MONITOS_DEMO = [];
-const monitosTodos = () => EN_CLAUDE && !DEMO ? [...MONITOS.values()] : MONITOS_DEMO;   // en la web vienen del archivo público de monitos
+const monitosCrudos = () => EN_CLAUDE && !DEMO ? [...MONITOS.values()] : MONITOS_DEMO;   // en la web vienen del archivo público de monitos
+const monitosTodos = () => RECOGIDO.size ? monitosCrudos().map(m => (m.reportes || []).some(r => RECOGIDO.has(`monitos/${m.id}/reportes/${r.id}`))
+  ? Object.assign({}, m, { reportes: m.reportes.filter(r => !RECOGIDO.has(`monitos/${m.id}/reportes/${r.id}`)) }) : m) : monitosCrudos();   // sin lo que ya recogió el droide
 const monitoPorId = id => monitosTodos().find(m => m.id === id);
 function escucharMonitos(db){
   db.collection('monitos').onSnapshot(snap => {
@@ -2739,7 +3181,8 @@ function enviosDeReportes(){   // lo que cada monito mandó al terminar su ronda
   });
   return out;
 }
-function juntarEnvios(){ cacheEnvios = enviosLimpios((EN_CLAUDE && !DEMO ? ENVIOS : ENVIOS_DEMO).concat(enviosDeReportes()), casaDeMonito); return cacheEnvios; }
+function juntarEnvios(){ cacheEnvios = enviosLimpios(enviosCrudos().filter(e => !RECOGIDO.has('envios/' + e.id)).concat(enviosDeReportes()), casaDeMonito); return cacheEnvios; }
+const enviosCrudos = () => EN_CLAUDE && !DEMO ? ENVIOS : ENVIOS_DEMO;
 const enviosTodos = () => cacheEnvios || juntarEnvios();   // se vuelve a juntar cada segundo, en revisarEnvios
 const BUZON_LEIDO = {};
 function leidoBuzon(clave){
@@ -2813,7 +3256,7 @@ function panelTunel(){
    Cartelera (Sala de Noticias): todo lo que hay para mostrar; la pantalla cambia cada 5 minutos y una de cada
    dos veces sale una noticia del día. */
 let AVISOS = [], AVISOS_DEMO = [];
-const avisosTodos = () => EN_CLAUDE && !DEMO ? AVISOS : AVISOS_DEMO;
+const avisosTodos = () => { const l = EN_CLAUDE && !DEMO ? AVISOS : AVISOS_DEMO; return RECOGIDO.size ? l.filter(a => !RECOGIDO.has('avisos/' + a.id)) : l; };   // sin lo que ya recogió el droide
 const notasDeMemoria = () => monitosTodos().reduce((n, m) => n + (m.memoria || []).length, 0);
 const diasArchivados = () => monitosTodos().reduce((n, m) => n + (m.reportes || []).length, 0);
 const colorSeccion = sec => sec.id === 'oficina' ? '#6fd36f' : (ASPECTOS[sec.aspecto] || ASPECTOS.normal).etiqueta;
@@ -3101,6 +3544,7 @@ function fichaMonito(a, cual){
 }
 
 function fichaAgente(a){
+  if (a.droide) return panelDroide();
   if (a.rol === 'programado') return fichaMonito(a);
   const m = MODELOS[a.modelo];
   const filas = [['Rol', a.rol === 'supervisor' ? '★ Supervisor (no se va)' : 'Visitante'],
@@ -3148,7 +3592,7 @@ async function cargarCalleros(){
 const EXTRAS = [];   // letreros que no son áreas de trabajo
 function letreroExtra(x, y, texto){ const el = document.createElement('div'); el.className = 'letrero'; el.textContent = texto; capa.appendChild(el); EXTRAS.push({ el, x, y }); return el; }
 const LETREROS_ESPACIO = { 'espacio-d': letreroExtra(80, 1016, ''), 'espacio-e': letreroExtra(256, 1016, ''), 'espacio-f': letreroExtra(416, 1016, ''),
-  'espacio-g': letreroExtra(256, 1448, ''), 'espacio-h': letreroExtra(416, 1448, '') };
+  'espacio-h': letreroExtra(416, 1448, '') };
 letreroExtra(256, 642, 'PERIFÉRICO · TÚNEL CENTRAL');
 letreroExtra(120, 1192, 'AMPLIACIÓN (EN OBRA)');
 function letrerosEspacios(){
@@ -3168,7 +3612,7 @@ function agenteEn(p){
   let mejor = null;
   for (const a of agentes.values()){
     if (a.fase === 'saliendo' || a.bajo) continue;
-    const m = modeloDe(a);
+    const m = a.droide ? { w: 16, h: 24 } : modeloDe(a);
     const holgura = 3 + 14 / escala;   // con el dedo se atina más fácil
     if (Math.abs(p.x - a.x) <= m.w / 2 + holgura && p.y <= a.y + holgura && p.y >= a.y - m.h - 6 - holgura) mejor = a;
   }
@@ -3204,7 +3648,7 @@ const PASE = `Regístrate en mi oficina virtual para que yo vea en qué andas. H
    "area" es el cuarto donde estás: "escritorio" si escribes o programas, "biblioteca" si lees o revisas, "internet" si buscas en la web, "sala de juntas" si coordinas ayudantes, "centro de pensado" si planeas.
 3. Cuando cambies de tarea, vuelve a avisar con action "update" y el "version" que te devolvió la escritura anterior como if_version: cambia "area", "actividad" y "actualizado". No avises más de una vez cada varios minutos.
 4. Cuando termines lo que te pedí, "update" con { "estado": "terminado", "actualizado": "la hora de ahora" }.
-5. Si te pido que vayas a algún lugar de la oficina, que te pasees o que hagas algo ahí, haz "update" con { "estado": "paseando", "area": "el cuarto", "actividad": "lo que haces ahí (máximo 40 letras)", "actualizado": "la hora de ahora" }. Cuartos: escritorio, biblioteca, internet, sala de juntas, descanso, centro de pensado, noticias, almacen, calleros, cerebro delta. Te quedas ahí hasta 3 horas o hasta que te mueva otra vez.
+5. Si te pido que vayas a algún lugar de la oficina, que te pasees o que hagas algo ahí, haz "update" con { "estado": "paseando", "area": "el cuarto", "actividad": "lo que haces ahí (máximo 40 letras)", "actualizado": "la hora de ahora" }. Cuartos: escritorio, biblioteca, internet, sala de juntas, descanso, centro de pensado, noticias, almacen, calleros, cerebro delta, taller. Te quedas ahí hasta 3 horas o hasta que te mueva otra vez.
 
 Si no tienes la herramienta ArtifactData, dime en una línea "no puedo entrar a la oficina" y sigue normal.`;
 function panelPase(){
@@ -3315,7 +3759,7 @@ function dibujar(t){
   const items = MUEBLES.filter(m => m.sortY > vy - 4 && m.sortY - 96 < vy + vh);   // lo que queda fuera de la vista no se pinta
   for (const a of agentes.values()) if (a.y > vy - 4 && a.y - 80 < vy + vh) items.push({ sortY: a.y, a });
   items.sort((p, q) => p.sortY - q.sortY);
-  for (const it of items){ if (!it.a) it.dibujar(t); else if (!it.a.bajo && !(it.a.fase === 'trabajando' && it.a.lugar && it.a.lugar.lavadora != null)) dibujarAgente(it.a, t); }
+  for (const it of items){ if (!it.a) it.dibujar(t); else if (it.a.droide){ if (!it.a.bajo) dibujarDroide(it.a, t); } else if (!it.a.bajo && !(it.a.fase === 'trabajando' && it.a.lugar && it.a.lugar.lavadora != null)) dibujarAgente(it.a, t); }
   tallos();
   noche();
   if (zonaEncima){   // marco punteado sobre lo que se puede picar
@@ -3391,6 +3835,7 @@ function bucle(ms){
   anterior = ms;
   leerVista();
   pasear();
+  droide(dt);
   for (const a of [...agentes.values()]) moverAgente(a, dt);
   letrerosActivos();
   ubicarVinetas();
@@ -3401,7 +3846,7 @@ function bucle(ms){
 
 /* ?depurar: deja ver por dentro desde la consola (para pruebas) */
 const DEPURAR = new URLSearchParams(location.search).has('depurar'), TIEMPOS = [];
-if (DEPURAR) window.oficinaDepurar = { agentes, monitosTodos, ratoLibre, registroProgramado, planDeNoche, abierta, zoomEn, TIEMPOS, lienzo: () => [lienzo.width, lienzo.height, k] };
+if (DEPURAR) window.oficinaDepurar = { droide: () => rolo, basuraAhora, SITIOS, panelDroide, agentes, monitosTodos, ratoLibre, registroProgramado, planDeNoche, abierta, zoomEn, TIEMPOS, lienzo: () => [lienzo.width, lienzo.height, k] };
 
 /* ---------- Arranque ---------- */
 construirMuebles();
@@ -3409,6 +3854,7 @@ mudar();
 construirEstaciones();
 calcularCandidatos();
 PUNTOS_PASEO = PUNTOS_PASEO.filter(p => caminable(p[0], p[1]));
+crearDroide();
 $('irClaude').hidden = EN_CLAUDE;
 pintarEstatica();
 ajustarEscala();

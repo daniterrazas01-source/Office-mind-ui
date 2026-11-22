@@ -39,7 +39,9 @@ export function estadoDemo() {
       reportes: [{ id: 'ejemplo', fecha: 'Ejemplo', creado: desde(90), titulo: 'Así se verá un resumen', intro: 'Esto es un resumen de muestra, no son noticias reales.',
         puntos: [{ titulo: 'Primer tema de ejemplo', resumen: 'Aquí va lo más importante en dos o tres líneas.', fuente: 'Nombre de la fuente' }],
         capsulas: [{ tipo: 'cómo funciona', titulo: 'Cápsula de ejemplo', texto: 'Un dato corto para la pantalla.' }], cierre: '¡Luz verde!',
-        enviado: desde(0.3), envios: [{ para: 'almacen', tipo: 'archivo', titulo: 'Resumen del día (ejemplo)', texto: 'Así se ve un archivo que Nitro manda a guardar al almacén.' }] }],
+        enviado: desde(0.3), envios: [{ para: 'almacen', tipo: 'archivo', titulo: 'Resumen del día (ejemplo)', texto: 'Así se ve un archivo que Nitro manda a guardar al almacén.' }] },
+        { id: 'viejo', fecha: 'Hace 9 días', creado: hace(9 * 1440), titulo: 'Un resumen viejo (ejemplo)', puntos: [{ titulo: 'Noticia de hace más de una semana', cuando: 'hace 9 días' }], capsulas: [] },
+        { id: 'viejo-dt', fecha: 'Hace 10 días', creado: hace(10 * 1440), titulo: 'Resumen viejo de Drag Tree (ejemplo)', puntos: [{ titulo: 'Salió Drag Tree 0.8: este no se tira', cuando: 'hace 10 días' }], capsulas: [] }],
       memoria: [{ id: 'pendientes', titulo: 'Pendientes', texto: '- Ejemplo: dar seguimiento a la final.', actualizado: hace(60) }],
     }],
     envios: [
@@ -48,7 +50,10 @@ export function estadoDemo() {
       { id: 'ej-4', de: 'internet', para: 'noticias', tipo: 'noticias', autor: 'Nitro', titulo: 'Noticias para la pantalla (ejemplo)', texto: 'Lo que va a salir hoy en la Sala de Noticias.', creado: desde(0) },
     ],
     visitas: [{ id: 'ejemplo', nombre: 'Sesión con pase', area: 'biblioteca', actividad: 'Leyendo el manual', estado: 'trabajando', modelo: 'sonnet', equipo: 'Teléfono', actualizado: hace(2) }],
-    avisos: [{ id: 'ejemplo', titulo: 'Aviso de ejemplo', texto: 'Aquí saldrán los cambios de la oficina.', creado: hace(120) }],
+    avisos: [{ id: 'ejemplo', titulo: 'Aviso de ejemplo', texto: 'Aquí saldrán los cambios de la oficina.', creado: hace(120) },
+      { id: 'viejo-1', titulo: 'Aviso viejo (ejemplo)', texto: 'De hace casi una semana: el droide lo recoge.', creado: hace(6 * 1440) },
+      { id: 'viejo-2', titulo: 'Otro aviso viejo (ejemplo)', texto: 'También se va a la papelera.', creado: hace(5 * 1440) },
+      { id: 'viejo-dt', titulo: 'Drag Tree se actualizó (ejemplo)', texto: 'Este se queda aunque sea viejo: es de Drag Tree.', creado: hace(6 * 1440) }],
     archivos_recientes: ['src/arbol.js', 'src/pista.js', 'src/boleta.js', 'index.html', 'css/tema.css', 'notas/ideas.md', 'src/carrera.js', 'README.md', 'src/sonido.js']
       .map((nombre, i) => ({ nombre, origen: 'tableta-android', area: 'terrazas', fecha: hace(5 + i * 40), tipo: i % 3 ? 'editado' : 'creado' })),
   };
