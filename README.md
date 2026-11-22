@@ -70,7 +70,7 @@ Su panel (tocar a BB-8, su base, la compactadora o la máquina) muestra qué hac
 
 ### Modelo y esfuerzo en el gafete
 
-Todo monito dice en el renglón de abajo de su gafete con qué trabaja, por ejemplo «Opus en alto ▮▮▮▯▯», y con esfuerzo alto o más trae un resplandor a sus pies. Vale para cualquiera que mande los campos `modelo` y `esfuerzo` (`low`, `medium`, `high`, `xhigh`, `max`): las sesiones con aviso (tableta, relevo, laptop con `collector/`), las del pase, las del Artifact cuando Claude da el dato, y los monitos programados, que lo escriben en su ficha. Si falta el esfuerzo, el gafete deja lo de antes (aparato u horario).
+Todo monito dice en el renglón de abajo de su gafete con qué trabaja, por ejemplo «Opus en alto ▮▮▮▯▯», y con esfuerzo alto o más trae un resplandor a sus pies. Vale para cualquiera que mande los campos `modelo` y `esfuerzo` (`low`, `medium`, `high`, `xhigh`, `max`): las sesiones con aviso (tableta, relevo, laptop con `collector/`), las del pase, las del Artifact cuando Claude da el dato, y los monitos programados, que lo escriben en su ficha. Si falta el esfuerzo, el gafete deja lo de antes (el aparato). A los agentes (Nitro, Pole…) no se les pone su horario en el gafete, para que quede chico: está en su ficha.
 
 ### Equipos: quién manda a quién
 

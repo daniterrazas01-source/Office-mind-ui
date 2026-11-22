@@ -2490,7 +2490,7 @@ function ponerNombre(a, nombre){
   a.elNombre.appendChild(document.createElement('b'));
   // Renglón de abajo: con qué trabaja ("Opus en alto" y sus rayitas) si se sabe; si no, en qué aparato está
   const conQue = m && a.esfuerzo ? m.nombre + ' en ' + a.esfuerzo[0] : a.tableta && m ? 'Modelo ' + m.nombre : '';
-  const abajo = [conQue, !conQue || a.rol === 'programado' ? a.dispositivo : '', plazo].filter(Boolean).join(' · ');   // los de tarea programada conservan su horario
+  const abajo = [conQue, !conQue && a.rol !== 'programado' ? a.dispositivo : '', plazo].filter(Boolean).join(' · ');   // a los agentes no se les pone su horario: está en su ficha
   if (abajo){
     const s = document.createElement('small'); s.textContent = abajo;
     if (conQue && a.esfuerzo){ const p = document.createElement('span'); p.className = 'pips'; p.style.color = m.etiqueta; p.textContent = ' ' + '▮'.repeat(a.esfuerzo[1]) + '▯'.repeat(5 - a.esfuerzo[1]); s.appendChild(p); }
