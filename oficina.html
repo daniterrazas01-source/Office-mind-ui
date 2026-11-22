@@ -3796,16 +3796,82 @@ function lamparas(){
   }
   return L;
 }
+/* Hasta dónde llega la luz de una lámpara: las casillas que "ve" sin que un muro se atraviese en medio (se trazan
+   rayos de la lámpara a cada casilla). Las puertas dejan pasar la luz al cuarto de al lado. La cara de un muro (=)
+   mira hacia abajo: solo la alumbra una luz que está debajo de ella; lo de arriba de los muros (#) nunca se alumbra. */
+const OPACO = c => c === '#' || c === '=' || c === undefined;
+function alcanceLuz(lx, ly, r){
+  const out = [], tx0 = Math.max(0, Math.floor((lx - r) / T)), tx1 = Math.min(COLS - 1, Math.floor((lx + r) / T));
+  const ty0 = Math.max(0, Math.floor((ly - r) / T)), ty1 = Math.min(ROWS - 1, Math.floor((ly + r) / T));
+  const ve = (tx, ty, ox, oy) => {
+    const n = Math.max(1, Math.ceil(Math.hypot(ox - lx, oy - ly) / 2));
+    for (let i = 1; i < n; i++){
+      const sx = Math.floor((lx + (ox - lx) * i / n) / T), sy = Math.floor((ly + (oy - ly) * i / n) / T);
+      if ((sx === tx && sy === ty) || (sx === Math.floor(lx / T) && sy === Math.floor(ly / T))) continue;
+      if (OPACO(MAPA[sy] && MAPA[sy][sx])) return false;
+    }
+    return true;
+  };
+  // El cuarto de la lámpara: hasta las puertas (en el umbral se alcanza a ver la luz, pero no pasa al otro cuarto)
+  const cuarto = new Set(), cola = [[Math.floor(lx / T), Math.floor(ly / T)]];
+  cuarto.add(cola[0][1] * COLS + cola[0][0]);
+  while (cola.length){
+    const [cx, cy] = cola.pop();
+    if (MAPA[cy][cx] === 'D' && cola.length + cuarto.size > 1) continue;
+    for (let d = 0; d < 4; d++){
+      const nx = cx + DX[d], ny = cy + DY[d], k = ny * COLS + nx;
+      if (nx < tx0 || nx > tx1 || ny < ty0 || ny > ty1 || cuarto.has(k) || OPACO(MAPA[ny] && MAPA[ny][nx])) continue;
+      cuarto.add(k); cola.push([nx, ny]);
+    }
+  }
+  for (let ty = ty0; ty <= ty1; ty++) for (let tx = tx0; tx <= tx1; tx++){
+    const c = MAPA[ty][tx];
+    if (c === '#' || c === undefined) continue;
+    const muro = c === '=';
+    if (muro ? !cuarto.has((ty + 1) * COLS + tx) : !cuarto.has(ty * COLS + tx)) continue;   // de otro cuarto
+    if (muro && ty * T + T > ly + 2) continue;                        // un muro de frente solo se alumbra desde abajo
+    if (Math.hypot(Math.max(Math.abs(tx * T + 8 - lx) - 8, 0), Math.max(Math.abs(ty * T + 8 - ly) - 8, 0)) > r) continue;
+    const yb = muro ? ty * T + T - 1 : ty * T + 8;                     // del muro se mira su orilla de abajo
+    if (ve(tx, ty, tx * T + 8, yb) || ve(tx, ty, tx * T + 2, muro ? yb : ty * T + 2) || ve(tx, ty, tx * T + 14, muro ? yb : ty * T + 14) ||
+        ve(tx, ty, tx * T + 2, muro ? yb : ty * T + 14) || ve(tx, ty, tx * T + 14, muro ? yb : ty * T + 2)) out.push([tx, ty]);
+  }
+  return out;
+}
+const LUZ_MAX = 0.66;   // de noche, junto a una lámpara se quita a lo más esto de la oscuridad
 function armarNoche(){
   const c = document.createElement('canvas'); c.width = W; c.height = H;
   const x = c.getContext('2d'), L = lamparas();
-  x.fillStyle = 'rgb(7,9,28)'; x.globalAlpha = 0.66; x.fillRect(0, 0, W, H);
-  x.globalCompositeOperation = 'destination-out';                     // cada lámpara abre su charco de luz, en tres escalones
-  for (const [lx, ly, r] of L) for (const [f, a] of [[1, 0.3], [0.72, 0.36], [0.44, 0.5]]){ x.globalAlpha = a; x.beginPath(); x.arc(lx, ly, r * f, 0, 7); x.fill(); }
+  x.fillStyle = 'rgb(7,9,28)'; x.globalAlpha = 0.74; x.fillRect(0, 0, W, H);
+  const recorte = (casillas) => { x.beginPath(); for (const [tx, ty] of casillas) x.rect(tx * T, ty * T, T, T); x.clip(); };
+  const zonas = L.map(([lx, ly, r]) => alcanceLuz(lx, ly, r * 1.6 + 16)), rebote = L.map(([lx, ly, r]) => alcanceLuz(lx, ly, r * 3 + 16));   // con holgura: el abanico se apaga antes de la orilla
+  /* Cada aplique alumbra desde la pared hacia el cuarto: un abanico ancho pegado a la pared, que se abre y se apaga
+     poco a poco (no un círculo). Además la luz rebota y deja el cuarto en penumbra. Las luces se suman en un mapa de
+     luz que topa en 1, así dos lámparas juntas no hacen de día: lo más que se aclara la noche es LUZ_MAX. */
+  const luz = document.createElement('canvas'); luz.width = W; luz.height = H;
+  const m = luz.getContext('2d'); m.globalCompositeOperation = 'lighter';
+  const abanico = (lx, ly, r, lado, fuerza, alcance) => {
+    const frente = lado === 'frente', ox = frente ? lx : lado === 'izq' ? lx - 15 : lx + 15, oy = frente ? ly - 13 : ly;   // de donde sale: la pared
+    m.save(); m.translate(ox, oy); m.scale(frente ? 1.35 : 0.85, frente ? 0.85 : 1.35);
+    const R0 = r * alcance, gr = m.createRadialGradient(0, 0, 0, 0, 0, R0);
+    for (const [u, a] of fuerza) gr.addColorStop(u, `rgba(255,255,255,${a})`);
+    m.fillStyle = gr; m.fillRect(-R0, -R0, R0 * 2, R0 * 2); m.restore();
+  };
+  const enZona = (casillas, pinta) => { m.save(); m.beginPath(); for (const [tx, ty] of casillas) m.rect(tx * T, ty * T, T, T); m.clip(); pinta(); m.restore(); };
+  L.forEach(([lx, ly, r, , , lado], i) => enZona(rebote[i], () => abanico(lx, ly, r, lado, [[0, 0.3], [0.5, 0.15], [1, 0]], 2.2)));
+  L.forEach(([lx, ly, r, , , lado], i) => enZona(zonas[i], () => abanico(lx, ly, r, lado, [[0, 1], [0.2, 0.8], [0.55, 0.35], [1, 0]], 1.05)));
+  x.globalCompositeOperation = 'destination-out'; x.globalAlpha = LUZ_MAX; x.drawImage(luz, 0, 0); x.globalAlpha = 1;
   x.globalCompositeOperation = 'source-over';
+  L.forEach(([lx, ly, r, fx, fy], i) => {                              // el tono cálido del foco, y el resplandor en la pared
+    x.save(); recorte(zonas[i]);
+    const gr = x.createRadialGradient(fx, fy, 0, fx, fy, r);
+    gr.addColorStop(0, 'rgba(255,210,122,0.2)'); gr.addColorStop(1, 'rgba(255,210,122,0)');
+    x.fillStyle = gr; x.fillRect(fx - r, fy - r, r * 2, r * 2);
+    const gp = x.createRadialGradient(fx, fy, 0, fx, fy, 12);
+    gp.addColorStop(0, 'rgba(255,210,122,0.45)'); gp.addColorStop(1, 'rgba(255,210,122,0)');
+    x.fillStyle = gp; x.fillRect(fx - 12, fy - 12, 24, 24);
+    x.restore();
+  });
   for (const [lx, ly, r, fx, fy, lado] of L){
-    x.globalAlpha = 0.1; x.fillStyle = '#ffd27a'; x.beginPath(); x.arc(lx, ly, r * 0.72, 0, 7); x.fill();
-    x.globalAlpha = 0.35; x.beginPath(); x.arc(fx, fy, 7, 0, 7); x.fill();                         // el resplandor en la pared
     x.globalAlpha = 1; const X = Math.round(fx), Y = Math.round(fy);
     if (lado === 'frente'){                                                                          // aplique visto de frente
       x.fillStyle = K; x.fillRect(X - 4, Y - 3, 8, 7); x.fillStyle = '#8a6a3a'; x.fillRect(X - 1, Y + 3, 2, 2);
@@ -3846,7 +3912,7 @@ function bucle(ms){
 
 /* ?depurar: deja ver por dentro desde la consola (para pruebas) */
 const DEPURAR = new URLSearchParams(location.search).has('depurar'), TIEMPOS = [];
-if (DEPURAR) window.oficinaDepurar = { droide: () => rolo, basuraAhora, SITIOS, panelDroide, agentes, monitosTodos, ratoLibre, registroProgramado, planDeNoche, abierta, zoomEn, TIEMPOS, lienzo: () => [lienzo.width, lienzo.height, k] };
+if (DEPURAR) window.oficinaDepurar = { droide: () => rolo, basuraAhora, SITIOS, panelDroide, armarNoche, agentes, monitosTodos, ratoLibre, registroProgramado, planDeNoche, abierta, zoomEn, TIEMPOS, lienzo: () => [lienzo.width, lienzo.height, k] };
 
 /* ---------- Arranque ---------- */
 construirMuebles();
