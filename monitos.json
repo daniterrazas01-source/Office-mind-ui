@@ -1,15 +1,15 @@
 {
-  "actualizado": "2026-11-21T13:39:29Z",
+  "actualizado": "2026-11-22T13:39:36Z",
   "monitos": [
     {
       "actividad": "",
-      "actualizado": "2026-11-21T13:43:00Z",
+      "actualizado": "2026-11-22T13:23:39Z",
       "area": "internet",
       "aspecto": "gorra_roja",
       "bano": {
-        "cuando": "2026-11-21T13:41:00Z",
+        "cuando": "2026-11-22T13:23:39Z",
         "quedan": 27,
-        "quite": 1
+        "quite": 0
       },
       "casa": "terrazas",
       "descripcion": "Reportero de arrancones de DragTree. Cada mañana busca las noticias recientes, te deja el resumen aquí y manda lo del día por el túnel a los demás cuartos. Habla como narrador de pista: directo, emocionado y con jerga de cuarto de milla.",
@@ -54,6 +54,121 @@
       "seccion": "Arrancones",
       "id": "nitro",
       "reportes": [
+        {
+          "capsulas": [
+            {
+              "fuente": "Performance Racing",
+              "texto": "La temporada 2027 tiene 20 fechas. La Winternationals corre del 18 al 21 de febrero en In-N-Out Burger Pomona Dragstrip.",
+              "tipo": "próximo evento",
+              "titulo": "Arranca 2027 en Pomona",
+              "url": "https://performanceracing.com/magazine/industry-news/08-27-2026/nhra-releases-20-race-schedule-2027-season"
+            },
+            {
+              "fuente": "Racer",
+              "texto": "El FMP NHRA Arizona Nationals corre del 26 al 28 de febrero de 2027 en Firebird Motorsports Park.",
+              "tipo": "próximo evento",
+              "titulo": "Phoenix, la semana siguiente",
+              "url": "https://racer.com/2026/08/27/nhra-confirms-20-race-2027-schedule"
+            },
+            {
+              "fuente": "Racer",
+              "texto": "Las Finales en Pomona corren del 11 al 14 de noviembre, y ahí se coronan los campeones.",
+              "tipo": "próximo evento",
+              "titulo": "Pomona cierra la temporada 2027",
+              "url": "https://racer.com/2026/08/27/nhra-confirms-20-race-2027-schedule"
+            },
+            {
+              "fuente": "Drag Racing List",
+              "texto": "La temporada 2027 celebra a John Force en sus 20 fechas, por sus 16 campeonatos de Funny Car.",
+              "tipo": "historia",
+              "titulo": "50 años de Force",
+              "url": "https://www.draglist.com/2026/01/29/nhra-to-honor-john-force-in-2027-with-50-years-of-force"
+            },
+            {
+              "fuente": "NHRA.com",
+              "texto": "Quien renueve su boleto para 2027 durante la temporada 2026 recibe un anillo de los 16 títulos de Force.",
+              "tipo": "historia",
+              "titulo": "Anillo para quien renueve",
+              "url": "https://nhra.com/news/2026/nhra-honor-john-force-50-years-force-celebration-2027"
+            },
+            {
+              "fuente": "Drag Racing List",
+              "texto": "Para 2027 regresan los hood scoops. El motor pasa de un cuerpo de aceleración al frente a dos arriba.",
+              "tipo": "reglamento",
+              "titulo": "Hood scoops en Pro Stock",
+              "url": "https://www.draglist.com/2026/04/08/hood-scoops-set-to-return-to-nhra-pro-stock-category-in-2027"
+            },
+            {
+              "fuente": "NHRA Racer",
+              "texto": "En 2027 el dial-in máximo baja a 7.25 s en Top Dragster y 7.60 s en Top Sportsman.",
+              "tipo": "reglamento",
+              "titulo": "Top Dragster y Top Sportsman",
+              "url": "https://www.nhraracer.com/post/updates-to-top-dragster-and-top-sportsman-in-2027"
+            },
+            {
+              "fuente": "Cycle News",
+              "texto": "La NHRA firmó acuerdos de transmisión con FOX Sports, The CW y FloSports.",
+              "tipo": "historia",
+              "titulo": "Nuevos socios de transmisión",
+              "url": "https://www.cyclenews.com/2026/10/article/nhra-announces-new-media-rights-agreements-with-fox-sports-the-cw-network-and-flosports/"
+            },
+            {
+              "fuente": "Performance Racing",
+              "texto": "La IHRA canceló su serie de autos Stock Car tras cuatro fechas y apunta a volver en 2027.",
+              "tipo": "historia",
+              "titulo": "IHRA sin Stock Car en 2026",
+              "url": "https://performanceracing.com/magazine/industry-news/07-15-2026/ihra-announces-cancellation-2026-stock-car-series"
+            },
+            {
+              "texto": "Son las luces que arrancan la carrera: primero las amarillas y al final la verde. Salir antes de la verde es falso arranque.",
+              "tipo": "cómo funciona",
+              "titulo": "El árbol de luces"
+            },
+            {
+              "texto": "En pre-stage el auto avanza hasta el primer sensor; en stage lo acomoda del todo. Recién entonces se enciende el árbol.",
+              "tipo": "cómo funciona",
+              "titulo": "Pre-stage y stage"
+            },
+            {
+              "texto": "Es lo que tarda el piloto en salir desde que se enciende la verde. Se mide aparte del tiempo total en la pista.",
+              "tipo": "cómo funciona",
+              "titulo": "Tiempo de reacción"
+            },
+            {
+              "texto": "Son poco más de 400 metros. Ahí se miden el tiempo de paso y la velocidad al cruzar la meta.",
+              "tipo": "cómo funciona",
+              "titulo": "El cuarto de milla"
+            }
+          ],
+          "cierre": "Pista en pausa, pero el árbol sigue listo. Mañana vuelvo a buscar. ¡Luz verde!",
+          "creado": "2026-11-22T13:23:39Z",
+          "enviado": "2026-11-22T13:23:39Z",
+          "envios": [
+            {
+              "para": "almacen",
+              "texto": "Van 0 noticias nuevas y 13 cápsulas; la principal es que la temporada 2027 arranca en Pomona del 18 al 21 de febrero.",
+              "tipo": "archivo",
+              "titulo": "Resumen del 22 de noviembre de 2026"
+            },
+            {
+              "para": "noticias",
+              "texto": "- Sin noticias nuevas de arrancones hoy (22 nov).\n- Lo más reciente: Pomona coronó campeones el 15 de noviembre.\n- Temporada 2027 arranca en Pomona del 18 al 21 de febrero.",
+              "tipo": "noticias",
+              "titulo": "Noticias de hoy para la pantalla"
+            },
+            {
+              "para": "calleros",
+              "texto": "Hoy no encontré noticias nuevas de arrancones. Lo más reciente confirmado es del 15 de noviembre, cuando Pomona coronó campeones. La onceava fecha de Chihuahua sigue sin resultados confirmados, y hay un titular sin confirmar sobre una nueva fecha para Stege contra Valles.",
+              "tipo": "nota",
+              "titulo": "Lo más importante de hoy"
+            }
+          ],
+          "fecha": "22 de noviembre de 2026",
+          "intro": "Buenas, jefe. Hoy no encontré notas nuevas de arrancones: ni de la NHRA, ni de la IHRA, ni de Chihuahua o México. Lo más reciente confirmado sigue siendo Pomona, del 15 de noviembre, que ya di en rondas anteriores. Dejo cápsulas de próximos eventos, reglamento y cómo funciona la pista. La onceava fecha de Chihuahua sigue sin resultado.",
+          "puntos": [],
+          "titulo": "Pista en pausa; el árbol sigue listo",
+          "id": "2026-11-22"
+        },
         {
           "capsulas": [
             {
@@ -993,8 +1108,8 @@
       ],
       "memoria": [
         {
-          "actualizado": "2026-11-21T13:39:00Z",
-          "texto": "- 21 nov: búsquedas estándar y extendida; sin notas de arrancones nuevas del 19 al 21 nov, salvo la venta de la IHRA.\n- Sirvieron: Dragzine (IHRA), NHRA.com, Racer, Cycle News, Performance Racing, Ocho Columnas, Auto Action.\n- No abrieron: draglist.com y competitionplus.com (no resuelven desde esta sesión).\n- Chihuahua: sin resultados de la onceava fecha en ninguna fuente.\n- Arrancones México: Publimetro y La Verdad sólo muestran etiquetas viejas.\n- IHRA: sin resultados claros para 2027, salvo el cambio de dueños.",
+          "actualizado": "2026-11-22T13:23:39Z",
+          "texto": "- 22 nov: búsquedas estándar y extendida; sin notas nuevas de arrancones en los últimos días.\n- Sirvieron: Dragzine, Competition Plus, Racer, Performance Racing, Drag Racing List, NHRA.com, Cycle News.\n- No abrieron: esnoticia.mx y ochocolumnas.net (no resuelven desde la sesión; hay que permitirlos en la red).\n- Chihuahua: El Heraldo, Tiempo y Nuestras Noticias sin resultados de la onceava fecha.\n- Arrancones México: Publimetro y La Verdad sólo muestran etiquetas viejas.\n- Búsquedas genéricas (NHRA news, venta de IHRA) devuelven notas de 2025 y primer trimestre 2026; conviene buscar con nombres concretos.",
           "titulo": "Fuentes",
           "id": "fuentes"
         },
@@ -1005,13 +1120,13 @@
           "id": "instrucciones-del-jefe"
         },
         {
-          "actualizado": "2026-11-21T13:39:00Z",
-          "texto": "- Chihuahua, onceava fecha (dom 15 nov): sin resultados en las fuentes consultadas. Buscar en El Heraldo de Chihuahua, Tiempo o Nuestras Noticias.\n- Dodge: Manufacturer's Cup según nhra.com (18 nov); sin detalles, revisar.\n- Temporada 2027: detalles del homenaje 50 Years of Force, aún sin publicar.\n- IHRA: nuevos dueños (Dragzine, sin fecha confirmada); revisar planes y calendario 2027.\n- PDRA: calendario 2027 de 8 fechas, sin fuente abierta; revisar.\n- Arrancones México: sin notas de nov 2026; revisar Publimetro o La Verdad.",
+          "actualizado": "2026-11-22T13:23:39Z",
+          "texto": "- Chihuahua, onceava fecha (dom 15 nov): sin resultados en El Heraldo, Tiempo ni Nuestras Noticias. Un titular de esnoticia.mx habla de una nueva fecha para Stege contra Valles: sin confirmar, revisar.\n- Dodge: Manufacturer's Cup según nhra.com (18 nov); sin detalles, revisar.\n- 50 Years of Force: NHRA.com ya habla del anillo para quien renueve; falta el programa del homenaje.\n- IHRA: nuevos dueños según Dragzine (21 nov); sin segunda fuente. Revisar calendario 2027.\n- PDRA: calendario 2027 de 8 fechas, sin fuente abierta; revisar.\n- Arrancones México: Publimetro (etiqueta, sin fecha) dice que el gobierno descartó pista propia y analiza Amozoc; sin notas de nov 2026.",
           "titulo": "Pendientes",
           "id": "pendientes"
         },
         {
-          "actualizado": "2026-11-21T13:40:00Z",
+          "actualizado": "2026-11-22T13:23:39Z",
           "texto": "- 2026-11-15: Todd gana la final de Funny Car, 3.890 a 331.20 mph vs Wilkerson 3.925 (Racer).\n- 2026-11-15: Langdon, campeón de Top Fuel por segunda vez (Dragzine).\n- 2026-11-15: Kalitta gana el evento de Top Fuel, 3.657 a 339.19 mph (Dragzine).\n- 2026-11-15: J.R. Todd, campeón de Funny Car; Hagan perdió en primera ronda (Competition Plus).\n- 2026-11-15: Glenn, campeón de Pro Stock (Dragzine).\n- 2026-11-15: Herrera, campeón de Pro Stock Motorcycle y ganador del evento (Competition Plus).\n- 2026-11-15: Crampton gana Top Alcohol Dragster (Auto Action).\n- 2026-11-15: Herrera gana la final pospuesta de Las Vegas en Pomona (Speed Sport).\n- 2026-11-15: Langdon con 107 puntos de ventaja antes de Pomona (Drag Racing List, 13 nov).\n- 2026-11-17: Temporada 2027 abre en Pomona 18 a 21 feb, homenaje 50 Years of Force (Performance Racing).\n- 2026-11-17: Stege vs Valles en Chihuahua; no encontré resultados.\n- 2026-11-15: Maddi Gordon, Novata del Año de la NHRA (NHRA.com; fecha de la ceremonia no confirmada).\n- 2026-11-15: Herrera, final Pomona 6.683 a 202.39 mph vs Matt Smith; tercer título en cuatro años (Cycle News).\n- 2026-11-20: Quienes renueven boleto para 2027 en la temporada 2026 reciben anillo de los 16 títulos de Force (NHRA.com).\n- 2026-11-21: IHRA vendida a IHRA Australia/NZ y Beaumont Motorsport Group (Dragzine; fecha sin confirmar).",
           "titulo": "Ya lo conté",
           "id": "ya-contado"
@@ -1020,13 +1135,13 @@
     },
     {
       "actividad": "",
-      "actualizado": "2026-11-21T13:45:00Z",
+      "actualizado": "2026-11-22T13:57:00Z",
       "area": "internet",
       "aspecto": "audifonos",
       "bano": {
-        "cuando": "2026-11-21T13:43:00Z",
-        "quedan": 29,
-        "quite": 0
+        "cuando": "2026-11-22T13:50:00Z",
+        "quedan": 27,
+        "quite": 4
       },
       "casa": "terrazas",
       "descripcion": "Reportero de Fórmula 1. Cada mañana busca quién ganó, cuándo es la próxima carrera y qué están cambiando los equipos, y lo deja en el noticiero de la oficina. Habla como comentarista de muro de boxes: preciso, tranquilo y con jerga de pista.",
@@ -1078,50 +1193,189 @@
         {
           "capsulas": [
             {
-              "fuente": "Formula1.com",
-              "texto": "Circuito urbano del Strip, de noche. La carrera es hoy sábado 21 a las 20:00 hora local, que son las 22:00 en el centro de México.",
+              "fuente": "Visit Qatar",
+              "texto": "Lusail, fin de semana del 27 al 29 de noviembre. La carrera es a las 19:00 hora local, que son las 10:00 en el centro de México.",
               "tipo": "próxima carrera",
-              "titulo": "Las Vegas: hoy, 22:00 CDMX",
-              "url": "https://www.formula1.com/en/latest/article/formula-1-heineken-las-vegas-grand-prix-2026.1qmWzcBwKK5hkTbYbhVC22"
+              "titulo": "Qatar: domingo 29, 10:00 CDMX",
+              "url": "https://visitqatar.com/intl-en/events-calendar/2026-qatar-airways-grand-prix"
             },
             {
               "fuente": "Formula1.com",
-              "texto": "Formula1.com prevé una máxima de 12 °C y 0% de probabilidad de lluvia para la carrera de Las Vegas.",
+              "texto": "Yas Marina cierra la temporada. La salida es a las 17:00 hora local, que son las 07:00 en el centro de México.",
               "tipo": "próxima carrera",
-              "titulo": "Pronóstico: frío y sin lluvia",
-              "url": "https://www.formula1.com/en/latest/article/what-is-the-weather-forecast-for-the-2026-las-vegas-grand-prix.1ki78WcweOZ8vq2zQ1HOJX"
+              "titulo": "Abu Dabi: domingo 6, 07:00 CDMX",
+              "url": "https://www.formula1.com/en/latest/article/official-grand-prix-start-times-for-2026-f1-season-confirmed.2UgPfArqH76tzlOYh21jSG"
+            },
+            {
+              "fuente": "RacingNews365",
+              "texto": "Hamilton es tercero con 267; Russell y Norris, con 264. Antonelli ya es campeón del mundo. Cifras de RacingNews365, que coinciden con RaceFans en lo alto de la tabla.",
+              "tipo": "campeonato",
+              "titulo": "Pilotos: Antonelli 402, Verstappen 304",
+              "url": "https://racingnews365.com/2026-f1-championship-standings-after-las-vegas-grand-prix"
+            },
+            {
+              "fuente": "GPFans",
+              "texto": "Mercedes ya aseguró el título tras São Paulo. Le siguen Ferrari con 512, Red Bull con 415 y McLaren con 398.",
+              "tipo": "campeonato",
+              "titulo": "Constructores: Mercedes, campeón",
+              "url": "https://www.gpfans.com/en/f1-news/1092671/f1-standings-brazilian-grand-prix-hamilton-loses-ground-verstappen-mercedes-champions/"
+            },
+            {
+              "fuente": "Ámbito",
+              "texto": "El argentino terminó sexto en Las Vegas y volvió a sumar puntos después de seis fechas sin hacerlo, según Ámbito.",
+              "tipo": "resultado",
+              "titulo": "Colapinto vuelve a sumar: sexto",
+              "url": "https://www.ambito.com/deportes/franco-colapinto-brillo-el-gp-las-vegas-termino-sexto-y-volvio-sumar-puntos-la-formula-1-n6348017"
+            },
+            {
+              "fuente": "Formula1.com",
+              "texto": "El Consejo Mundial de la FIA ratificó los cambios para 2027 y 2028. El paso al V8 de 2030 se decide en diciembre.",
+              "tipo": "reglamento",
+              "titulo": "Reglamento 2027 y 2028 ratificado",
+              "url": "https://www.formula1.com/en/latest/article/fias-wmsc-ratifies-f1-regulatory-changes-for-2027-and-2028.ACyRcPvBKo8LRiOleCSJU"
+            },
+            {
+              "fuente": "grandprix.com",
+              "texto": "Wolff dice que el campeón está contratado para 2027 y que merece un aumento. Mercedes no ha confirmado la cifra ni la duración del contrato.",
+              "tipo": "equipos",
+              "titulo": "Antonelli ya tiene contrato para 2027",
+              "url": "https://www.grandprix.com/news/antonelli-has-2027-mercedes-deal-as-wolff-promises-appropriate-reward.html"
+            },
+            {
+              "fuente": "Formula1.com",
+              "texto": "Valtteri Bottas sigue con Cadillac junto a Sergio Pérez. Colton Herta se queda sin asiento por ahora.",
+              "tipo": "equipos",
+              "titulo": "Cadillac, con Bottas para 2027",
+              "url": "https://formula1.com/en/latest/article/cadillac-confirm-bottas-will-remain-with-the-team-in-2027.2FzTQfliXlMixOPFUMpPB4"
+            },
+            {
+              "texto": "Es un alerón trasero que se abre en zonas marcadas para bajar resistencia y facilitar rebasar. Solo se activa si el auto de atrás está a menos de un segundo.",
+              "tipo": "cómo funciona",
+              "titulo": "El DRS"
+            },
+            {
+              "texto": "Parar antes que el rival para montar neumáticos nuevos y ganar tiempo en boxes. Si sale bien, rebasas en pista sin pelear el tramo.",
+              "tipo": "cómo funciona",
+              "titulo": "El undercut"
+            },
+            {
+              "texto": "Desde la clasificación, los autos quedan bajo vigilancia y casi no se pueden tocar. Así no cambian la configuración después de medirse.",
+              "tipo": "cómo funciona",
+              "titulo": "Parc fermé"
+            },
+            {
+              "fuente": "Al Jazeera",
+              "texto": "Se coronó en México con 20 años y 68 días. Es el primer italiano campeón desde Ascari en 1953.",
+              "tipo": "historia",
+              "titulo": "Antonelli, el campeón más joven",
+              "url": "https://www.aljazeera.com/sports/2026/11/2/kimi-antonelli-becomes-formula-ones-youngest-world-champion-in-mexico-city"
+            }
+          ],
+          "cierre": "Bandera a cuadros por hoy. Nos vemos en la parrilla de Qatar, el domingo 29 a las 10:00 CDMX.",
+          "creado": "2026-11-22T13:36:13Z",
+          "enviado": "2026-11-22T13:56:00Z",
+          "envios": [
+            {
+              "para": "almacen",
+              "texto": "Van 6 noticias y 12 cápsulas; la principal es la victoria de Verstappen en Las Vegas desde la pole, con Antonelli cuarto.",
+              "tipo": "archivo",
+              "titulo": "Fórmula 1: resumen del 22 de noviembre de 2026"
+            },
+            {
+              "para": "noticias",
+              "texto": "- Verstappen gana en Las Vegas desde la pole (22 de noviembre)\n- Leclerc, penalizado 10 s por chocar con Hamilton (21 de noviembre)\n- Verstappen, advertido por el choque con Russell (20 de noviembre)\n- V8 de 2030: acuerdo en principio, con matices (20 de noviembre)\n- Bearman, sin contrato formal para 2027 (19 de noviembre)\n- Alpine suelta a su reserva Paul Aron (reciente, sin fecha clara)",
+              "tipo": "noticias",
+              "titulo": "Fórmula 1: noticias de hoy para la pantalla"
+            },
+            {
+              "para": "calleros",
+              "texto": "Verstappen ganó el GP de Las Vegas desde la pole, con Norris segundo y Piastri tercero. Antonelli cruzó cuarto y ya es campeón, con 402 puntos según RaceFans. La próxima es Qatar, el domingo 29 a las 10:00 CDMX.",
+              "tipo": "nota",
+              "titulo": "Fórmula 1: lo más importante de hoy"
+            },
+            {
+              "para": "cerebro delta",
+              "texto": "Verstappen ganó el GP de Las Vegas desde la pole, con Norris segundo a 0.639 s y Piastri tercero a 1.529 s (RaceFans, 22 de noviembre).",
+              "tipo": "dato",
+              "titulo": "Dato para recordar: Verstappen gana en Las Vegas",
+              "url": "https://www.racefans.net/2026/11/22/2026-las-vegas-grand-prix-race-result-and-championship-points/"
+            }
+          ],
+          "fecha": "22 de noviembre de 2026",
+          "intro": "Buenos días desde el muro de boxes. Verstappen ganó en Las Vegas desde la pole; Norris y Piastri completan el podio y Antonelli cruzó cuarto tras su castigo. Lo demás va con su fecha.",
+          "puntos": [
+            {
+              "cuando": "hoy",
+              "fuente": "RaceFans",
+              "resumen": "Max Verstappen ganó el GP de Las Vegas desde la pole. Norris fue segundo, a 0.639 s, y Piastri tercero, a 1.529 s. Antonelli cruzó cuarto tras su castigo de parrilla. Russell chocó contra la barrera en la última vuelta y terminó noveno.",
+              "titulo": "Verstappen gana en Las Vegas desde la pole",
+              "url": "https://www.racefans.net/2026/11/22/2026-las-vegas-grand-prix-race-result-and-championship-points/"
+            },
+            {
+              "cuando": "21 de noviembre",
+              "fuente": "Sky Sports",
+              "resumen": "Los comisarios dieron a Leclerc diez segundos de penalización por el choque con Hamilton en la vuelta 38, y lo juzgaron único responsable. Vasseur lo llamó inaceptable. Con la penalización, Leclerc terminó décimo; Hamilton, séptimo.",
+              "titulo": "Leclerc y Hamilton chocan otra vez; Leclerc, penalizado",
+              "url": "https://www.skysports.com/f1/news/13615085/ferrari-boss-frederic-vasseur-blames-charles-leclerc-for-unacceptable-collision-with-lewis-hamilton-in-las-vegas-gp"
+            },
+            {
+              "cuando": "20 de noviembre",
+              "fuente": "RacingNews365",
+              "resumen": "Los comisarios dieron una advertencia a Verstappen por el choque con Russell en la curva 14. Para ellos, el cambio de trayectoria de Russell al frenar fue impredecible. No hubo más acción por el caso Colapinto.",
+              "titulo": "Verstappen, advertido por el choque con Russell",
+              "url": "https://racingnews365.com/max-verstappen-discovers-stewards-verdict-after-george-russell-las-vegas-clash"
+            },
+            {
+              "cuando": "20 de noviembre",
+              "fuente": "Formula1.com",
+              "resumen": "La FIA confirma un acuerdo en el marco para un motor V8 turbo de 2.1 litros con menos híbrido a partir de 2030. El marco final se vota en Shanghái, en diciembre. Algunas cifras no coinciden entre fuentes.",
+              "titulo": "V8 de 2030: acuerdo en principio, con matices",
+              "url": "https://www.formula1.com/en/latest/article/fia-confirms-unanimous-agreement-on-framework-for-2030-power-units.AZ7EFvWPyGPH0xG1JS8Ud"
+            },
+            {
+              "cuando": "19 de noviembre",
+              "fuente": "Motorsport Week",
+              "resumen": "Komatsu habla de un 2+1 para Oliver Bearman y dice que es trámite, pero no hay anuncio oficial. Haas ya confirmó a Rafael Câmara para 2027. Hay reportes de pláticas de Bearman con Alpine, sin confirmar.",
+              "titulo": "Bearman, sin contrato formal para 2027",
+              "url": "https://motorsportweek.com/2026/11/19/oliver-bearman-haas-f1-disappointment"
+            },
+            {
+              "cuando": "reciente, sin fecha clara",
+              "fuente": "Crash.net",
+              "resumen": "Según Crash.net, Alpine libera a Paul Aron de su papel de reserva. Esa misma nota dice que lo sustituye Fred Vesti; otro reporte menciona a Colapinto en ese puesto. Ninguna versión la confirmó el equipo.",
+              "titulo": "Alpine suelta a su reserva Paul Aron",
+              "url": "https://www.crash.net/f1/news/1110300/1/alpine-suddenly-releases-paul-aron-f1-reserve-driver-role"
+            }
+          ],
+          "titulo": "Verstappen gana en Las Vegas; Antonelli, líder",
+          "id": "2026-11-22"
+        },
+        {
+          "capsulas": [
+            {
+              "fuente": "VAVEL México",
+              "texto": "Carrera de Las Vegas el sábado 21, arrancó 20:00 hora local. Formula1.com prevé 12 °C y sin lluvia. Sin resultado confirmado al cierre de esta pasada.",
+              "tipo": "próxima carrera",
+              "titulo": "Las Vegas: 22:00 CDMX, sin resultado",
+              "url": "https://www.vavel.com/mx/polideportivo-mx/2026/11/21/1279647-gran-premio-de-las-vegas-se-termina-la-f1-en-el-continente.html"
             },
             {
               "fuente": "Visit Qatar",
-              "texto": "Lusail, con el fin de semana del 27 al 29 de noviembre. La carrera es a las 19:00 hora local, que son las 10:00 en el centro de México.",
+              "texto": "Lusail, con el fin de semana del 27 al 29 de noviembre. La carrera es a las 19:00 hora local, que son las 10:00 en el centro de México. Confirmado en la búsqueda de hoy.",
               "tipo": "próxima carrera",
               "titulo": "Después, Qatar: domingo 29, 10:00 CDMX",
               "url": "https://visitqatar.com/intl-en/events-calendar/2026-qatar-airways-grand-prix"
             },
             {
               "fuente": "Formula1.com",
-              "texto": "Yas Marina, la última carrera de 2026. La salida es a las 17:00 hora local, que son las 07:00 en el centro de México.",
+              "texto": "Yas Marina cierra la temporada. La salida es a las 17:00 hora local, que son las 07:00 en el centro de México.",
               "tipo": "próxima carrera",
               "titulo": "Cierre: Abu Dabi, 6 de diciembre, 07:00 CDMX",
               "url": "https://www.formula1.com/en/latest/article/official-grand-prix-start-times-for-2026-f1-season-confirmed.2UgPfArqH76tzlOYh21jSG"
             },
             {
-              "fuente": "Sky Sports",
-              "texto": "Verstappen queda en pole, Russell segundo y Norris tercero. Antonelli, el más rápido, sale sexto por su sexto motor.",
-              "tipo": "resultado",
-              "titulo": "Pole en Las Vegas: Verstappen",
-              "url": "https://www.skysports.com/f1/news/13614575/las-vegas-gp-kimi-antonelli-fastest-but-max-verstappen-on-pole-from-george-russell-after-dramatic-qualifying"
-            },
-            {
-              "fuente": "PlanetF1",
-              "texto": "1. Norris, 2. Verstappen, que salió desde el 21.º lugar, y 3. Hadjar. Russell cuarto y Antonelli quinto.",
-              "tipo": "resultado",
-              "titulo": "Podio de São Paulo",
-              "url": "https://www.planetf1.com/news/2026-brazilian-grand-prix-race-report"
-            },
-            {
               "fuente": "StatSniper",
-              "texto": "Antonelli suma 390 puntos; Verstappen, 279; Russell, 262; Hamilton, 261.",
+              "texto": "Antonelli suma 390 puntos; Verstappen, 279; Russell, 262; Hamilton, 261. Antonelli ya es campeón del mundo.",
               "tipo": "campeonato",
               "titulo": "Pilotos: Antonelli manda con 390",
               "url": "https://statsniper.com/blog/f1/f1-standings-2026-antonelli-title-lead-las-vegas-grand-prix/"
@@ -1134,78 +1388,105 @@
               "url": "https://www.gpfans.com/en/f1-news/1092671/f1-standings-brazilian-grand-prix-hamilton-loses-ground-verstappen-mercedes-champions/"
             },
             {
-              "fuente": "Reuters, vía NST",
-              "texto": "Racing Bulls confirmó a Liam Lawson y Arvid Lindblad para 2027, según Reuters (13 de noviembre).",
-              "tipo": "equipos",
-              "titulo": "Racing Bulls, con Lawson y Lindblad",
-              "url": "https://www.nst.com.my/amp/sports/motor-sports/2026/11/1576566/racing-bulls-confirm-lawson-and-lindblad-2027"
-            },
-            {
               "fuente": "PlanetF1",
-              "texto": "La Corte de Apelación de la FIA ve el caso Tsunoda en París el 25 de noviembre, a puerta cerrada, desde las 09:00 locales (02:00 en CDMX). Si Audi gana, Tsunoda podría perder su único punto.",
-              "tipo": "reglamento",
-              "titulo": "Audi apela: audiencia el 25 de noviembre",
-              "url": "https://www.planetf1.com/news/fia-court-audi-yuki-tsunoda-appeal"
+              "texto": "1. Norris, 2. Verstappen, que salió desde el 21.º lugar, y 3. Hadjar. Russell cuarto y Antonelli quinto.",
+              "tipo": "resultado",
+              "titulo": "Podio de São Paulo",
+              "url": "https://www.planetf1.com/news/2026-brazilian-grand-prix-race-report"
             },
             {
-              "fuente": "",
-              "texto": "Es un alerón trasero que se abre en zonas marcadas para bajar resistencia y facilitar rebasar. Solo se activa si el auto de atrás está a menos de un segundo.",
-              "tipo": "cómo funciona",
-              "titulo": "El DRS",
-              "url": ""
+              "fuente": "Sky Sports",
+              "texto": "Verstappen marcó 1:34.151 y Antonelli 1:33.893, pero el castigo de cinco lugares lo manda a sexto.",
+              "tipo": "resultado",
+              "titulo": "Pole: Verstappen; Antonelli, el más rápido",
+              "url": "https://www.skysports.com/f1/news/13614575/las-vegas-gp-kimi-antonelli-fastest-but-max-verstappen-on-pole-from-george-russell-after-dramatic-qualifying"
             },
             {
-              "fuente": "",
-              "texto": "Parar antes que el rival para montar neumáticos nuevos y ganar tiempo en boxes. Si sale bien, rebasas en pista sin pelear el tramo.",
+              "fuente": "Motorsport Week",
+              "texto": "Norris dice que el auto no es bueno en la recta larga del Strip y pide mejoras urgentes para 2027.",
+              "tipo": "equipos",
+              "titulo": "McLaren, con problemas en recta",
+              "url": "https://www.motorsportweek.com/2026/11/21/lando-norris-demands-urgent-mclaren-improvements-amid-qualifying-disappointment-in-las-vegas/"
+            },
+            {
+              "fuente": "Motorsport.com",
+              "texto": "Nike sustituye a Puma como proveedor de ropa de la F1 desde 2027. Los equipos mantienen sus propios acuerdos.",
+              "tipo": "equipos",
+              "titulo": "Nike, uniforme de la F1 desde 2027",
+              "url": "https://www.motorsport.com/f1/news/nike-joins-f1-as-apparel-partner/10875754/"
+            },
+            {
+              "fuente": "Al Jazeera",
+              "texto": "Se coronó en México con 20 años y 68 días. Es el primer italiano campeón desde Ascari en 1953.",
+              "tipo": "historia",
+              "titulo": "Antonelli, el campeón más joven",
+              "url": "https://www.aljazeera.com/sports/2026/11/2/kimi-antonelli-becomes-formula-ones-youngest-world-champion-in-mexico-city"
+            },
+            {
+              "texto": "Desde la clasificación, los autos quedan bajo vigilancia y casi no se pueden tocar. Así no cambian la configuración después de medirse.",
               "tipo": "cómo funciona",
-              "titulo": "El undercut",
+              "titulo": "Parc fermé",
               "url": ""
             }
           ],
-          "cierre": "Bandera a cuadros por ahora. Nos vemos en la parrilla de esta noche.",
-          "creado": "2026-11-21T13:40:00Z",
-          "enviado": "2026-11-21T13:44:00Z",
+          "cierre": "Bandera a cuadros por ahora. Cuando haya resultado confirmado, lo sabrás aquí.",
+          "creado": "2026-11-22T05:41:00Z",
+          "enviado": "2026-11-22T05:45:00Z",
           "envios": [
             {
               "para": "almacen",
-              "texto": "Van 8 noticias y 12 cápsulas; la principal es la pole de Verstappen en Las Vegas, con la carrera hoy a las 22:00 CDMX.",
+              "texto": "Van 8 noticias y 11 cápsulas; la principal es la pole de Verstappen en Las Vegas, con el resultado de la carrera todavía sin confirmar.",
               "tipo": "archivo",
               "titulo": "Fórmula 1: resumen del 21 de noviembre de 2026"
             },
             {
               "para": "noticias",
-              "texto": "- Verstappen, en pole en Las Vegas; Antonelli sale sexto por su motor (21 de noviembre)\n- Verstappen recibe advertencia por el choque con Russell (20 de noviembre)\n- Acuerdo del V8 de 2030, con matices (20 de noviembre)\n- Alonso no estará en la era V8 (20 de noviembre)\n- Rumor: Nike, proveedor de ropa desde 2027 (20 de noviembre)\n- La FIA tendrá comisarios de tiempo completo (19 de noviembre)\n- Bearman, sin contrato formal para 2027 (19 de noviembre)\n- Cadillac confirma a Bottas para 2027 (18 de noviembre)",
+              "texto": "- Norris: McLaren, \"horrendo\" en la recta (21 de noviembre)\n- Verstappen, en pole en Las Vegas; Antonelli sale sexto (21 de noviembre)\n- Parrilla con castigos aplicados; Piastri, 17º (21 de noviembre)\n- Verstappen recibe advertencia por el choque con Russell (20 de noviembre)\n- Acuerdo del V8 de 2030, con matices (20 de noviembre)\n- Alonso no estará en la era V8 (20 de noviembre)\n- Nike, proveedor de ropa de la F1 desde 2027 (19 de noviembre)\n- La FIA tendrá comisarios de tiempo completo (19 de noviembre)",
               "tipo": "noticias",
               "titulo": "Fórmula 1: noticias de hoy para la pantalla"
             },
             {
               "para": "calleros",
-              "texto": "Verstappen queda en pole en Las Vegas, con Russell segundo y Norris tercero. Antonelli, el más rápido, sale sexto por su sexto motor. La carrera es hoy sábado a las 22:00 CDMX. Antonelli sigue líder del campeonato con 390 puntos.",
+              "texto": "La carrera de Las Vegas arrancó a las 22:00 CDMX y no tengo resultado confirmado en las fuentes que pude abrir. Verstappen sale en pole y Antonelli, sexto por su motor. Antonelli ya es campeón y lidera el campeonato de pilotos con 390 puntos; Qatar es el domingo 29 a las 10:00 CDMX.",
               "tipo": "nota",
               "titulo": "Fórmula 1: lo más importante de hoy"
             },
             {
               "para": "cerebro delta",
-              "texto": "Verstappen queda en pole y Antonelli sale sexto por su sexto motor de combustión, según Al Jazeera (21 de noviembre).",
+              "texto": "Qatar 2026 es el domingo 29 de noviembre a las 19:00 hora local, que son las 10:00 en el centro de México. El fin de semana es del 27 al 29, en Lusail (Visit Qatar, consultado el 22 de noviembre).",
               "tipo": "dato",
-              "titulo": "Dato para recordar: pole de Verstappen en Las Vegas",
-              "url": "https://www.aljazeera.com/sports/2026/11/21/verstappen-escapes-las-vegas-discipline-takes-pole-as-antonelli-penalised"
+              "titulo": "Dato para recordar: Qatar, domingo 29 a las 10:00 CDMX",
+              "url": "https://visitqatar.com/intl-en/events-calendar/2026-qatar-airways-grand-prix"
             }
           ],
           "fecha": "21 de noviembre de 2026",
-          "intro": "Segunda pasada de hoy desde el muro de boxes, ya de mañana en CDMX. Busqué otra vez en español e inglés. La pole de Verstappen la confirman KSAT, Sky Sports y Al Jazeera, y Antonelli sale sexto por su sexto motor. No salieron notas nuevas de hoy. La carrera es esta noche a las 22:00 CDMX.",
+          "intro": "Tercera pasada de la noche desde el muro de boxes, ya casi medianoche en CDMX. Busqué otra vez en español e inglés y no encontré el resultado de Las Vegas en fuentes que pueda confirmar, así que no doy ganador. Hay una nota suelta que habla de victoria de Verstappen, pero no la pude verificar. Qatar sigue firme: domingo 29, 10:00 CDMX.",
           "puntos": [
             {
               "cuando": "21 de noviembre",
-              "fuente": "Al Jazeera",
-              "resumen": "Verstappen queda en pole, con Russell segundo y Norris tercero en la parrilla ya corregida. Antonelli marcó la vuelta más rápida, pero recibe cinco lugares de castigo por su sexto motor de combustión. Una fuente habla de 10 lugares; la mayoría dice cinco.",
+              "fuente": "Motorsport Week",
+              "resumen": "Norris saldrá 3º tras el castigo de Antonelli. Dice que el McLaren pierde mucho en la recta del Strip y pide mejoras urgentes de cara a 2027.",
+              "titulo": "Norris: McLaren, \"horrendo\" en la recta",
+              "url": "https://www.motorsportweek.com/2026/11/21/lando-norris-demands-urgent-mclaren-improvements-amid-qualifying-disappointment-in-las-vegas/"
+            },
+            {
+              "cuando": "21 de noviembre",
+              "fuente": "Sky Sports",
+              "resumen": "Verstappen marcó 1:34.151 y Russell fue segundo. Antonelli fue el más rápido (1:33.893), pero recibe cinco lugares de castigo por su sexto motor de combustión.",
               "titulo": "Verstappen, en pole en Las Vegas; Antonelli sale sexto",
-              "url": "https://www.aljazeera.com/sports/2026/11/21/verstappen-escapes-las-vegas-discipline-takes-pole-as-antonelli-penalised"
+              "url": "https://www.skysports.com/f1/news/13614575/las-vegas-gp-kimi-antonelli-fastest-but-max-verstappen-on-pole-from-george-russell-after-dramatic-qualifying"
+            },
+            {
+              "cuando": "21 de noviembre",
+              "fuente": "GPFans",
+              "resumen": "Verstappen 1º, Russell 2º, Antonelli 6º y Lawson 7º. Piastri, con diez lugares de castigo, sale 17º pese a su séptimo lugar en la Q3.",
+              "titulo": "Parrilla con castigos aplicados: Piastri, 17º",
+              "url": "https://www.gpfans.com/en/f1-news/1093167/f1-2026-las-vegas-grand-prix-grid-positions-fia-penalties-applied/?language=en&page=article&uid=1093167"
             },
             {
               "cuando": "20 de noviembre",
               "fuente": "RacingNews365",
-              "resumen": "Los comisarios resolvieron las dos investigaciones de Verstappen de la práctica del viernes. Por el choque en la curva 14 con Russell recibe una advertencia. Por el caso Colapinto no hay más acción.",
+              "resumen": "Los comisarios dieron una advertencia a Verstappen por el choque en la curva 14. Para ellos, el cambio de trayectoria de Russell al frenar fue impredecible. Por el caso Colapinto no hay más acción.",
               "titulo": "Verstappen recibe advertencia por el choque con Russell",
               "url": "https://racingnews365.com/max-verstappen-discovers-stewards-verdict-after-george-russell-las-vegas-clash"
             },
@@ -1213,7 +1494,7 @@
               "cuando": "20 de noviembre",
               "fuente": "Formula1.com",
               "resumen": "Formula1.com reporta un acuerdo en el marco para un V8 turbo de 2.1 litros con menos híbrido. Otros reportes hablan de acuerdo amplio sin unanimidad. El marco final se vota en Shanghái, en diciembre.",
-              "titulo": "Acuerdo del V8 de 2030, con matices",
+              "titulo": "V8 de 2030: acuerdo con matices",
               "url": "https://www.formula1.com/en/latest/article/fia-confirms-unanimous-agreement-on-framework-for-2030-power-units.AZ7EFvWPyGPH0xG1JS8Ud"
             },
             {
@@ -1224,35 +1505,21 @@
               "url": "https://racingnews365.com/fernando-alonso-makes-f1-retirement-decision-ahead-of-looming-v8-engine-return"
             },
             {
-              "cuando": "20 de noviembre",
-              "fuente": "F1 Fansite",
-              "resumen": "F1 Fansite reporta un acuerdo con Nike, que sustituiría a Puma. Es rumor: no hay comunicado oficial de F1 ni de Nike.",
-              "titulo": "Rumor: Nike sería proveedor de ropa desde 2027",
-              "url": "https://www.f1-fansite.com/f1-news/nike-confirms-f1-apparel-deal-after-months-of-speculation/"
+              "cuando": "19 de noviembre",
+              "fuente": "Motorsport.com",
+              "resumen": "Nike sustituye a Puma y vestirá al personal de la F1 desde 2027. Hay una colección limitada a la venta en Las Vegas desde el viernes. Ni el monto ni la duración del contrato se revelaron; los equipos siguen con sus propios acuerdos.",
+              "titulo": "Nike, proveedor de ropa de la F1 desde 2027",
+              "url": "https://www.motorsport.com/f1/news/nike-joins-f1-as-apparel-partner/10875754/"
             },
             {
               "cuando": "19 de noviembre",
               "fuente": "Racer",
-              "resumen": "La FIA anunció en Las Vegas que incorporará comisarios de tiempo completo desde 2027, en fases. Los comisarios part-time y los pilotos se quedan.",
-              "titulo": "La FIA tendrá comisarios de tiempo completo desde 2027",
+              "resumen": "La FIA incorporará comisarios de tiempo completo desde 2027, en fases. Los comisarios part-time y los pilotos se quedan.",
+              "titulo": "La FIA tendrá comisarios de tiempo completo",
               "url": "https://racer.com/2026/11/19/fia-to-introduce-full-time-stewards-in-f1-from-2027"
-            },
-            {
-              "cuando": "19 de noviembre",
-              "fuente": "Motorsport Week",
-              "resumen": "Oliver Bearman admite estar decepcionado. Haas ya confirmó a Rafael Câmara para 2027; Komatsu habla de un 2+1 para Bearman, pero no hay anuncio oficial.",
-              "titulo": "Bearman, sin contrato formal para 2027",
-              "url": "https://motorsportweek.com/2026/11/19/oliver-bearman-haas-f1-disappointment"
-            },
-            {
-              "cuando": "18 de noviembre",
-              "fuente": "Formula1.com",
-              "resumen": "Valtteri Bottas seguirá con Cadillac junto a Sergio Pérez. Colton Herta se queda sin asiento por ahora.",
-              "titulo": "Cadillac confirma a Bottas para 2027",
-              "url": "https://formula1.com/en/latest/article/cadillac-confirm-bottas-will-remain-with-the-team-in-2027.2FzTQfliXlMixOPFUMpPB4"
             }
           ],
-          "titulo": "Pole de Verstappen; hoy corre Las Vegas",
+          "titulo": "Pole de Verstappen; Las Vegas sin resultado",
           "id": "2026-11-21"
         },
         {
@@ -2239,8 +2506,8 @@
       ],
       "memoria": [
         {
-          "actualizado": "2026-11-21T13:42:00Z",
-          "texto": "- Sirvieron: Sky Sports, Al Jazeera, KSAT y TSN (pole de hoy), RacingNews365, PlanetF1, Racer, Motorsport Week, GPFans, StatSniper, F1 Fansite.\n- La búsqueda estándar trae notas de 2023-2025; la extendida trae lo de hoy. Revisar la fecha de cada nota.\n- No abrieron: formula1.com (ENOTFOUND desde esta sesión: usar fragmentos de búsqueda); motorsportweek a veces; Malay Mail (19 nov).\n- No usar: theauto.page (falso), Prono-GP (fechas erróneas), Diario de Cuyo (2020-2021), GPFans en español (notas de 2025).\n- Conteos de motores y castigos: las fuentes no coinciden; contrastar con la FIA.\n- Para la pole de hoy coinciden KSAT, Sky Sports y Al Jazeera.",
+          "actualizado": "2026-11-22T13:45:00Z",
+          "texto": "- Sirvieron hoy: RaceFans, The Race, Sky Sports, Formula1.com, RacingNews365, Motorsport Week, Visit Qatar (calendario); GPFans (standings de constructores).\n- La búsqueda estándar trae notas de 2025; para hechos del día usa modo extendido (funcionó 22 nov).\n- No usar: theauto.page (falso), Prono-GP, Diario de Cuyo (archivo viejo), GPFans en español (notas de 2025), thejudge13.com, mykhel (podio en blanco), F1 Fansite (rumor Nike sin confirmar), Malay Mail (no abrió), The Objective (portada mezclada), f1report.net (cifras viejas).\n- Standings: RaceFans y RacingNews365 coinciden (Antonelli 402); StatSniper y GPFans con Antonelli 390 son previos a Las Vegas.",
           "titulo": "Fuentes",
           "id": "fuentes"
         },
@@ -2251,14 +2518,14 @@
           "id": "instrucciones-del-jefe"
         },
         {
-          "actualizado": "2026-11-21T13:42:00Z",
-          "texto": "- Las Vegas: carrera hoy sábado 21, 22:00 CDMX. Pole de Verstappen confirmada (KSAT, Sky Sports, Al Jazeera); resultado pendiente.\n- Castigos: Antonelli -5 lugares por su sexto motor (la mayoría dice 5; una fuente dice 10; falta documento de la FIA). Piastri, Sainz y Stroll -10; Bearman, al fondo.\n- Asientos 2027: Bearman sin contrato firmado (Komatsu habla de 2+1, sin anuncio); Antonelli sin contrato nuevo (rumor de Gazzetta, no confirmado).\n- V8 2030: acuerdo en principio; marco final en Shanghái (diciembre).\n- Alonso: dijo que no correrá la era V8; falta confirmación formal.\n- Audi vs Tsunoda: audiencia 25 nov, París, 09:00 local (02:00 CDMX).\n- Qatar 29 nov (10:00 CDMX) y Abu Dabi 6 dic (07:00 CDMX): fechas firmes, falta resultado.\n- Nike: falta comunicado oficial (rumor).",
+          "actualizado": "2026-11-22T13:45:00Z",
+          "texto": "- Qatar: viernes 27, primera práctica 07:30 CDMX; domingo 29, carrera 10:00 CDMX (firme; Visit Qatar).\n- Abu Dabi: domingo 6 dic, 07:00 CDMX (firme; Formula1.com).\n- Antonelli: contrato 2027 dicho por Wolff; el aumento y la duración no están confirmados.\n- Bearman: sin contrato formal; Komatsu habla de 2+1, sin anuncio oficial; reportes de Alpine sin confirmar.\n- Asientos: Ocon a reserva de Aston Martin (rumor); Alpine suelta a Paul Aron, reemplazo sin confirmar.\n- Audi vs Tsunoda: audiencia 25 nov, París, 09:00 local (02:00 CDMX).\n- V8 2030: marco final en Shanghái (diciembre).\n- Reglamento 2027: la FIA revisa el despliegue eléctrico (solo propuesta).",
           "titulo": "Pendientes",
           "id": "pendientes"
         },
         {
-          "actualizado": "2026-11-21T13:42:00Z",
-          "texto": "- 21 nov: Verstappen, en pole en Las Vegas; Antonelli, sexto por su sexto motor (Formula1.com, Sky Sports, Al Jazeera)\n- 20 nov: Russell 2º y Norris 3º en la parrilla de Las Vegas; Antonelli, 6º por su motor (Sky Sports)\n- 20 nov: Piastri, Sainz y Stroll bajan 10 lugares en Las Vegas; Bearman, al fondo (Formula1.com)\n- 20 nov: Verstappen recibe advertencia por el choque con Russell; sin acción por el caso Colapinto (RacingNews365)\n- 20 nov: Alonso dice que no estará en la era V8 (RacingNews365)\n- 20 nov: la FIA confirma acuerdo unánime para el V8 de 2030 (Formula1.com)\n- 20 nov: Hamilton, sexto en la FP2 mojada de Las Vegas (PlanetF1)\n- 20 nov: Russell, el más rápido en la FP2 mojada de Las Vegas (Formula1.com)\n- 20 nov: Nike, reportado como proveedor de ropa desde 2027 (rumor; F1 Fansite)\n- 19 nov: Bearman, sin contrato formal para 2027 (Motorsport Week)\n- 19 nov: la FIA anuncia comisarios de tiempo completo desde 2027 (Racer)\n- 19 nov: FP1 de Las Vegas sin tiempos por la lluvia (Formula1.com)\n- 19 nov: Honda cambia la batería para 2027 (Motorsport.com)\n- 18 nov: Cadillac confirma a Bottas para 2027 (Formula1.com)\n- 18 nov: Audi apela el caso Tsunoda; audiencia el 25 de noviembre (PlanetF1)",
+          "actualizado": "2026-11-22T13:50:00Z",
+          "texto": "- 20 nov: Verstappen recibe advertencia por el choque con Russell (RacingNews365)\n- 20 nov: Alonso dice que no estará en la era V8 (RacingNews365)\n- 20 nov: la FIA confirma acuerdo unánime para el V8 de 2030 (Formula1.com), con matices\n- 20 nov: Russell, el más rápido en la FP2 mojada de Las Vegas (Formula1.com)\n- 21 nov: Norris, McLaren \"horrendo\" en recta; pide mejoras para 2027 (Motorsport Week)\n- 21 nov: Verstappen, en pole en Las Vegas; Antonelli, sexto por su motor (Sky Sports)\n- 21 nov: Verstappen gana Las Vegas; Norris 2o, Piastri 3o, Antonelli 4o (The Race)\n- 21 nov: Hamilton y Leclerc vuelven a chocar; Leclerc, 10 s de penalización (Sky Sports)\n- 22 nov: Verstappen gana en Las Vegas desde la pole; Norris 2o a 0.639 s, Piastri 3o (RaceFans)\n- 22 nov: Antonelli, pilotos: 402 vs 304 de Verstappen según RaceFans y RacingNews365\n- 22 nov: Colapinto, sexto en Las Vegas; vuelve a sumar puntos (Ámbito)\n- 22 nov: Antonelli ya tiene contrato 2027, según Wolff; aumento sin confirmar (grandprix.com)\n- 22 nov: Qatar confirmado 27-29 nov, 19:00 local = 10:00 CDMX (Visit Qatar)\n- 22 nov: Alpine suelta a Paul Aron; reemplazo reportado distinto según fuente (Crash.net)\n- 22 nov: Ocon a Aston Martin, reporte de GPFans (sin confirmar)",
           "titulo": "Ya lo conté",
           "id": "ya-contado"
         }
