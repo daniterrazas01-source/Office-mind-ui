@@ -157,7 +157,7 @@ test('en pantalla las secciones salen por turnos y cada una lleva su cuenta', ()
 
 // ---------- Las alas ----------
 test('el periférico llega a los cuartos de las dos alas y a los de abajo', () => {
-  for (const c of ['oeste 1', 'oeste 4', 'taller 2', 'ala oeste', 'este 2', 'este 6', 'ala este', 'espacio d', 'espacio e', 'taller', 'espacio h']){
+  for (const c of ['oeste 1', 'oeste 4', 'taller 2', 'ala oeste', 'este 2', 'este 6', 'ala este', 'este 7', 'este 12', 'ala este 2', 'espacio d', 'espacio e', 'taller', 'espacio h']){
     const r = rutaTunel('internet', c);
     assert.ok(r && r.length > 2, c);
     for (let i = 1; i < r.length; i++) assert.ok(r[i].x === r[i - 1].x || r[i].y === r[i - 1].y, `${c}: tramo ${i} recto`);
@@ -174,4 +174,6 @@ test('estacionDe entiende los cuartos nuevos', () => {
   assert.equal(estacionDe('el taller'), 'taller');
   assert.equal(estacionDe('Espacio libre D'), 'espacio d');
   assert.equal(estacionDe('Oeste 9'), null);
+  assert.equal(estacionDe('Este 10'), 'este 10');
+  assert.equal(estacionDe('Ala Este 2'), 'ala este 2');
 });

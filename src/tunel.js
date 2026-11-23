@@ -45,6 +45,14 @@ export const ESTACIONES = {
   'este 5':            { tx: 39, ty: 99, lado: 'der',   nombre: 'Este 5',            pie: { tx: 38, ty: 99 } },
   'este 6':            { tx: 46, ty: 99, lado: 'izq',   nombre: 'Este 6',            pie: { tx: 47, ty: 99 } },
   'ala este':          { tx: 41, ty: 102, lado: 'abajo', nombre: 'Ala Este',         pie: { tx: 44, ty: 103 }, boca: { tx: 42, ty: 102 } },
+  // El Ala Este es el doble de larga: un segundo tramo de cuartos con su propio pasillo
+  'este 7':            { tx: 62, ty: 72, lado: 'der',   nombre: 'Este 7',            pie: { tx: 61, ty: 72 } },
+  'este 8':            { tx: 69, ty: 72, lado: 'izq',   nombre: 'Este 8',            pie: { tx: 70, ty: 72 } },
+  'este 9':            { tx: 62, ty: 84, lado: 'der',   nombre: 'Este 9',            pie: { tx: 61, ty: 84 } },
+  'este 10':           { tx: 69, ty: 84, lado: 'izq',   nombre: 'Este 10',           pie: { tx: 70, ty: 84 } },
+  'este 11':           { tx: 62, ty: 99, lado: 'der',   nombre: 'Este 11',           pie: { tx: 61, ty: 99 } },
+  'este 12':           { tx: 69, ty: 99, lado: 'izq',   nombre: 'Este 12',           pie: { tx: 70, ty: 99 } },
+  'ala este 2':        { tx: 64, ty: 102, lado: 'abajo', nombre: 'Ala Este 2',       pie: { tx: 67, ty: 103 }, boca: { tx: 65, ty: 102 } },
 };
 
 const centro = (e) => (e.boca ? { x: e.boca.tx * T + 16, y: e.boca.ty * T + 16 } : { x: e.tx * T + 8, y: e.ty * T + 8 });
@@ -68,7 +76,7 @@ export const NODOS = {
   pt: { x: 17 * T + 8, y: 93 * T },        // pasillo 5: ramal al Taller
   ph: { x: 24 * T + 8, y: 93 * T },        // pasillo 5: ramal al cuarto libre de abajo a la derecha
 };
-for (const [lado, x] of [['o', -11 * T], ['e', 43 * T]]){   // el pasillo de en medio de cada ala
+for (const [lado, x] of [['o', -11 * T], ['e', 43 * T], ['f', 66 * T]]){   // el pasillo de en medio de cada ala
   NODOS[lado + '4'] = { x, y: 66 * T };     // donde llega el ramal del pasillo 4
   NODOS[lado + '1'] = { x, y: fila(72) };   // ramales a los cuartos de arriba
   NODOS[lado + '2'] = { x, y: fila(84) };   // a los de en medio
@@ -85,12 +93,14 @@ const TRONCALES = [
   ['o4', 'o1'], ['o1', 'o2'], ['o2', 'o5'], ['o5', 'o3'], ['o3', 'ala oeste'],
   ['e4', 'e1'], ['e1', 'e2'], ['e2', 'e5'], ['e5', 'e3'], ['e3', 'ala este'],
   ['o5', 'pt'], ['pt', 'ph'], ['ph', 'e5'],                                                // por el pasillo 5
+  ['e4', 'f4'], ['e5', 'f5'], ['f4', 'f1'], ['f1', 'f2'], ['f2', 'f5'], ['f5', 'f3'], ['f3', 'ala este 2'],   // segundo tramo del Ala Este
 ];
 export const RAMALES = [
   ['cruce', 'calleros'], ['cruce', 'cerebro delta'], ['tm', 'terrazas'], ['tm', 'centro de pensado'], ['tn', 'noticias'],
   ['pd', 'espacio d'], ['ce', 'espacio e'], ['pf', 'espacio f'], ['pt', 'taller'], ['ph', 'espacio h'],
   ['o1', 'oeste 1'], ['o1', 'oeste 2'], ['o2', 'oeste 3'], ['o2', 'oeste 4'], ['o3', 'oeste 5'], ['o3', 'taller 2'],
   ['e1', 'este 1'], ['e1', 'este 2'], ['e2', 'este 3'], ['e2', 'este 4'], ['e3', 'este 5'], ['e3', 'este 6'],
+  ['f1', 'este 7'], ['f1', 'este 8'], ['f2', 'este 9'], ['f2', 'este 10'], ['f3', 'este 11'], ['f3', 'este 12'],
 ];
 export const TRAMOS = TRONCALES.concat(RAMALES);
 // Los ramales delgados (un canal angosto en el piso) y los tramos anchos de la línea principal, del mismo grueso
@@ -99,9 +109,9 @@ export const TRAMOS = TRONCALES.concat(RAMALES);
 export const ANCHOS = [
   [23, 9, 24, 14, 'v', 1], [12, 13, 24, 14, 'h', -1], [12, 13, 13, 28, 'v', 1], [12, 27, 15, 28, 'h', 1],
   [14, 27, 15, 44, 'v', 1], [14, 43, 16, 44, 'h', 1], [15, 65, 16, 80, 'v', 1],
-  [-12, 65, 14, 66, 'h', -1], [17, 65, 43, 66, 'h', 1],                                    // pasillo 4, hacia las alas
-  [-12, 65, -11, 101, 'v', 1], [42, 65, 43, 101, 'v', 1],                                   // el pasillo de en medio de cada ala
-  [-12, 92, 43, 93, 'h', 1],                                                                // pasillo 5, de ala a ala
+  [-12, 65, 14, 66, 'h', -1], [17, 65, 66, 66, 'h', 1],                                    // pasillo 4, hacia las alas
+  [-12, 65, -11, 101, 'v', 1], [42, 65, 43, 101, 'v', 1], [65, 65, 66, 101, 'v', 1],        // el pasillo de en medio de cada tramo de ala
+  [-12, 92, 66, 93, 'h', 1],                                                                // pasillo 5, de punta a punta
 ];
 
 // Recorre todo `columnas` casillas a la derecha (la oficina lo hace una vez: su mapa empieza en el ala oeste).
@@ -154,9 +164,10 @@ const plano = (t) => String(t ?? '').normalize('NFD').replace(/[̀-ͯ]/g, '').to
 export function estacionDe(texto){
   const s = plano(texto);
   if (!s) return null;
-  const ala = /\b(oeste|este)\s*(\d)\b/.exec(s);
+  const term = /\bala (oeste|este)( 2)?\b/.exec(s);
+  if (term) return 'ala ' + term[1] + (term[2] && term[1] === 'este' ? ' 2' : '');
+  const ala = /\b(oeste|este)\s*(\d{1,2})\b/.exec(s);
   if (ala && ESTACIONES[ala[1] + ' ' + ala[2]]) return ala[1] + ' ' + ala[2];
-  if (/\bala (oeste|este)\b/.test(s)) return 'ala ' + /\bala (oeste|este)\b/.exec(s)[1];
   if (/taller\s*2/.test(s)) return 'taller 2';
   if (/\btaller\b/.test(s)) return 'taller';
   const libre = /espacio(?: libre)? ([a-z])\b/.exec(s);

@@ -115,6 +115,11 @@ body.sinTexto .vineta{display:none!important}
 .pisos a{background:var(--naranja);color:#1a120e;font-weight:700;padding:5px 10px;font-size:12px;text-decoration:none;box-shadow:0 2px 0 #120e17;white-space:nowrap}
 #bajar{position:fixed;left:50%;bottom:14px;transform:translateX(-50%);z-index:6;font-size:13px;padding:8px 14px;background:var(--naranja);color:#1a120e;font-weight:700}
 #bajar.oculto{display:none}
+.lado{position:fixed;top:55%;z-index:6;transform:translateY(-50%);background:rgba(58,47,72,.92);color:var(--texto);border:0;font:inherit;font-size:13px;
+  padding:12px 10px;cursor:pointer;box-shadow:0 2px 0 #120e17;opacity:0;pointer-events:none;transition:opacity .25s}
+.lado:hover{background:#4a3d5c}
+#ladoIzq{left:6px;border-radius:0 8px 8px 0}#ladoDer{right:6px;border-radius:8px 0 0 8px}
+.lado.ver{opacity:1;pointer-events:auto}
 
 /* Letrero que sale al pasar el mouse sobre algo que se puede picar */
 #tip{position:fixed;z-index:9;pointer-events:none;background:#151015;color:#fff;font-size:12px;padding:4px 8px;display:none;
@@ -179,6 +184,7 @@ textarea.campo{min-height:70px;resize:vertical}
 </header>
 <div id="tip"></div>
 <button id="bajar">↓ Baja: Oficina Calleros y Cerebro Delta</button>
+<button id="ladoIzq" class="lado" aria-label="Ir a la izquierda"></button><button id="ladoDer" class="lado" aria-label="Ir a la derecha"></button>
 <div id="zoomTip">Pellizca para acercar</div>
 <aside id="panel" aria-label="Detalles">
   <div class="cabeza"><span id="panelTitulo"></span><button class="cerrar" id="panelCerrar" title="Cerrar (Esc)">✕</button></div>
@@ -218,9 +224,9 @@ import { PROTEGIDOS, listaProtegidos, basura, idPapelera, paraCompactar, rondas,
    ===================================================================== */
 
 /* ---------- Ajustes ---------- */
-const T = 16, NUCLEO = 32, ALA = 23, COLS = NUCLEO + 2 * ALA, OX = ALA * T;
+const T = 16, NUCLEO = 32, ALA = 23, ALA_ESTE = 2 * ALA, COLS = ALA + NUCLEO + ALA_ESTE, OX = ALA * T;
 /* La oficina es una T invertida: el cuerpo de en medio (NUCLEO casillas de ancho) y, del pasillo 4 para abajo, un ala
-   de ALA casillas a cada lado. Todo lo del cuerpo de en medio se escribió con su columna 0 en la orilla: se dibuja
+   a cada lado: el oeste de ALA casillas y el este del doble (ALA_ESTE: dos tramos de cuartos, cada uno con su pasillo). Todo lo del cuerpo de en medio se escribió con su columna 0 en la orilla: se dibuja
    recorrido OX pixeles. Lo de las alas también se escribe así (el ala oeste con columnas negativas). */
 /* El mapa se escribió con los pasillos 1 y 2 de dos casillas de ancho. Ahora son más anchos: se les agregan
    filas y todo lo de abajo se recorre. Los muebles y adornos de siempre siguen escritos con sus medidas de
@@ -337,10 +343,10 @@ const MAPA = (() => {
     for (let i = 0; i < (r === 12 ? N1 : r === 24 ? N2 : 0); i++){ const c = fila.slice(); c[NUCLEO - 1] = '#'; ancho.push(c); }
   });
   // ---- La T invertida: el cuerpo de en medio queda al centro y del pasillo 4 para abajo sale un ala a cada lado ----
-  const w = ancho.map((fila, r) => { const lado = () => Array(ALA).fill(r >= FILA(59) ? '#' : ' '); return lado().concat(fila, lado()); });   // ' ' = afuera
+  const w = ancho.map((fila, r) => { const lado = n => Array(n).fill(r >= FILA(59) ? '#' : ' '); return lado(ALA).concat(fila, lado(ALA_ESTE)); });   // ' ' = afuera
   const R = r => FILA(r);                                                // filas de antes -> de ahora
-  for (const lado of [0, 1]){                                           // 0 = oeste, 1 = este (en espejo)
-    const col = c => lado ? COLS - 1 - c : c;                           // c = columna del ala, 0 = muro de afuera
+  for (const lado of [0, 1, 2]){                                        // 0 = oeste; 1 y 2 = los dos tramos del este (en espejo)
+    const col = c => lado === 0 ? c : ALA + NUCLEO + ALA * lado - 1 - c;   // c = columna del tramo, 0 = su muro de afuera
     const poner = (c0, r0, c1, r1, t) => { for (let r = R(r0); r <= R(r1); r++) for (let c = c0; c <= c1; c++) w[r][col(c)] = t; };
     poner(1, 60, 23, 60, '='); poner(1, 61, 23, 62, 'h');               // el pasillo 4 sigue hasta la orilla
     poner(1, 64, 8, 64, '='); poner(15, 64, 22, 64, '=');               // cuartos de arriba
@@ -1119,19 +1125,21 @@ function tallerDeDroides(){
    dos lados: arriba libres, en medio una ampliación en obra y abajo libres; el de abajo adentro del oeste es el
    Taller 2. */
 function alas(){
-  for (const [cx, id] of [[-19, 'espacio-o1'], [-5, 'espacio-o2'], [35, 'espacio-e1'], [49, 'espacio-e2']]) caballete(cx, 68, id);
-  for (const [cx, id] of [[-19, 'espacio-o5'], [35, 'espacio-e5'], [49, 'espacio-e6']]) caballete(cx, 95, id);
+  for (const [cx, id] of [[-19, 'espacio-o1'], [-5, 'espacio-o2'], [35, 'espacio-e1'], [49, 'espacio-e2'], [58, 'espacio-e7'], [73, 'espacio-e8']]) caballete(cx, 68, id);
+  for (const [cx, id] of [[-19, 'espacio-o5'], [35, 'espacio-e5'], [49, 'espacio-e6'], [58, 'espacio-e11'], [73, 'espacio-e12']]) caballete(cx, 95, id);
   // la obra de en medio
   caja(-21, 76); caja(-20, 76, true); escalera(-17, 78); cubeta(-21, 85); caja(-16, 86);
   caja(-7, 76); escalera(-3, 77); cubeta(-6, 85); caja(-2, 86); caja(-2, 85, true);
   caja(33, 76); caja(34, 76, true); escalera(37, 78); cubeta(33, 85);
   caja(52, 76); escalera(48, 77); cubeta(51, 85); caja(52, 86); caja(51, 86, true);
-  for (const [x0, x1] of [[-22, -15], [-8, -1], [32, 39], [46, 53]]) mueble(75 * T, () => {   // las rayas de la obra en el piso
+  caja(56, 76); caja(57, 76, true); escalera(59, 78); cubeta(56, 85);
+  caja(75, 76); escalera(72, 77); cubeta(74, 85); caja(75, 86); caja(74, 86, true);
+  for (const [x0, x1] of [[-22, -15], [-8, -1], [32, 39], [46, 53], [55, 62], [69, 76]]) mueble(75 * T, () => {   // las rayas de la obra en el piso
     const a = x0 * T + 10, b = (x1 + 1) * T - 10, y0 = 75 * T + 26, y1 = 87 * T - 22;
     for (let x = a; x < b; x += 8){ R(x, y0, 4, 1, '#e0b93a'); R(x, y1, 4, 1, '#e0b93a'); }
     for (let y = y0; y < y1; y += 8){ R(a, y, 1, 4, '#e0b93a'); R(b, y, 1, 4, '#e0b93a'); }
   });
-  for (const [cx, cy] of [[-18, 71], [-1, 71], [32, 71], [53, 71], [-22, 99], [32, 99], [53, 99]]) planta(cx, cy);
+  for (const [cx, cy] of [[-18, 71], [-1, 71], [32, 71], [53, 71], [-22, 99], [32, 99], [53, 99], [55, 71], [76, 71], [55, 99], [76, 99]]) planta(cx, cy);
   tallerDos();
 }
 /* Taller 2: para el próximo droide. Banco de trabajo, tablero de herramientas, dos bases de carga y su gabinete */
@@ -1714,7 +1722,7 @@ const CARA = { biblioteca: '#d4c3a0', escritorio: '#e2d4b4', internet: '#b8c3d4'
 function caraDe(xa, y){
   const x = xa - ALA;                                                  // columna del cuerpo de en medio
   if (x < 0 || x >= NUCLEO){                                            // las alas
-    const c = x < 0 ? xa : COLS - 1 - xa;                               // columna del ala (0 = muro de afuera)
+    const c = x < 0 ? xa : ALA + NUCLEO + ALA * (Math.floor((x - NUCLEO) / ALA) + 1) - 1 - xa;   // columna del tramo (0 = muro de afuera)
     if (y === 60 || y === 87 || (c >= 10 && c <= 13)) return CARA.pasillo;
     return y === 91 && x < 0 && c >= 15 ? CARA.taller : CARA.vacio;
   }
@@ -2751,6 +2759,7 @@ let PUNTOS_PASEO = [[5, 11, 'arriba'], [12, 12, 'abajo'], [19, 11, 'arriba'], [2
   [13, 46, 'der'], [18, 52, 'izq'], [12, 55, 'der'], [19, 48, 'izq'], [8, 40, 'abajo'], [22, 39, 'arriba'], [10, 61, 'abajo'], [21, 62, 'abajo'],
   [8, 88, 'abajo'], [22, 89, 'arriba'], [12, 88, 'abajo'],
   [-13, 70, 'der'], [-10, 90, 'izq'], [-18, 61, 'abajo'], [-5, 88, 'abajo'], [41, 70, 'der'], [44, 90, 'izq'], [48, 61, 'abajo'], [36, 88, 'abajo'],   // las alas
+  [64, 70, 'der'], [67, 90, 'izq'], [72, 61, 'abajo'], [60, 88, 'abajo'],
   [23, 18, 'abajo'], [28, 16, 'arriba'], [21, 19, 'abajo'], [14, 31, 'abajo'], [15, 34, 'abajo']];
 const entre = (a, b) => a + Math.random() * (b - a);
 const esperaPaseo = a => (a.callado ? entre(150, 420) : entre(40, 130)) * PRISA;   // los dormidos pasean menos
@@ -3128,7 +3137,7 @@ function letrerosActivos(){
 
 /* ---------- Tamaño en pantalla ---------- */
 const escenario = document.getElementById('escenario'), mundo = document.getElementById('mundo');
-const MAX_PIXELES = 9e6;   // con las alas el mapa es más ancho: aun así cabe a 2 pixeles por pixel
+const MAX_PIXELES = 1.1e7;   // con las alas el mapa es más ancho: aun así cabe a 2 pixeles por pixel
 let vista = { x: 0, y: 0, w: W, h: H };   // la parte de la oficina que se ve ahorita (en pixeles del mapa)
 function leerVista(){   // se lee al empezar cada cuadro, antes de mover viñetas y gafetes
   const m = 40 / escala + 24;                                             // un margen, para que al deslizar no se vea vacío
@@ -3693,10 +3702,12 @@ const LETREROS_ESPACIO = { 'espacio-d': letreroExtra(80, 1016, ''), 'espacio-e':
   'espacio-h': letreroExtra(416, 1448, ''),
   // las alas: los cuartos libres (los de en medio están en obra; el de abajo adentro del oeste es el Taller 2)
   'espacio-o1': letreroExtra(-288, 1016, ''), 'espacio-o2': letreroExtra(-64, 1016, ''), 'espacio-o5': letreroExtra(-288, 1448, ''),
-  'espacio-e1': letreroExtra(576, 1016, ''), 'espacio-e2': letreroExtra(800, 1016, ''), 'espacio-e5': letreroExtra(576, 1448, ''), 'espacio-e6': letreroExtra(800, 1448, '') };
-const NOMBRE_ESPACIO = { 'espacio-o1': 'OESTE 1', 'espacio-o2': 'OESTE 2', 'espacio-o5': 'OESTE 5', 'espacio-e1': 'ESTE 1', 'espacio-e2': 'ESTE 2', 'espacio-e5': 'ESTE 5', 'espacio-e6': 'ESTE 6' };
-for (const [x, t] of [[-288, 'OESTE 3 · EN OBRA'], [-64, 'OESTE 4 · EN OBRA'], [576, 'ESTE 3 · EN OBRA'], [800, 'ESTE 4 · EN OBRA']]) letreroExtra(x, 1192, t);
-letreroExtra(-176, 966, 'ALA OESTE'); letreroExtra(688, 966, 'ALA ESTE');
+  'espacio-e1': letreroExtra(576, 1016, ''), 'espacio-e2': letreroExtra(800, 1016, ''), 'espacio-e5': letreroExtra(576, 1448, ''), 'espacio-e6': letreroExtra(800, 1448, ''),
+  'espacio-e7': letreroExtra(944, 1016, ''), 'espacio-e8': letreroExtra(1168, 1016, ''), 'espacio-e11': letreroExtra(944, 1448, ''), 'espacio-e12': letreroExtra(1168, 1448, '') };
+const NOMBRE_ESPACIO = { 'espacio-o1': 'OESTE 1', 'espacio-o2': 'OESTE 2', 'espacio-o5': 'OESTE 5', 'espacio-e1': 'ESTE 1', 'espacio-e2': 'ESTE 2', 'espacio-e5': 'ESTE 5', 'espacio-e6': 'ESTE 6',
+  'espacio-e7': 'ESTE 7', 'espacio-e8': 'ESTE 8', 'espacio-e11': 'ESTE 11', 'espacio-e12': 'ESTE 12' };
+for (const [x, t] of [[-288, 'OESTE 3 · EN OBRA'], [-64, 'OESTE 4 · EN OBRA'], [576, 'ESTE 3 · EN OBRA'], [800, 'ESTE 4 · EN OBRA'], [944, 'ESTE 9 · EN OBRA'], [1168, 'ESTE 10 · EN OBRA']]) letreroExtra(x, 1192, t);
+letreroExtra(-176, 966, 'ALA OESTE'); letreroExtra(688, 966, 'ALA ESTE'); letreroExtra(1056, 966, 'ALA ESTE 2');
 letreroExtra(256, 642, 'PERIFÉRICO · TÚNEL CENTRAL');
 letreroExtra(120, 1192, 'AMPLIACIÓN (EN OBRA)');
 function letrerosEspacios(){
@@ -3811,9 +3822,42 @@ $('irHorario').addEventListener('click', ev => { ev.preventDefault(); panelHorar
 
 /* Ir de piso en piso */
 const centroX = () => Math.max(0, LIENZO_OFF.x * escala + (OX + NUCLEO * T / 2) * escala - escenario.clientWidth / 2);   // el cuerpo de en medio al centro
-const irAFila = (fila, x) => escenario.scrollTo({ top: Math.max(0, fila * T * escala), left: x == null ? centroX() : Math.max(0, (LIENZO_OFF.x + x) * escala - escenario.clientWidth / 2), behavior: 'smooth' });
+let regresando = 0;
+const irAFila = (fila, x) => (regresando = performance.now() + 1200, escenario.scrollTo({ top: Math.max(0, fila * T * escala), left: x == null ? centroX() : Math.max(0, (LIENZO_OFF.x + x) * escala - escenario.clientWidth / 2), behavior: 'smooth' }));
 document.querySelectorAll('.pisos button').forEach(b => b.addEventListener('click', () => irAFila(FILA(+b.dataset.fila), b.dataset.x == null ? null : +b.dataset.x * T)));
 $('bajar').addEventListener('click', () => irAFila(FILA(21)));
+/* ---------- De lado solo donde hay algo ----------
+   Arriba solo está el cuerpo de en medio: ahí la vista no se va a los lados (con zoom, solo dentro del cuerpo).
+   Al bajar hasta donde empiezan las alas se suelta, y aparecen flechas a los lados para ir a ellas. */
+const TRAMOS_LADO = [['Ala Oeste', 0, ALA], ['Centro', ALA, ALA + NUCLEO], ['Ala Este', ALA + NUCLEO, ALA + NUCLEO + ALA], ['Ala Este 2', ALA + NUCLEO + ALA, COLS]];
+const xVista = () => (escenario.scrollLeft + escenario.clientWidth / 2) / escala - LIENZO_OFF.x;   // el centro de lo que se ve, en pixeles del mapa
+const verAlas = () => (escenario.scrollTop + escenario.clientHeight * 0.75) / escala - LIENZO_OFF.y > FILA(60) * T;
+function vigilarLados(){
+  const alas = verAlas(), ancho = escenario.clientWidth;
+  const i0 = (LIENZO_OFF.x + OX) * escala - 8, i1 = i0 + NUCLEO * T * escala + 16 - ancho;   // de dónde a dónde se ve solo el cuerpo de en medio
+  const cabe = i1 <= i0 + 24;                                          // el cuerpo de en medio cabe a lo ancho (sin zoom)
+  escenario.style.overflowX = alas || !cabe ? 'auto' : 'hidden';
+  clearTimeout(vigilarLados.espera);
+  if (!alas) vigilarLados.espera = setTimeout(() => {                  // cuando se deja de mover: si quedó de lado, regresa suave al centro
+    if (verAlas() || performance.now() < regresando) return;
+    const x = escenario.scrollLeft, meta = cabe ? centroX() : Math.min(Math.max(x, i0), i1);
+    if (Math.abs(meta - x) > 2) escenario.scrollTo({ left: meta, top: escenario.scrollTop, behavior: Math.abs(meta - x) > 40 ? 'smooth' : 'auto' });
+  }, 180);
+  const c = xVista() / T, i = TRAMOS_LADO.findIndex(([, a, b]) => c >= a && c < b), aqui = i < 0 ? 1 : i;
+  for (const [el, j] of [[$('ladoIzq'), aqui - 1], [$('ladoDer'), aqui + 1]]){
+    const t = alas && TRAMOS_LADO[j], txt = t ? (j < aqui ? '◀ ' + t[0] : t[0] + ' ▶') : '';
+    if (el.textContent !== txt && t) el.textContent = txt;
+    el.classList.toggle('ver', !!t); el.dataset.a = t ? (t[1] + t[2]) / 2 : '';
+  }
+}
+for (const id of ['ladoIzq', 'ladoDer']) $(id).addEventListener('click', e => {
+  const x = +e.currentTarget.dataset.a; if (!x && x !== 0) return;
+  regresando = performance.now() + 900;
+  escenario.scrollTo({ left: Math.max(0, (LIENZO_OFF.x + x * T) * escala - escenario.clientWidth / 2), behavior: 'smooth' });
+});
+let lados = false;
+escenario.addEventListener('scroll', () => { if (!lados){ lados = true; requestAnimationFrame(() => { lados = false; vigilarLados(); }); } }, { passive: true });
+window.addEventListener('resize', () => requestAnimationFrame(vigilarLados));
 escenario.addEventListener('scroll', () => $('bajar').classList.toggle('oculto', escenario.scrollTop > 60));
 
 async function cargarDatos(){
@@ -4030,6 +4074,7 @@ $('irClaude').hidden = EN_CLAUDE;
 pintarEstatica();
 ajustarEscala();
 escenario.scrollLeft = centroX();   // al abrir, el cuerpo de en medio al centro (las alas, a los lados)
+vigilarLados();
 window.addEventListener('resize', ajustarEscala);
 if (location.protocol === 'file:') $('aviso').style.display = 'flex';
 document.addEventListener('visibilitychange', () => { if (!document.hidden){ leerEstado(); if (EN_CLAUDE && !sesionesFalla) consultarSesiones(); } });
