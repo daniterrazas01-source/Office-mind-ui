@@ -361,6 +361,11 @@ const MAPA = (() => {
     for (const c of [4, 5, 18, 19]) for (const r of [63, 64, 90, 91]) w[R(r)][col(c)] = 'D';   // puertas desde los pasillos 4 y 5
     for (const c of [9, 14]) for (const r of [82, 83]) w[R(r)][col(c)] = 'D';                    // la obra se entra por el pasillo del ala
     if (!clip) for (const r of [80, 81]) w[R(r)][col(23)] = 'D';                                 // y se pasa a la Ampliación de en medio
+    if (clip){   // el Estudio de Clipping es abierto: del pasillo 4 hasta abajo del Centro de diseño, sin paredes, encima del periférico
+      poner(1, 61, 22, 86, 'q');
+      poner(15, 65, 22, 72, 'r');                                       // el lounge conserva su duela
+      poner(23, 60, 23, 62, '#');                                       // cerrado hacia el pasillo 4: solo se entra por abajo (el pasillo 5)
+    }
   }
   return w;
 })();
@@ -1258,14 +1263,16 @@ function mesaEdicion(tx, ty, area, idx){   // escritorio de edición: dos monito
 }
 function estudioClipping(){
   /* ----- Centro de diseño (la oficina central) ----- */
-  mueble(75 * T - 1, (t) => {                                          // la pantalla grande: el clip vertical y su línea de tiempo
+  mueble(75 * T + 9, (t) => {                                          // la pantalla grande (de pie): el clip vertical y su línea de tiempo
     const on = hayAlguien('centro de diseno');
     R(1112, 1166, 112, 34, K); R(1113, 1167, 110, 32, '#2b2f3a'); R(1115, 1169, 106, 28, '#0b1220');
     R(1118, 1171, 14, 24, on ? '#1f3550' : '#141b28');                // el clip en vertical (9:16)
     if (on){ disco(1125, 1179, 3, '#f2c9a0'); R(1121, 1183, 9, 8, '#d97757'); R(1119, 1191, 12, 2, '#ffffff'); R(1120, 1192, 10, 1, '#111'); }
     lineaDeTiempo(1136, 1172, 82, 22, on ? t : 0, 3);
     R(1216, 1169, 3, 3, on && Math.floor(t * 2) % 2 ? '#ff5b5b' : '#5a1e1e');   // REC
+    R(1122, 1200, 3, 8, K); R(1211, 1200, 3, 8, K); R(1116, 1207, 15, 2, K); R(1205, 1207, 15, 2, K);   // de pie: sus patas
   });
+  bloquear(70, 74, 76, 74);
   for (const [x, y, i] of [[70, 77, 0], [73, 77, 1], [70, 81, 2], [73, 81, 3]]) mesaEdicion(x, y, 'centro de diseno', i);
   bloquear(76, 76, 76, 77);
   mueble(77 * T + 15, (t) => {                                         // el servidor de render
@@ -1287,14 +1294,15 @@ function estudioClipping(){
   });
   planta(69, 86);
   /* ----- Diseño aux 1, 2 y 3 (oficinas auxiliares) ----- */
-  const storyboard = (x, y) => mueble(y + 18, () => {                 // pizarrón con las escenas del clip
+  const storyboard = (x, y, dePie) => mueble(y + (dePie ? 22 : 18), () => {   // pizarrón con las escenas del clip (en la pared o de pie)
+    if (dePie){ R(x + 4, y + 13, 2, 9, K); R(x + 36, y + 13, 2, 9, K); R(x + 1, y + 21, 8, 1, K); R(x + 33, y + 21, 8, 1, K); }
     R(x, y, 42, 14, K); R(x + 1, y + 1, 40, 12, '#c9a06a');
     for (let i = 0; i < 4; i++){ R(x + 3 + i * 10, y + 3, 8, 8, '#f7f3ea'); R(x + 4 + i * 10, y + 4, 6, 4, COLOR_CLIP[i]); R(x + 4 + i * 10, y + 9, 5, 1, '#9a9488'); }
   });
   for (const [x, y, i] of [[70, 69, 0], [74, 69, 1]]) mesaEdicion(x, y, 'diseno aux 1', i);
-  storyboard(1106, 1025); planta(76, 72);
+  storyboard(1106, 961); planta(76, 72);
   for (const [x, y, i] of [[56, 77, 0], [59, 77, 1]]) mesaEdicion(x, y, 'diseno aux 2', i);
-  storyboard(884, 1185);
+  bloquear(55, 74, 57, 74); storyboard(884, 1178, true);
   bloquear(55, 81, 58, 81);
   mueble(81 * T + 15, (t) => {                                         // la tele para ver cómo quedaron los clips
     const on = hayAlguien('diseno aux 2');
@@ -1306,14 +1314,14 @@ function estudioClipping(){
   for (const [x, y, i] of [[70, 96, 0], [74, 96, 1]]) mesaEdicion(x, y, 'diseno aux 3', i);
   storyboard(1106, 1457); planta(76, 99);
   /* ----- Lounge de diseño: donde descansan los agentes de clipping ----- */
-  mueble(65 * T - 1, (t) => {                                          // letrero de neón y foquitos en la pared
-    const b = 0.75 + 0.25 * Math.sin(t * 2.3);
+  mueble(61 * T - 1, (t) => {                                          // letrero de neón y foquitos en la pared de arriba del estudio
+    const b = 0.75 + 0.25 * Math.sin(t * 2.3), y = 963;
     g.globalAlpha = b;
-    R(884, 1027, 40, 12, '#ff5fa2'); R(886, 1029, 36, 8, '#2a1830');  // marco rosa
-    R(898, 1030, 2, 6, '#7fe7ff'); R(900, 1031, 2, 4, '#7fe7ff'); R(902, 1032, 2, 2, '#7fe7ff');   // ▶
-    R(907, 1031, 1, 4, '#ffd34d'); R(910, 1030, 1, 6, '#ffd34d'); R(913, 1032, 1, 2, '#ffd34d'); R(916, 1031, 1, 4, '#ffd34d');   // ondas
+    R(884, y, 40, 12, '#ff5fa2'); R(886, y + 2, 36, 8, '#2a1830');    // marco rosa
+    R(898, y + 3, 2, 6, '#7fe7ff'); R(900, y + 4, 2, 4, '#7fe7ff'); R(902, y + 5, 2, 2, '#7fe7ff');   // ▶
+    R(907, y + 4, 1, 4, '#ffd34d'); R(910, y + 3, 1, 6, '#ffd34d'); R(913, y + 5, 1, 2, '#ffd34d'); R(916, y + 4, 1, 4, '#ffd34d');   // ondas
     g.globalAlpha = 1;
-    for (let i = 0; i < 8; i++) R(964 + i * 6, 1027 + (i % 2), 2, 2, COLOR_CLIP[(i + Math.floor(t)) % COLOR_CLIP.length]);
+    for (let i = 0; i < 14; i++) R(932 + i * 6, y + (i % 2), 2, 2, COLOR_CLIP[(i + Math.floor(t)) % COLOR_CLIP.length]);
   });
   mueble(66 * T, () => {                                               // tapete
     R(884, 1062, 44, 54, '#5b4a8a'); R(886, 1064, 40, 50, '#6d5aa5');
