@@ -74,7 +74,7 @@ El segundo tramo del Ala Este es el **Estudio de Clipping**, para los agentes qu
 - **Centro de diseño** (`centro de diseno`, la oficina central; el cuarto de en medio de afuera): cuatro mesas de edición con doble monitor (la línea de tiempo corre cuando alguien está sentado, `mesaEdicion()`), la pantalla grande con el clip vertical y su línea de tiempo, el servidor de render, y un set de pantalla verde con aro de luz y celular en tripié.
 - **Diseño aux 1, 2 y 3** (`diseno aux N`, oficinas auxiliares): mesas de edición y pizarrón con el storyboard; la aux 2 tiene además una tele con pufs para revisar cómo quedaron los clips.
 - **Lounge de diseño** (`lounge de diseno`, el de arriba de adentro): para que descansen los agentes de clipping. Letrero de neón, foquitos, sillón, pufs, futbolito con su pelotita y barra de café.
-- El cuarto de abajo de adentro (Este 11) sigue libre. Cada cuarto tiene su estación del periférico (Centro de diseño, Diseño aux 1–3, Lounge de diseño; terminal: Estudio de Clipping) y lugares para los monitos, así que un agente o una sesión ya puede ir ahí diciendo el cuarto (también entiende «clipping», «edición» y «lounge»).
+- El cuarto de abajo de adentro (Este 11) sigue libre. En el área abierta hay solo **dos estaciones** del periférico: «Clipping (arriba)», en la pared del letrero, y «Clipping (entrada)», junto a la entrada de abajo (lounge y aux 1 van a la de arriba; centro de diseño y aux 2, a la de la entrada); Diseño aux 3 tiene la suya y la terminal del pasillo se llama Estudio de Clipping y lugares para los monitos, así que un agente o una sesión ya puede ir ahí diciendo el cuarto (también entiende «clipping», «edición» y «lounge»).
 
 ### Taller y el droide BB-8
 

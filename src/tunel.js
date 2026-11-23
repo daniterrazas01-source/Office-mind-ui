@@ -46,10 +46,8 @@ export const ESTACIONES = {
   'este 6':            { tx: 46, ty: 99, lado: 'izq',   nombre: 'Este 6',            pie: { tx: 47, ty: 99 } },
   'ala este':          { tx: 41, ty: 102, lado: 'abajo', nombre: 'Ala Este',         pie: { tx: 44, ty: 103 }, boca: { tx: 42, ty: 102 } },
   // El Ala Este es el doble de larga: su segundo tramo es el Estudio de Clipping (edición de video)
-  'este 7':            { tx: 62, ty: 72, lado: 'der',   nombre: 'Lounge de diseño',  pie: { tx: 61, ty: 72 } },
-  'este 8':            { tx: 69, ty: 72, lado: 'izq',   nombre: 'Diseño aux 1',      pie: { tx: 70, ty: 72 } },
-  'este 9':            { tx: 62, ty: 84, lado: 'der',   nombre: 'Diseño aux 2',      pie: { tx: 61, ty: 84 } },
-  'este 10':           { tx: 69, ty: 84, lado: 'izq',   nombre: 'Centro de diseño',  pie: { tx: 70, ty: 84 } },
+  'clipping arriba':   { tx: 67, ty: 65, lado: 'izq',   nombre: 'Clipping (arriba)', pie: { tx: 68, ty: 65 } },   // en la pared del letrero
+  'clipping abajo':    { tx: 67, ty: 89, lado: 'izq',   nombre: 'Clipping (entrada)', pie: { tx: 68, ty: 89 } },  // junto a la entrada
   'este 11':           { tx: 62, ty: 99, lado: 'der',   nombre: 'Este 11',           pie: { tx: 61, ty: 99 } },
   'este 12':           { tx: 69, ty: 99, lado: 'izq',   nombre: 'Diseño aux 3',      pie: { tx: 70, ty: 99 } },
   'ala este 2':        { tx: 64, ty: 102, lado: 'abajo', nombre: 'Estudio de Clipping', pie: { tx: 67, ty: 103 }, boca: { tx: 65, ty: 102 } },
@@ -83,6 +81,8 @@ for (const [lado, x] of [['o', -11 * T], ['e', 43 * T], ['f', 66 * T]]){   // el
   NODOS[lado + '5'] = { x, y: 93 * T };     // cruce con el pasillo 5
   NODOS[lado + '3'] = { x, y: fila(99) };   // a los de abajo
 }
+NODOS.fa = { x: 66 * T, y: fila(65) };       // Estudio de Clipping: la estación de arriba
+NODOS.fb = { x: 66 * T, y: fila(89) };       // y la de la entrada
 for (const [clave, e] of Object.entries(ESTACIONES)) NODOS[clave] = centro(e);
 
 // Tramos: la línea principal (ancha) y los ramales (delgados, a cada estación).
@@ -93,14 +93,14 @@ const TRONCALES = [
   ['o4', 'o1'], ['o1', 'o2'], ['o2', 'o5'], ['o5', 'o3'], ['o3', 'ala oeste'],
   ['e4', 'e1'], ['e1', 'e2'], ['e2', 'e5'], ['e5', 'e3'], ['e3', 'ala este'],
   ['o5', 'pt'], ['pt', 'ph'], ['ph', 'e5'],                                                // por el pasillo 5
-  ['e4', 'f4'], ['e5', 'f5'], ['f4', 'f1'], ['f1', 'f2'], ['f2', 'f5'], ['f5', 'f3'], ['f3', 'ala este 2'],   // segundo tramo del Ala Este
+  ['e4', 'f4'], ['e5', 'f5'], ['f4', 'fa'], ['f4', 'fb'], ['fb', 'f5'], ['f5', 'f3'], ['f3', 'ala este 2'],   // Estudio de Clipping
 ];
 export const RAMALES = [
   ['cruce', 'calleros'], ['cruce', 'cerebro delta'], ['tm', 'terrazas'], ['tm', 'centro de pensado'], ['tn', 'noticias'],
   ['pd', 'espacio d'], ['ce', 'espacio e'], ['pf', 'espacio f'], ['pt', 'taller'], ['ph', 'espacio h'],
   ['o1', 'oeste 1'], ['o1', 'oeste 2'], ['o2', 'oeste 3'], ['o2', 'oeste 4'], ['o3', 'oeste 5'], ['o3', 'taller 2'],
   ['e1', 'este 1'], ['e1', 'este 2'], ['e2', 'este 3'], ['e2', 'este 4'], ['e3', 'este 5'], ['e3', 'este 6'],
-  ['f1', 'este 7'], ['f1', 'este 8'], ['f2', 'este 9'], ['f2', 'este 10'], ['f3', 'este 11'], ['f3', 'este 12'],
+  ['fa', 'clipping arriba'], ['fb', 'clipping abajo'], ['f3', 'este 11'], ['f3', 'este 12'],
 ];
 export const TRAMOS = TRONCALES.concat(RAMALES);
 // Los ramales delgados (un canal angosto en el piso) y los tramos anchos de la línea principal, del mismo grueso
@@ -172,10 +172,11 @@ export function estacionDe(texto){
   if (/\btaller\b/.test(s)) return 'taller';
   const libre = /espacio(?: libre)? ([a-z])\b/.exec(s);
   if (libre && ESTACIONES['espacio ' + libre[1]]) return 'espacio ' + libre[1];
-  if (s.includes('lounge')) return 'este 7';                                       // el Estudio de Clipping
-  if (s.includes('centro de diseno') || s.includes('clipping') || s.includes('edicion de video')) return s.includes('estudio de clipping') ? 'ala este 2' : 'este 10';
-  const aux = /(?:diseno )?aux(?:iliar)? ?([123])\b/.exec(s);
-  if (aux) return { 1: 'este 8', 2: 'este 9', 3: 'este 12' }[aux[1]];
+  if (s.includes('estudio de clipping')) return 'ala este 2';                      // el Estudio de Clipping: dos estaciones
+  if (s.includes('arriba') && s.includes('clipping')) return 'clipping arriba';
+  if (s.includes('lounge') || /aux(iliar)? ?1\b/.test(s)) return 'clipping arriba';
+  if (/aux(iliar)? ?3\b/.test(s)) return 'este 12';
+  if (s.includes('centro de diseno') || s.includes('clipping') || s.includes('edicion de video') || /aux(iliar)? ?2\b/.test(s)) return 'clipping abajo';
   if (s.includes('calleros')) return 'calleros';
   if (s.includes('cerebro')) return 'cerebro delta';
   if (s.includes('terraza') || s.includes('dragtree')) return 'terrazas';
