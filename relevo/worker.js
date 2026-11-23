@@ -1,7 +1,9 @@
 // Relevo de la oficina (Cloudflare Worker).
 // Guarda lo último que avisó cada sesión de Claude y se lo da a la página web.
 //   GET  /estado  -> cualquiera lo lee (sin caché). Mismo formato que estado.json.
-//   POST /aviso   -> una sesión avisa qué hace. Pide "Authorization: Bearer <ESCRITURA>".
+//   POST /aviso   -> una sesión avisa qué hace. Pide "Authorization: Bearer <llave>".
+//   POST /llave   -> la primera vez, guarda la llave que trae (así nadie la tiene que escribir en el panel de
+//                    Cloudflare). Después ya no se puede cambiar por aquí. La llave también puede ser el secreto ESCRITURA.
 // Un solo Durable Object guarda todo: lo que se escribe se lee al instante.
 
 const CORS = {
@@ -17,10 +19,19 @@ const MAX_ARCHIVOS = 40;
 const CAMPOS = ['id', 'nombre', 'titulo', 'persona', 'proyecto', 'area', 'actividad', 'estado', 'modo', 'modelo', 'dispositivo', 'origen', 'equipo', 'ayudante_actividad', 'ayudante_area', 'esfuerzo'];
 
 export class Estado {
-  constructor(state) { this.state = state; }
+  constructor(state, env) { this.state = state; this.env = env || {}; }
 
   async fetch(request) {
-    const url = new URL(request.url);
+    const url = new URL(request.url), escritura = this.env.ESCRITURA || '';
+    const trae = (request.headers.get('Authorization') || '').replace(/^Bearer\s+/i, '');
+    const guardada = await this.state.storage.get('llave');
+    if (request.method === 'POST' && url.pathname === '/llave') {
+      if (guardada || escritura) return json({ error: 'ya tiene llave' }, 409);
+      if (trae.length < 16) return json({ error: 'llave muy corta (mínimo 16)' }, 400);
+      await this.state.storage.put('llave', trae);
+      return json({ ok: true });
+    }
+    if (request.method === 'POST' && url.pathname === '/aviso' && !(trae && (trae === escritura || trae === guardada))) return json({ error: 'sin permiso' }, 401);
     if (request.method === 'GET' && url.pathname === '/estado') {
       const agentes = (await this.state.storage.get('agentes')) || {};
       const archivos = (await this.state.storage.get('archivos')) || [];
@@ -32,6 +43,11 @@ export class Estado {
       let d;
       try { d = await request.json(); } catch { return json({ error: 'JSON inválido' }, 400); }
       if (!d || typeof d.id !== 'string' || !d.id || d.id.length > 80) return json({ error: 'falta id' }, 400);
+      if (d.quitar === true){                                         // la sesión se cerró o era de prueba: se quita
+        const agentes = (await this.state.storage.get('agentes')) || {};
+        delete agentes[d.id]; await this.state.storage.put('agentes', agentes);
+        return json({ ok: true, quitado: d.id });
+      }
       const ahora = new Date().toISOString();
       const agente = { actualizado: ahora, ultima_actividad: ahora };
       for (const k of CAMPOS) if (typeof d[k] === 'string') agente[k] = d[k].slice(0, 200);
@@ -59,10 +75,6 @@ export default {
   async fetch(request, env) {
     if (request.method === 'OPTIONS') return new Response(null, { status: 204, headers: CORS });
     const url = new URL(request.url);
-    if (request.method === 'POST' && url.pathname === '/aviso') {
-      const llave = (request.headers.get('Authorization') || '').replace(/^Bearer\s+/i, '');
-      if (!env.ESCRITURA || llave !== env.ESCRITURA) return json({ error: 'sin permiso' }, 401);
-    }
     const id = env.ESTADO.idFromName('oficina');
     return env.ESTADO.get(id).fetch(request);
   },

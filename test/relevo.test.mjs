@@ -8,10 +8,10 @@ import fs from 'node:fs';
 import worker, { Estado } from '../relevo/worker.js';
 
 // Un "Cloudflare" de mentiras: un solo objeto con almacenamiento en memoria.
-function entornoFalso() {
-  const datos = new Map();
-  const objeto = new Estado({ storage: { get: async (k) => datos.get(k), put: async (k, v) => { datos.set(k, structuredClone(v)); } } });
-  return { ESCRITURA: 'secreto', ESTADO: { idFromName: () => 'x', get: () => objeto } };
+function entornoFalso(escritura = 'secreto') {
+  const datos = new Map(), env = { ESCRITURA: escritura };
+  const objeto = new Estado({ storage: { get: async (k) => datos.get(k), put: async (k, v) => { datos.set(k, structuredClone(v)); } } }, env);
+  return Object.assign(env, { ESTADO: { idFromName: () => 'x', get: () => objeto } });
 }
 const pedir = (env, ruta, opciones) => worker.fetch(new Request('https://relevo.test' + ruta, opciones), env);
 const aviso = (env, cuerpo, llave = 'secreto') => pedir(env, '/aviso', { method: 'POST', headers: { Authorization: 'Bearer ' + llave, 'Content-Type': 'application/json' }, body: JSON.stringify(cuerpo) });
@@ -71,4 +71,22 @@ test('el hook manda al relevo lo que hace la sesión', async () => {
   assert.deepEqual([recibidos[0].cuerpo.area, recibidos[0].cuerpo.actividad, recibidos[0].cuerpo.modelo, recibidos[0].cuerpo.nombre, recibidos[0].cuerpo.equipo],
     ['internet', 'Buscando en internet', 'opus', 'Prueba del hook', 'Aparato de prueba']);
   assert.deepEqual([recibidos[1].cuerpo.area, recibidos[1].cuerpo.estado], ['descanso', 'esperando']);
+});
+
+test('sin secreto en Cloudflare, la primera llave que llega a /llave se queda y ya no se cambia', async () => {
+  const env = entornoFalso('');
+  assert.equal((await aviso(env, { id: 'a' }, 'cualquier-cosa-larga')).status, 401, 'sin llave todavía nadie escribe');
+  const llave = (l) => pedir(env, '/llave', { method: 'POST', headers: { Authorization: 'Bearer ' + l } });
+  assert.equal((await llave('corta')).status, 400);
+  assert.equal((await llave('una-llave-larga-de-prueba')).status, 200);
+  assert.equal((await llave('otra-llave-larga-de-prueba')).status, 409, 'ya no se cambia');
+  assert.equal((await aviso(env, { id: 'a' }, 'otra-llave-larga-de-prueba')).status, 401);
+  assert.equal((await aviso(env, { id: 'a', nombre: 'Uno' }, 'una-llave-larga-de-prueba')).status, 200);
+  const e = await (await pedir(env, '/estado')).json();
+  assert.equal(e.agentes[0].nombre, 'Uno');
+});
+
+test('con el secreto ESCRITURA puesto, /llave no hace nada', async () => {
+  const env = entornoFalso('secreto');
+  assert.equal((await pedir(env, '/llave', { method: 'POST', headers: { Authorization: 'Bearer una-llave-larga-de-prueba' } })).status, 409);
 });

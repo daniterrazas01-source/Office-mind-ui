@@ -4,6 +4,7 @@
     "UserPromptSubmit": [{ "hooks": [{ "type": "command", "command": "python3 ~/.claude/oficina_aviso.py", "async": true, "timeout": 20 }] }],
     "Stop": [{ "hooks": [{ "type": "command", "command": "python3 ~/.claude/oficina_aviso.py", "async": true, "timeout": 20 }] }],
     "Notification": [{ "hooks": [{ "type": "command", "command": "python3 ~/.claude/oficina_aviso.py", "async": true, "timeout": 20 }] }],
-    "SessionStart": [{ "hooks": [{ "type": "command", "command": "python3 ~/.claude/oficina_aviso.py", "async": true, "timeout": 20 }] }]
+    "SessionStart": [{ "hooks": [{ "type": "command", "command": "python3 ~/.claude/oficina_aviso.py", "async": true, "timeout": 20 }] }],
+    "SessionEnd": [{ "hooks": [{ "type": "command", "command": "python3 ~/.claude/oficina_aviso.py", "timeout": 10 }] }]
   }
 }

@@ -83,10 +83,20 @@ def titulo_y_modelo(ruta):
     return titulo, modelo
 
 
+def enviar(c, aviso):
+    # En la nube la llave la pone el proxy (cambia este relleno por la de verdad); en la laptop va en la configuración
+    cabeceras = {"Content-Type": "application/json", "User-Agent": "oficina-aviso",
+                 "Authorization": "Bearer " + (c["llave"] or "proxy-injected")}
+    req = urllib.request.Request(c["url"] + "/aviso", data=json.dumps(aviso).encode("utf-8"), headers=cabeceras, method="POST")
+    urllib.request.urlopen(req, timeout=8).read()
+
+
 def main():
     c = config()
     if not c["url"]:
         return
+    if os.environ.get("CLAUDE_CODE_SESSION_ATTENDED") == "0":
+        return  # una tarea programada (Nitro, Pole, el mensajero…): ya sale en la oficina como su monito
     d = json.loads(sys.stdin.buffer.read().decode("utf-8-sig", "replace") or "{}")
     de_ayudante = bool(d.get("agent_id"))  # lo hace un ayudante (subagente): no sale como monito aparte, se anota en su sesión
     if os.path.exists(os.path.join(str(d.get("cwd") or ""), ".claude", "hooks", "oficina_terrazas.py")):
@@ -100,6 +110,9 @@ def main():
         g = {"enviado": 0}
 
     ev, tool, inp = d.get("hook_event_name"), d.get("tool_name") or "", d.get("tool_input") or {}
+    if ev == "SessionEnd" and not de_ayudante:  # la sesión se cerró: su monito se va de la oficina
+        enviar(c, {"id": "ses-" + ses, "quitar": True})
+        return
     area, actividad, estado, urgente, archivo = "escritorio", "Trabajando", "trabajando", False, None
     if de_ayudante and ev != "PreToolUse":
         return
@@ -155,11 +168,7 @@ def main():
         aviso["equipo"] = c["equipo"]
     if archivo:
         aviso["archivo"] = archivo
-    cabeceras = {"Content-Type": "application/json", "User-Agent": "oficina-aviso"}
-    if c["llave"]:
-        cabeceras["Authorization"] = "Bearer " + c["llave"]
-    req = urllib.request.Request(c["url"] + "/aviso", data=json.dumps(aviso).encode("utf-8"), headers=cabeceras, method="POST")
-    urllib.request.urlopen(req, timeout=8).read()
+    enviar(c, aviso)
     g["enviado"] = time.time()
     with open(guarda, "w", encoding="utf-8") as f:
         json.dump(g, f, ensure_ascii=False)
