@@ -1,6 +1,8 @@
 # Relevo: que la página web vea todas las sesiones
 
-**Estado: armado y probado en local, sin instalar.** Falta desplegarlo en Cloudflare. Se puede hacer desde una computadora (paso 1) o sin computadora, desde una sesión de Claude Code en la nube (paso 1B). Estas instrucciones están escritas para que las siga una persona o cualquier asistente de IA con acceso a una terminal.
+**Estado (23 nov 2026): instalado.** El worker está en `https://oficina-relevo.kalleros.workers.dev` (cuenta de Cloudflare de Kalleroz, subido con la ruta 1B). La página web lo lee (`config/oficina.json` → `nube.relevo`). Las sesiones de la nube del entorno **Default** (`env_01Vbh…`) avisan solas: su script de arranque baja este hook y lo pone en `~/.claude/settings.json` (comprobado con una sesión nueva). La llave no la escribió nadie en Cloudflare: el entorno la guarda como secreto de red para el host del worker y la primera vez se le mandó a `POST /llave`, que la guarda y ya no deja cambiarla. Falta: la laptop de Calleros (paso 3, con la misma llave) y el otro entorno llamado «Default» (`env_01A2U…`), si alguna sesión cae ahí.
+
+Cambios de esta versión: `POST /llave` (la primera llave se queda), `{"id", "quitar": true}` en `/aviso` quita una sesión (el hook lo manda en `SessionEnd`), las tareas programadas no avisan (`CLAUDE_CODE_SESSION_ATTENDED=0`: ya salen como su monito) y una sesión sin título ni repositorio se llama con sus primeras palabras.
 
 ## Qué sesiones se ven hoy y qué agrega el relevo
 

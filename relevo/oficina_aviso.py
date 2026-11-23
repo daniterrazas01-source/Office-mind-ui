@@ -130,6 +130,8 @@ def main():
             archivo = {"nombre": nombre, "tipo": "creado" if tool == "Write" else "editado"}
     elif ev == "UserPromptSubmit":
         actividad, g["ultra"] = "Leyendo el mensaje", False
+        if not g.get("primer") and str(d.get("prompt") or "").strip():
+            g["primer"] = corto(d.get("prompt"), 5, 24)  # por si la sesión no tiene título: sus primeras palabras
     elif ev in ("Stop", "SessionStart", "SessionEnd") or (ev == "Notification" and d.get("notification_type") == "idle_prompt"):
         area, actividad, estado, urgente, g["ultra"] = "descanso", "Esperando instrucciones", "esperando", True, False
     elif ev == "Notification":
@@ -150,9 +152,12 @@ def main():
         return
     titulo, modelo = titulo_y_modelo(d.get("transcript_path"))
     g["titulo"], g["modelo"] = titulo or g.get("titulo"), modelo or g.get("modelo")
-    nombre = g["titulo"] or os.path.basename(str(d.get("cwd") or "").replace("\\", "/")) or ("Sesión " + ses[:4])
+    carpeta = os.path.basename(str(d.get("cwd") or "").replace("\\", "/"))
+    if carpeta.lower() in ("user", "root", "home", "workspace", "tmp", ""):
+        carpeta = ""  # una sesión sin repositorio en la nube: la carpeta no dice nada
+    nombre = g["titulo"] or carpeta or g.get("primer") or ("Sesión " + ses[:4])
     aviso = {"id": "ses-" + ses, "nombre": corto(nombre, 6, 18), "titulo": corto(nombre, 12, 60),
-             "proyecto": os.path.basename(str(d.get("cwd") or "").replace("\\", "/")),
+             "proyecto": carpeta,
              "area": area, "actividad": corto(actividad), "estado": estado,
              "modo": "ultra" if g.get("ultra") and estado == "trabajando" else "normal",
              "dispositivo": c["dispositivo"], "origen": c["dispositivo"]}
