@@ -179,7 +179,7 @@ textarea.campo{min-height:70px;resize:vertical}
 <header>
   <div class="titulo"><span class="logo"></span>OFICINA · MONITOREO</div>
   <div class="senal" id="senal"><span class="punto"></span><span id="senalTexto">Conectando…</span></div>
-  <nav class="pisos"><button data-fila="0">Planta principal</button><button data-fila="21">Calleros · Cerebro</button><button data-fila="37">Terrazas · Pensado</button><button data-fila="59">Espacios libres</button><button data-fila="72">Ampliación</button><button data-fila="86">Agentes · Taller</button><button data-fila="59" data-x="12">Ala Oeste</button><button data-fila="59" data-x="66">Ala Este</button><a id="irPase" href="#pase" role="button">＋ Sesión</a><a id="irTexto" href="#texto" role="button" title="Tamaño del texto de los monitos">Aa</a><a id="irHorario" href="#horario" role="button" title="Horario de la oficina">Horario</a><a id="irClaude" href="https://claude.ai/artifact/KbxrcsXckzZSE5F65iZwCE" target="_blank" rel="noopener" hidden>Todas mis sesiones ↗</a></nav>
+  <nav class="pisos"><button data-fila="0">Planta principal</button><button data-fila="21">Calleros · Cerebro</button><button data-fila="37">Terrazas · Pensado</button><button data-fila="59">Espacios libres</button><button data-fila="72">Ampliación</button><button data-fila="86">Agentes · Taller</button><button data-fila="59" data-x="12">Ala Oeste</button><button data-fila="59" data-x="66">Ala Este</button><button data-fila="59" data-x="89">Clipping</button><a id="irPase" href="#pase" role="button">＋ Sesión</a><a id="irTexto" href="#texto" role="button" title="Tamaño del texto de los monitos">Aa</a><a id="irHorario" href="#horario" role="button" title="Horario de la oficina">Horario</a><a id="irClaude" href="https://claude.ai/artifact/KbxrcsXckzZSE5F65iZwCE" target="_blank" rel="noopener" hidden>Todas mis sesiones ↗</a></nav>
   <div class="derecha"><span id="ultimo"></span><span id="cuantos"></span><span id="reloj"></span></div>
 </header>
 <div id="tip"></div>
@@ -349,21 +349,22 @@ const MAPA = (() => {
     const col = c => lado === 0 ? c : ALA + NUCLEO + ALA * lado - 1 - c;   // c = columna del tramo, 0 = su muro de afuera
     const poner = (c0, r0, c1, r1, t) => { for (let r = R(r0); r <= R(r1); r++) for (let c = c0; c <= c1; c++) w[r][col(c)] = t; };
     poner(1, 60, 23, 60, '='); poner(1, 61, 23, 62, 'h');               // el pasillo 4 sigue hasta la orilla
+    const clip = lado === 2;                                            // el segundo tramo del este es el Estudio de Clipping
     poner(1, 64, 8, 64, '='); poner(15, 64, 22, 64, '=');               // cuartos de arriba
-    poner(1, 65, 8, 72, 'v'); poner(15, 65, 22, 72, 'v');
+    poner(1, 65, 8, 72, clip ? 'q' : 'v'); poner(15, 65, 22, 72, clip ? 'r' : 'v');   // q = estudio de edición · r = lounge
     poner(1, 74, 8, 74, '='); poner(15, 74, 22, 74, '=');               // cuartos de en medio: ampliación (en obra)
-    poner(1, 75, 8, 86, 'a'); poner(15, 75, 22, 86, 'a');
+    poner(1, 75, 8, 86, clip ? 'q' : 'a'); poner(15, 75, 22, 86, clip ? 'q' : 'a');
     poner(1, 87, 23, 87, '='); poner(1, 88, 23, 89, 'h');               // el pasillo 5 también sigue
     poner(1, 91, 8, 91, '='); poner(15, 91, 22, 91, '=');               // cuartos de abajo (el de adentro del oeste es el Taller 2)
-    poner(1, 92, 8, 99, 'v'); poner(15, 92, 22, 99, lado ? 'v' : 'w');
+    poner(1, 92, 8, 99, clip ? 'q' : 'v'); poner(15, 92, 22, 99, lado ? 'v' : 'w');
     poner(10, 63, 13, 99, 'h');                                         // el pasillo de en medio del ala, con su periférico
     for (const c of [4, 5, 18, 19]) for (const r of [63, 64, 90, 91]) w[R(r)][col(c)] = 'D';   // puertas desde los pasillos 4 y 5
     for (const c of [9, 14]) for (const r of [82, 83]) w[R(r)][col(c)] = 'D';                    // la obra se entra por el pasillo del ala
-    for (const r of [80, 81]) w[R(r)][col(23)] = 'D';                                            // y se pasa a la Ampliación de en medio
+    if (!clip) for (const r of [80, 81]) w[R(r)][col(23)] = 'D';                                 // y se pasa a la Ampliación de en medio
   }
   return w;
 })();
-const CAMINABLE = new Set(['h', 'b', 'e', 'i', 'j', 'd', 'D', 'E', 'c', 'x', 'v', 't', 'k', 'n', 'a', 'g', 'w']);
+const CAMINABLE = new Set(['h', 'b', 'e', 'i', 'j', 'd', 'D', 'E', 'c', 'x', 'v', 't', 'k', 'n', 'a', 'g', 'w', 'q', 'r']);
 /* Túnel subterráneo: una escotilla en la Oficina Terrazas y otra en el Centro de Pensado (filas de antes) */
 const ESCOTILLAS = [{ x: 9, y: 45 }, { x: 22, y: 45 }];
 const BLOQUEO = new Set();
@@ -384,6 +385,12 @@ const AREAS = {
   'almacen':        { letrero: 'ALMACÉN',        x0: 28, y0: 44, x1: 30, y1: 50, lx: 472, ly: 659, pose: 'leer' },
   'agentes':        { letrero: 'CUARTO DE AGENTES', x0: 1, y0: 92, x1: 9, y1: 99, lx: 80, ly: 1448, pose: 'descansar' },
   'taller':         { letrero: 'TALLER',         x0: 11, y0: 92, x1: 20, y1: 99, lx: 256, ly: 1448, pose: 'parado' },
+  // El Estudio de Clipping (edición de video), en el segundo tramo del Ala Este
+  'centro de diseno': { letrero: 'CENTRO DE DISEÑO', x0: 69, y0: 75, x1: 76, y1: 86, lx: 1168, ly: 1156, pose: 'teclear' },   // el letrero arriba de la pantalla grande
+  'diseno aux 1':   { letrero: 'DISEÑO AUX 1',   x0: 69, y0: 65, x1: 76, y1: 72, lx: 1168, ly: 1016, pose: 'teclear' },
+  'diseno aux 2':   { letrero: 'DISEÑO AUX 2',   x0: 55, y0: 75, x1: 62, y1: 86, lx: 944,  ly: 1192, pose: 'teclear' },
+  'diseno aux 3':   { letrero: 'DISEÑO AUX 3',   x0: 69, y0: 92, x1: 76, y1: 99, lx: 1168, ly: 1448, pose: 'teclear' },
+  'lounge de diseno': { letrero: 'LOUNGE DE DISEÑO', x0: 55, y0: 65, x1: 62, y1: 72, lx: 944, ly: 1016, pose: 'descansar' },
   'taller 2':       { letrero: 'TALLER 2',       x0: -8, y0: 92, x1: -1, y1: 99, lx: -64, ly: 1448, pose: 'parado' },   // ala oeste
   'noticias':       { letrero: 'NOTICIAS',       x0: 22, y0: 55, x1: 30, y1: 58, lx: 416, ly: 823, pose: 'leer' },
 };
@@ -476,6 +483,45 @@ const LUGARES = {
     L(6, 94, 'arriba', { ox: 8, lavadora: 0 }),                       // frente a cada lavadora de memoria (adentro no se ve)
     L(8, 94, 'arriba', { ox: 8, lavadora: 1 }),
   ],
+  'centro de diseno': [                                               // mesas de edición, la pantalla grande y el set de grabación
+    L(70, 78, 'arriba', { ox: 8, oy: -3, sentado: true, silla: 'oficina' }),
+    L(73, 78, 'arriba', { ox: 8, oy: -3, sentado: true, silla: 'oficina' }),
+    L(70, 82, 'arriba', { ox: 8, oy: -3, sentado: true, silla: 'oficina' }),
+    L(73, 82, 'arriba', { ox: 8, oy: -3, sentado: true, silla: 'oficina' }),
+    L(72, 76, 'arriba'),                                               // revisando el corte en la pantalla grande
+    L(75, 85, 'abajo'),                                                // grabando frente a la pantalla verde
+    L(70, 80, 'izq', { tubo: true }),
+  ],
+  'diseno aux 1': [
+    L(70, 70, 'arriba', { ox: 8, oy: -3, sentado: true, silla: 'oficina' }),
+    L(74, 70, 'arriba', { ox: 8, oy: -3, sentado: true, silla: 'oficina' }),
+    L(70, 66, 'arriba'),                                               // frente al storyboard
+    L(70, 68, 'izq', { tubo: true }),
+  ],
+  'diseno aux 2': [
+    L(56, 78, 'arriba', { ox: 8, oy: -3, sentado: true, silla: 'oficina' }),
+    L(59, 78, 'arriba', { ox: 8, oy: -3, sentado: true, silla: 'oficina' }),
+    L(56, 83, 'arriba', { sentado: true, puf: '#ff5fa2' }),            // viendo los clips en la tele
+    L(58, 83, 'arriba', { sentado: true, puf: '#7fe7ff' }),
+    L(61, 80, 'der', { tubo: true }),
+  ],
+  'diseno aux 3': [
+    L(70, 97, 'arriba', { ox: 8, oy: -3, sentado: true, silla: 'oficina' }),
+    L(74, 97, 'arriba', { ox: 8, oy: -3, sentado: true, silla: 'oficina' }),
+    L(70, 93, 'arriba'),
+    L(70, 95, 'izq', { tubo: true }),
+  ],
+  'lounge de diseno': [                                               // para que descansen los agentes de clipping
+    L(56, 71, 'arriba', { oy: 6, sentado: true }),                     // el sillón, de espaldas, viendo al cuarto
+    L(57, 71, 'arriba', { oy: 6, sentado: true }),
+    L(58, 71, 'arriba', { oy: 6, sentado: true }),
+    L(56, 67, 'der', { sentado: true, puf: '#ff5fa2' }),
+    L(56, 69, 'der', { sentado: true, puf: '#7fe7ff' }),
+    L(59, 67, 'abajo'),                                                // jugando futbolito
+    L(59, 70, 'arriba'),
+    L(61, 66, 'arriba'),                                               // haciendo un café
+    L(61, 68, 'der', { tubo: true }),
+  ],
   'taller 2': [
     L(-5, 94, 'abajo'),
     L(-3, 96, 'izq'),
@@ -507,6 +553,9 @@ function normalizarArea(a){
   if (s.includes('almacen') || s.includes('archivero') || s.includes('archivo')) return 'almacen';
   if (s.includes('noticia') || s.includes('pantalla') || s.includes('cartelera')) return 'noticias';
   if (s.includes('agentes') || s.includes('ayudantes')) return 'agentes';
+  if (s.includes('lounge')) return 'lounge de diseno';
+  if (s.includes('centro de diseno') || s.includes('clipping') || s.includes('edicion')) return 'centro de diseno';
+  { const aux = /aux(?:iliar)? ?([123])\b/.exec(s); if (aux) return 'diseno aux ' + aux[1]; }
   if (/taller\s*2/.test(s)) return 'taller 2';
   if (s.includes('taller') || s.includes('droide')) return 'taller';
   if (s.includes('junta') || s === 'sala' || s.includes('reunion')) return 'sala de juntas';
@@ -1125,22 +1174,21 @@ function tallerDeDroides(){
    dos lados: arriba libres, en medio una ampliación en obra y abajo libres; el de abajo adentro del oeste es el
    Taller 2. */
 function alas(){
-  for (const [cx, id] of [[-19, 'espacio-o1'], [-5, 'espacio-o2'], [35, 'espacio-e1'], [49, 'espacio-e2'], [58, 'espacio-e7'], [73, 'espacio-e8']]) caballete(cx, 68, id);
-  for (const [cx, id] of [[-19, 'espacio-o5'], [35, 'espacio-e5'], [49, 'espacio-e6'], [58, 'espacio-e11'], [73, 'espacio-e12']]) caballete(cx, 95, id);
+  for (const [cx, id] of [[-19, 'espacio-o1'], [-5, 'espacio-o2'], [35, 'espacio-e1'], [49, 'espacio-e2']]) caballete(cx, 68, id);
+  for (const [cx, id] of [[-19, 'espacio-o5'], [35, 'espacio-e5'], [49, 'espacio-e6'], [58, 'espacio-e11']]) caballete(cx, 95, id);
   // la obra de en medio
   caja(-21, 76); caja(-20, 76, true); escalera(-17, 78); cubeta(-21, 85); caja(-16, 86);
   caja(-7, 76); escalera(-3, 77); cubeta(-6, 85); caja(-2, 86); caja(-2, 85, true);
   caja(33, 76); caja(34, 76, true); escalera(37, 78); cubeta(33, 85);
   caja(52, 76); escalera(48, 77); cubeta(51, 85); caja(52, 86); caja(51, 86, true);
-  caja(56, 76); caja(57, 76, true); escalera(59, 78); cubeta(56, 85);
-  caja(75, 76); escalera(72, 77); cubeta(74, 85); caja(75, 86); caja(74, 86, true);
-  for (const [x0, x1] of [[-22, -15], [-8, -1], [32, 39], [46, 53], [55, 62], [69, 76]]) mueble(75 * T, () => {   // las rayas de la obra en el piso
+  for (const [x0, x1] of [[-22, -15], [-8, -1], [32, 39], [46, 53]]) mueble(75 * T, () => {   // las rayas de la obra en el piso
     const a = x0 * T + 10, b = (x1 + 1) * T - 10, y0 = 75 * T + 26, y1 = 87 * T - 22;
     for (let x = a; x < b; x += 8){ R(x, y0, 4, 1, '#e0b93a'); R(x, y1, 4, 1, '#e0b93a'); }
     for (let y = y0; y < y1; y += 8){ R(a, y, 1, 4, '#e0b93a'); R(b, y, 1, 4, '#e0b93a'); }
   });
-  for (const [cx, cy] of [[-18, 71], [-1, 71], [32, 71], [53, 71], [-22, 99], [32, 99], [53, 99], [55, 71], [76, 71], [55, 99], [76, 99]]) planta(cx, cy);
+  for (const [cx, cy] of [[-18, 71], [-1, 71], [32, 71], [53, 71], [-22, 99], [32, 99], [53, 99], [55, 99]]) planta(cx, cy);
   tallerDos();
+  estudioClipping();
 }
 /* Taller 2: para el próximo droide. Banco de trabajo, tablero de herramientas, dos bases de carga y su gabinete */
 function tallerDos(){
@@ -1172,6 +1220,133 @@ function tallerDos(){
   });
   planta(-2, 99);
   zonaLectura(-128, 1456, 128, 144, 'Taller 2: listo para el próximo droide', () => mensaje('Taller 2', 'Este taller está listo para el próximo droide: tiene su banco de trabajo, sus herramientas y dos bases de carga libres. BB-8 vive en el Taller de en medio.'));
+}
+
+
+/* ---------- Estudio de Clipping (edición de video), en el segundo tramo del Ala Este ----------
+   Centro de diseño (la oficina central), tres oficinas de diseño auxiliares y el lounge, donde descansan los agentes
+   de clipping. Estilo startup: piso oscuro de cuarto de edición, monitores con la línea de tiempo, pantalla verde. */
+const COLOR_CLIP = ['#d97757', '#4fa3ff', '#7ed99a', '#c79bff', '#ffd34d', '#ff5fa2'];
+function lineaDeTiempo(x, y, w, h, t, semilla){   // pistas de video con clips de colores y la aguja que corre
+  R(x, y, w, h, '#0b1220');
+  const pistas = Math.max(2, Math.floor((h - 2) / 3));
+  for (let p = 0; p < pistas; p++){
+    let cx = x + 1 + ((p * 5 + semilla * 3) % 4);
+    for (let k = 0; cx < x + w - 2; k++){
+      const largo = 3 + ((p * 7 + k * 5 + semilla) % 6), c = COLOR_CLIP[(p + k + semilla) % COLOR_CLIP.length];
+      R(cx, y + 1 + p * 3, Math.min(largo, x + w - 1 - cx), 2, c); cx += largo + 1;
+    }
+  }
+  R(x + 1 + Math.floor((t * 6 + semilla * 4) % (w - 2)), y, 1, h, '#ff5b5b');
+}
+function mesaEdicion(tx, ty, area, idx){   // escritorio de edición: dos monitores con la línea de tiempo, teclado, audífonos
+  bloquear(tx, ty, tx + 1, ty);
+  const cx = (tx + 1) * T, top = ty * T - 2;
+  mueble(ty * T + 16, (t) => {
+    R(cx - 16, top, 32, 18, K); R(cx - 15, top + 1, 30, 10, '#3a3f4d'); R(cx - 15, top + 1, 30, 1, '#55607a');
+    R(cx - 15, top + 11, 30, 6, '#262a35'); R(cx - 15, top + 11, 30, 1, '#1c1f28');
+    const on = ocupadoLugar(area, idx);
+    for (const mx of [cx - 15, cx + 1]){                                // dos monitores
+      R(mx, top - 12, 14, 11, K);
+      if (on) lineaDeTiempo(mx + 1, top - 11, 12, 8, t, idx * 2 + (mx > cx ? 1 : 0)); else R(mx + 1, top - 11, 12, 8, '#1a1d26');
+      R(mx + 6, top - 1, 2, 2, K);
+    }
+    R(cx - 7, top + 4, 14, 4, K); R(cx - 6, top + 5, 12, 2, '#d9d9e0');                     // teclado
+    R(cx + 9, top + 5, 3, 4, K); R(cx + 10, top + 6, 1, 2, '#9aa3ad');                     // ratón
+    R(cx - 14, top + 3, 5, 1, K); R(cx - 14, top + 4, 1, 3, K); R(cx - 10, top + 4, 1, 3, K); R(cx - 15, top + 6, 3, 3, '#ff5fa2'); R(cx - 11, top + 6, 3, 3, '#ff5fa2');   // audífonos
+  });
+}
+function estudioClipping(){
+  /* ----- Centro de diseño (la oficina central) ----- */
+  mueble(75 * T - 1, (t) => {                                          // la pantalla grande: el clip vertical y su línea de tiempo
+    const on = hayAlguien('centro de diseno');
+    R(1112, 1166, 112, 34, K); R(1113, 1167, 110, 32, '#2b2f3a'); R(1115, 1169, 106, 28, '#0b1220');
+    R(1118, 1171, 14, 24, on ? '#1f3550' : '#141b28');                // el clip en vertical (9:16)
+    if (on){ disco(1125, 1179, 3, '#f2c9a0'); R(1121, 1183, 9, 8, '#d97757'); R(1119, 1191, 12, 2, '#ffffff'); R(1120, 1192, 10, 1, '#111'); }
+    lineaDeTiempo(1136, 1172, 82, 22, on ? t : 0, 3);
+    R(1216, 1169, 3, 3, on && Math.floor(t * 2) % 2 ? '#ff5b5b' : '#5a1e1e');   // REC
+  });
+  for (const [x, y, i] of [[70, 77, 0], [73, 77, 1], [70, 81, 2], [73, 81, 3]]) mesaEdicion(x, y, 'centro de diseno', i);
+  bloquear(76, 76, 76, 77);
+  mueble(77 * T + 15, (t) => {                                         // el servidor de render
+    R(1218, 1210, 14, 36, K); R(1219, 1211, 12, 34, '#2a2e38'); R(1219, 1211, 12, 1, '#4a5368');
+    for (let i = 0; i < 7; i++){ R(1221, 1214 + i * 4, 8, 2, '#1a1d26'); R(1227, 1214 + i * 4, 2, 2, (Math.floor(t * 5) + i) % 3 ? '#5dff7a' : '#1f5a2a'); }
+  });
+  bloquear(74, 84, 76, 84);
+  mueble(84 * T + 15, () => {                                          // pantalla verde para grabar
+    R(1184, 1322, 3, 38, K); R(1229, 1322, 3, 38, K); R(1184, 1322, 48, 3, K);
+    R(1187, 1325, 42, 30, '#2fbf5a'); R(1187, 1325, 42, 2, '#5fe07f'); R(1187, 1353, 42, 2, '#249a48');
+    R(1187, 1355, 42, 4, '#2fbf5a');
+  });
+  bloquear(73, 86);
+  mueble(86 * T + 15, (t) => {                                         // aro de luz con el celular en el tripié
+    const on = hayAlguien('centro de diseno');
+    R(1175, 1386, 1, 4, K); R(1171, 1389, 9, 1, K); R(1175, 1366, 1, 20, K);
+    disco(1175, 1360, 7, K); disco(1175, 1360, 6, on ? '#fff6d0' : '#8a8a8a'); disco(1175, 1360, 4, K); R(1173, 1357, 4, 6, '#1c2a3a');
+    if (on){ g.globalAlpha = 0.15 + 0.05 * Math.sin(t * 3); disco(1175, 1360, 12, '#fff6d0'); g.globalAlpha = 1; }
+  });
+  planta(69, 86);
+  /* ----- Diseño aux 1, 2 y 3 (oficinas auxiliares) ----- */
+  const storyboard = (x, y) => mueble(y + 18, () => {                 // pizarrón con las escenas del clip
+    R(x, y, 42, 14, K); R(x + 1, y + 1, 40, 12, '#c9a06a');
+    for (let i = 0; i < 4; i++){ R(x + 3 + i * 10, y + 3, 8, 8, '#f7f3ea'); R(x + 4 + i * 10, y + 4, 6, 4, COLOR_CLIP[i]); R(x + 4 + i * 10, y + 9, 5, 1, '#9a9488'); }
+  });
+  for (const [x, y, i] of [[70, 69, 0], [74, 69, 1]]) mesaEdicion(x, y, 'diseno aux 1', i);
+  storyboard(1106, 1025); planta(76, 72);
+  for (const [x, y, i] of [[56, 77, 0], [59, 77, 1]]) mesaEdicion(x, y, 'diseno aux 2', i);
+  storyboard(884, 1185);
+  bloquear(55, 81, 58, 81);
+  mueble(81 * T + 15, (t) => {                                         // la tele para ver cómo quedaron los clips
+    const on = hayAlguien('diseno aux 2');
+    R(882, 1286, 60, 6, K); R(883, 1287, 58, 4, '#5b3a22');            // mueble
+    R(889, 1262, 46, 26, K); R(890, 1263, 44, 23, on ? '#0b1220' : '#151a24');
+    if (on){ R(905, 1264, 13, 21, '#1f3550'); disco(911, 1271, 3, '#f2c9a0'); R(907, 1275, 9, 7, '#7fe7ff'); R(906, 1282, 11, 1, '#ffffff'); }
+  });
+  planta(55, 86);
+  for (const [x, y, i] of [[70, 96, 0], [74, 96, 1]]) mesaEdicion(x, y, 'diseno aux 3', i);
+  storyboard(1106, 1457); planta(76, 99);
+  /* ----- Lounge de diseño: donde descansan los agentes de clipping ----- */
+  mueble(65 * T - 1, (t) => {                                          // letrero de neón y foquitos en la pared
+    const b = 0.75 + 0.25 * Math.sin(t * 2.3);
+    g.globalAlpha = b;
+    R(884, 1027, 40, 12, '#ff5fa2'); R(886, 1029, 36, 8, '#2a1830');  // marco rosa
+    R(898, 1030, 2, 6, '#7fe7ff'); R(900, 1031, 2, 4, '#7fe7ff'); R(902, 1032, 2, 2, '#7fe7ff');   // ▶
+    R(907, 1031, 1, 4, '#ffd34d'); R(910, 1030, 1, 6, '#ffd34d'); R(913, 1032, 1, 2, '#ffd34d'); R(916, 1031, 1, 4, '#ffd34d');   // ondas
+    g.globalAlpha = 1;
+    for (let i = 0; i < 8; i++) R(964 + i * 6, 1027 + (i % 2), 2, 2, COLOR_CLIP[(i + Math.floor(t)) % COLOR_CLIP.length]);
+  });
+  mueble(66 * T, () => {                                               // tapete
+    R(884, 1062, 44, 54, '#5b4a8a'); R(886, 1064, 40, 50, '#6d5aa5');
+    for (let i = 0; i < 5; i++) R(888 + i * 8, 1066, 4, 46, '#7c69b4');
+  });
+  bloquear(60, 65, 62, 65);
+  mueble(65 * T + 15, (t) => {                                         // barra de café con su cafetera
+    R(960, 1046, 48, 9, K); R(961, 1047, 46, 3, '#e7e2d6'); R(961, 1050, 46, 4, '#7b4f2b');
+    R(963, 1034, 12, 13, K); R(964, 1035, 10, 11, '#9aa3ad'); R(966, 1037, 6, 3, '#2a2e38'); R(968, 1042, 2, 3, K);   // cafetera
+    R(979, 1040, 5, 6, K); R(980, 1041, 3, 4, '#ffffff'); R(986, 1040, 5, 6, K); R(987, 1041, 3, 4, '#ff5fa2');      // tazas
+    if (Math.floor(t * 0.5) % 2){ g.globalAlpha = 0.5; R(981, 1035, 1, 3, '#ffffff'); R(983, 1033, 1, 3, '#ffffff'); g.globalAlpha = 1; }
+    R(995, 1036, 9, 10, K); R(996, 1037, 7, 8, '#3f8f3f'); R(997, 1034, 5, 3, '#6fcf7b');                               // matita
+  });
+  bloquear(58, 68, 60, 69);
+  mueble(69 * T + 15, (t) => {                                         // futbolito
+    R(928, 1090, 48, 28, K); R(929, 1091, 46, 26, '#7b4f2b'); R(932, 1094, 40, 20, '#2fa84f');
+    R(951, 1094, 1, 20, '#e8f6e8'); R(932, 1103, 40, 1, '#e8f6e8'); R(929, 1100, 3, 8, '#e7e2d6'); R(972, 1100, 3, 8, '#e7e2d6');
+    for (let i = 0; i < 4; i++){ const x = 936 + i * 10; R(x, 1088, 1, 32, '#c9ced6'); R(x - 1, 1098 + (i % 2) * 6, 3, 3, i < 2 ? '#d24040' : '#3f7ad2'); }
+    const u = (t * 0.7) % 1; R(Math.round(934 + Math.abs(u * 2 - 1) * 34), 1102 + Math.round(Math.sin(t * 3) * 3), 2, 2, '#ffffff');   // la pelotita
+  });
+  bloquear(56, 72, 58, 72);
+  mueble(71 * T + 2, () => {                                           // el sillón: los cojines (atrás de quien se sienta)
+    R(893, 1144, 54, 12, K); R(894, 1145, 52, 10, '#ff7a59'); R(894, 1145, 52, 1, '#ffa287');
+    R(911, 1145, 1, 10, '#d65e40'); R(928, 1145, 1, 10, '#d65e40');
+  });
+  mueble(72 * T + 15, () => {                                          // respaldo y brazos (delante)
+    R(893, 1154, 54, 13, K); R(894, 1155, 52, 11, '#e8654a'); R(894, 1155, 52, 1, '#ff8a6c'); R(894, 1164, 52, 2, '#b84a33');
+    R(890, 1144, 6, 23, K); R(891, 1145, 4, 21, '#b84a33'); R(944, 1144, 6, 23, K); R(945, 1145, 4, 21, '#b84a33');
+    R(900, 1151, 8, 5, '#7fe7ff'); R(932, 1151, 8, 5, '#ffd34d');
+  });
+  planta(55, 65); planta(62, 72);
+  zonaLectura(1104, 1166, 128, 230, 'Centro de diseño: la oficina central del Estudio de Clipping', () => mensaje('Centro de diseño', 'La oficina central del Estudio de Clipping: mesas de edición con doble monitor, la pantalla grande con el corte del día, el servidor de render y el set de pantalla verde con aro de luz para grabar. Aquí trabajarán los agentes de clipping.'));
+  zonaLectura(880, 1024, 128, 144, 'Lounge de diseño: donde descansan los agentes de clipping', () => mensaje('Lounge de diseño', 'El lugar para descansar del Estudio de Clipping: sillón, pufs, futbolito y barra de café. Los agentes de clipping vendrán aquí entre clip y clip.'));
 }
 
 /* ---------- La basura: lo viejo que se junta en la Sala de Noticias y en el Almacén ---------- */
@@ -1718,12 +1893,14 @@ function construirMuebles(){
 /* ---------- Capa fija: pisos, paredes y adornos que no se mueven ---------- */
 const estatica = document.createElement('canvas'); estatica.width = W; estatica.height = H;
 const CARA = { biblioteca: '#d4c3a0', escritorio: '#e2d4b4', internet: '#b8c3d4', pasillo: '#dccfb2', sala: '#ccd2dc', descanso: '#ead3ae',
-               calleros: '#d8c39b', cerebro: '#3a3157', vacio: '#cfcbc2', agentes: '#9fb1c9', taller: '#8f98a3', terrazas: '#e9d9bd', pensado: '#3b5166', noticias: '#4a4f66' };
+               calleros: '#d8c39b', cerebro: '#3a3157', vacio: '#cfcbc2', agentes: '#9fb1c9', taller: '#8f98a3', estudio: '#3c3752', lounge: '#e7c79d', terrazas: '#e9d9bd', pensado: '#3b5166', noticias: '#4a4f66' };
 function caraDe(xa, y){
   const x = xa - ALA;                                                  // columna del cuerpo de en medio
   if (x < 0 || x >= NUCLEO){                                            // las alas
     const c = x < 0 ? xa : ALA + NUCLEO + ALA * (Math.floor((x - NUCLEO) / ALA) + 1) - 1 - xa;   // columna del tramo (0 = muro de afuera)
     if (y === 60 || y === 87 || (c >= 10 && c <= 13)) return CARA.pasillo;
+    if (x >= NUCLEO + ALA && (y === 74 || ((y === 64 || y === 91) && c <= 8))) return CARA.estudio;   // Estudio de Clipping
+    if (x >= NUCLEO + ALA && y === 64) return CARA.lounge;
     return y === 91 && x < 0 && c >= 15 ? CARA.taller : CARA.vacio;
   }
   if (y === 1) return x <= 9 ? CARA.biblioteca : x <= 20 ? CARA.escritorio : CARA.internet;
@@ -1822,6 +1999,17 @@ function baldosa(x, y){
     case 'g':   // Cuarto de Agentes: alfombra azul suave
       R(px, py, T, T, ((x + y) & 1) ? '#4a5a78' : '#465673');
       if ((x * 3 + y * 5) % 4 === 0) R(px + 6, py + 6, 2, 2, '#56688a');
+      break;
+    case 'q':   // Estudio de Clipping: piso oscuro de cuarto de edición, con juntas
+      R(px, py, T, T, ((x + y) & 1) ? '#2f2c3b' : '#2c2938');
+      R(px, py + T - 1, T, 1, '#24212f'); R(px + T - 1, py, 1, T, '#24212f');
+      if ((x * 7 + y * 5) % 9 === 0) R(px + 6, py + 6, 2, 2, '#38344a');
+      break;
+    case 'r':   // Lounge: duela cálida
+      R(px, py, T, T, '#c48f5c');
+      R(px, py + 5, T, 1, '#a9784a'); R(px, py + 11, T, 1, '#a9784a');
+      R(px + ((y * 7) % 12), py, 1, 5, '#a9784a'); R(px + ((y * 5 + 6) % 14), py + 6, 1, 5, '#a9784a'); R(px + ((y * 3 + 3) % 13), py + 12, 1, 4, '#a9784a');
+      if ((x + y) % 3 === 0) R(px + 3, py + 2, 4, 1, '#d4a06c');
       break;
     case 'w':   // Taller: concreto pulido, con juntas y una franja de seguridad junto a la pared
       R(px, py, T, T, ((x + y) & 1) ? '#7c838c' : '#788089');
@@ -3212,7 +3400,7 @@ function obsidianURL(boveda, ruta){ return 'obsidian://open?vault=' + encodeURIC
 
 /* Ficha de un monito (solo lectura) */
 const NOMBRE_AREA = { escritorio: 'Escritorio', biblioteca: 'Biblioteca', internet: 'Internet', 'sala de juntas': 'Sala de juntas',
-                      descanso: 'Descanso', taller: 'Taller', 'taller 2': 'Taller 2', calleros: 'Oficina Calleros', 'cerebro delta': 'Cerebro Delta', terrazas: 'Oficina Terrazas', 'centro de pensado': 'Centro de Pensado', almacen: 'Almacén', noticias: 'Sala de Noticias', agentes: 'Cuarto de Agentes' };
+                      descanso: 'Descanso', taller: 'Taller', 'taller 2': 'Taller 2', 'centro de diseno': 'Centro de diseño', 'diseno aux 1': 'Diseño aux 1', 'diseno aux 2': 'Diseño aux 2', 'diseno aux 3': 'Diseño aux 3', 'lounge de diseno': 'Lounge de diseño', calleros: 'Oficina Calleros', 'cerebro delta': 'Cerebro Delta', terrazas: 'Oficina Terrazas', 'centro de pensado': 'Centro de Pensado', almacen: 'Almacén', noticias: 'Sala de Noticias', agentes: 'Cuarto de Agentes' };
 function fechaCorta(s){
   const v = typeof s === 'number' ? s * (s < 1e12 ? 1000 : 1) : Date.parse(s);
   if (!v || isNaN(v)) return '—';
@@ -3703,11 +3891,11 @@ const LETREROS_ESPACIO = { 'espacio-d': letreroExtra(80, 1016, ''), 'espacio-e':
   // las alas: los cuartos libres (los de en medio están en obra; el de abajo adentro del oeste es el Taller 2)
   'espacio-o1': letreroExtra(-288, 1016, ''), 'espacio-o2': letreroExtra(-64, 1016, ''), 'espacio-o5': letreroExtra(-288, 1448, ''),
   'espacio-e1': letreroExtra(576, 1016, ''), 'espacio-e2': letreroExtra(800, 1016, ''), 'espacio-e5': letreroExtra(576, 1448, ''), 'espacio-e6': letreroExtra(800, 1448, ''),
-  'espacio-e7': letreroExtra(944, 1016, ''), 'espacio-e8': letreroExtra(1168, 1016, ''), 'espacio-e11': letreroExtra(944, 1448, ''), 'espacio-e12': letreroExtra(1168, 1448, '') };
+  'espacio-e11': letreroExtra(944, 1448, '') };
 const NOMBRE_ESPACIO = { 'espacio-o1': 'OESTE 1', 'espacio-o2': 'OESTE 2', 'espacio-o5': 'OESTE 5', 'espacio-e1': 'ESTE 1', 'espacio-e2': 'ESTE 2', 'espacio-e5': 'ESTE 5', 'espacio-e6': 'ESTE 6',
-  'espacio-e7': 'ESTE 7', 'espacio-e8': 'ESTE 8', 'espacio-e11': 'ESTE 11', 'espacio-e12': 'ESTE 12' };
-for (const [x, t] of [[-288, 'OESTE 3 · EN OBRA'], [-64, 'OESTE 4 · EN OBRA'], [576, 'ESTE 3 · EN OBRA'], [800, 'ESTE 4 · EN OBRA'], [944, 'ESTE 9 · EN OBRA'], [1168, 'ESTE 10 · EN OBRA']]) letreroExtra(x, 1192, t);
-letreroExtra(-176, 966, 'ALA OESTE'); letreroExtra(688, 966, 'ALA ESTE'); letreroExtra(1056, 966, 'ALA ESTE 2');
+  'espacio-e11': 'ESTE 11' };
+for (const [x, t] of [[-288, 'OESTE 3 · EN OBRA'], [-64, 'OESTE 4 · EN OBRA'], [576, 'ESTE 3 · EN OBRA'], [800, 'ESTE 4 · EN OBRA']]) letreroExtra(x, 1192, t);
+letreroExtra(-176, 966, 'ALA OESTE'); letreroExtra(688, 966, 'ALA ESTE'); letreroExtra(1056, 966, 'ESTUDIO DE CLIPPING');
 letreroExtra(256, 642, 'PERIFÉRICO · TÚNEL CENTRAL');
 letreroExtra(120, 1192, 'AMPLIACIÓN (EN OBRA)');
 function letrerosEspacios(){
@@ -3763,7 +3951,7 @@ const PASE = `Regístrate en mi oficina virtual para que yo vea en qué andas. H
    "area" es el cuarto donde estás: "escritorio" si escribes o programas, "biblioteca" si lees o revisas, "internet" si buscas en la web, "sala de juntas" si coordinas ayudantes, "centro de pensado" si planeas.
 3. Cuando cambies de tarea, vuelve a avisar con action "update" y el "version" que te devolvió la escritura anterior como if_version: cambia "area", "actividad" y "actualizado". No avises más de una vez cada varios minutos.
 4. Cuando termines lo que te pedí, "update" con { "estado": "terminado", "actualizado": "la hora de ahora" }.
-5. Si te pido que vayas a algún lugar de la oficina, que te pasees o que hagas algo ahí, haz "update" con { "estado": "paseando", "area": "el cuarto", "actividad": "lo que haces ahí (máximo 40 letras)", "actualizado": "la hora de ahora" }. Cuartos: escritorio, biblioteca, internet, sala de juntas, descanso, centro de pensado, noticias, almacen, calleros, cerebro delta, taller, taller 2. Te quedas ahí hasta 3 horas o hasta que te mueva otra vez.
+5. Si te pido que vayas a algún lugar de la oficina, que te pasees o que hagas algo ahí, haz "update" con { "estado": "paseando", "area": "el cuarto", "actividad": "lo que haces ahí (máximo 40 letras)", "actualizado": "la hora de ahora" }. Cuartos: escritorio, biblioteca, internet, sala de juntas, descanso, centro de pensado, noticias, almacen, calleros, cerebro delta, taller, taller 2, centro de diseño, diseño aux 1, diseño aux 2, diseño aux 3, lounge de diseño. Te quedas ahí hasta 3 horas o hasta que te mueva otra vez.
 
 Si no tienes la herramienta ArtifactData, dime en una línea "no puedo entrar a la oficina" y sigue normal.`;
 function panelPase(){
@@ -3829,7 +4017,7 @@ $('bajar').addEventListener('click', () => irAFila(FILA(21)));
 /* ---------- De lado solo donde hay algo ----------
    Arriba solo está el cuerpo de en medio: ahí la vista no se va a los lados (con zoom, solo dentro del cuerpo).
    Al bajar hasta donde empiezan las alas se suelta, y aparecen flechas a los lados para ir a ellas. */
-const TRAMOS_LADO = [['Ala Oeste', 0, ALA], ['Centro', ALA, ALA + NUCLEO], ['Ala Este', ALA + NUCLEO, ALA + NUCLEO + ALA], ['Ala Este 2', ALA + NUCLEO + ALA, COLS]];
+const TRAMOS_LADO = [['Ala Oeste', 0, ALA], ['Centro', ALA, ALA + NUCLEO], ['Ala Este', ALA + NUCLEO, ALA + NUCLEO + ALA], ['Estudio de Clipping', ALA + NUCLEO + ALA, COLS]];
 const xVista = () => (escenario.scrollLeft + escenario.clientWidth / 2) / escala - LIENZO_OFF.x;   // el centro de lo que se ve, en pixeles del mapa
 const verAlas = () => (escenario.scrollTop + escenario.clientHeight * 0.75) / escala - LIENZO_OFF.y > FILA(60) * T;
 function vigilarLados(){

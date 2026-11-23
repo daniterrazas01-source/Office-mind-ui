@@ -45,14 +45,14 @@ export const ESTACIONES = {
   'este 5':            { tx: 39, ty: 99, lado: 'der',   nombre: 'Este 5',            pie: { tx: 38, ty: 99 } },
   'este 6':            { tx: 46, ty: 99, lado: 'izq',   nombre: 'Este 6',            pie: { tx: 47, ty: 99 } },
   'ala este':          { tx: 41, ty: 102, lado: 'abajo', nombre: 'Ala Este',         pie: { tx: 44, ty: 103 }, boca: { tx: 42, ty: 102 } },
-  // El Ala Este es el doble de larga: un segundo tramo de cuartos con su propio pasillo
-  'este 7':            { tx: 62, ty: 72, lado: 'der',   nombre: 'Este 7',            pie: { tx: 61, ty: 72 } },
-  'este 8':            { tx: 69, ty: 72, lado: 'izq',   nombre: 'Este 8',            pie: { tx: 70, ty: 72 } },
-  'este 9':            { tx: 62, ty: 84, lado: 'der',   nombre: 'Este 9',            pie: { tx: 61, ty: 84 } },
-  'este 10':           { tx: 69, ty: 84, lado: 'izq',   nombre: 'Este 10',           pie: { tx: 70, ty: 84 } },
+  // El Ala Este es el doble de larga: su segundo tramo es el Estudio de Clipping (edición de video)
+  'este 7':            { tx: 62, ty: 72, lado: 'der',   nombre: 'Lounge de diseño',  pie: { tx: 61, ty: 72 } },
+  'este 8':            { tx: 69, ty: 72, lado: 'izq',   nombre: 'Diseño aux 1',      pie: { tx: 70, ty: 72 } },
+  'este 9':            { tx: 62, ty: 84, lado: 'der',   nombre: 'Diseño aux 2',      pie: { tx: 61, ty: 84 } },
+  'este 10':           { tx: 69, ty: 84, lado: 'izq',   nombre: 'Centro de diseño',  pie: { tx: 70, ty: 84 } },
   'este 11':           { tx: 62, ty: 99, lado: 'der',   nombre: 'Este 11',           pie: { tx: 61, ty: 99 } },
-  'este 12':           { tx: 69, ty: 99, lado: 'izq',   nombre: 'Este 12',           pie: { tx: 70, ty: 99 } },
-  'ala este 2':        { tx: 64, ty: 102, lado: 'abajo', nombre: 'Ala Este 2',       pie: { tx: 67, ty: 103 }, boca: { tx: 65, ty: 102 } },
+  'este 12':           { tx: 69, ty: 99, lado: 'izq',   nombre: 'Diseño aux 3',      pie: { tx: 70, ty: 99 } },
+  'ala este 2':        { tx: 64, ty: 102, lado: 'abajo', nombre: 'Estudio de Clipping', pie: { tx: 67, ty: 103 }, boca: { tx: 65, ty: 102 } },
 };
 
 const centro = (e) => (e.boca ? { x: e.boca.tx * T + 16, y: e.boca.ty * T + 16 } : { x: e.tx * T + 8, y: e.ty * T + 8 });
@@ -172,6 +172,10 @@ export function estacionDe(texto){
   if (/\btaller\b/.test(s)) return 'taller';
   const libre = /espacio(?: libre)? ([a-z])\b/.exec(s);
   if (libre && ESTACIONES['espacio ' + libre[1]]) return 'espacio ' + libre[1];
+  if (s.includes('lounge')) return 'este 7';                                       // el Estudio de Clipping
+  if (s.includes('centro de diseno') || s.includes('clipping') || s.includes('edicion de video')) return s.includes('estudio de clipping') ? 'ala este 2' : 'este 10';
+  const aux = /(?:diseno )?aux(?:iliar)? ?([123])\b/.exec(s);
+  if (aux) return { 1: 'este 8', 2: 'este 9', 3: 'este 12' }[aux[1]];
   if (s.includes('calleros')) return 'calleros';
   if (s.includes('cerebro')) return 'cerebro delta';
   if (s.includes('terraza') || s.includes('dragtree')) return 'terrazas';

@@ -176,4 +176,9 @@ test('estacionDe entiende los cuartos nuevos', () => {
   assert.equal(estacionDe('Oeste 9'), null);
   assert.equal(estacionDe('Este 10'), 'este 10');
   assert.equal(estacionDe('Ala Este 2'), 'ala este 2');
+  assert.equal(estacionDe('Centro de diseño'), 'este 10');
+  assert.equal(estacionDe('clipping'), 'este 10');
+  assert.equal(estacionDe('Estudio de Clipping'), 'ala este 2');
+  assert.equal(estacionDe('Diseño aux 2'), 'este 9');
+  assert.equal(estacionDe('lounge de diseño'), 'este 7');
 });

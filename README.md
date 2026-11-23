@@ -66,6 +66,14 @@ Cada ala tiene su pasillo de en medio, de arriba a abajo, y tres pisos de cuarto
 
 **El periférico** sigue: en el pasillo 4 se abre en dos ramales anchos (con tapa de vidrio) hacia las alas, baja por el pasillo de en medio de cada ala hasta su terminal (Ala Oeste, Ala Este) y por el pasillo 5 un tramo une las dos alas por abajo. Hay estación en todos los cuartos de las alas, en los tres cuartos libres de en medio (D, E y F), en el Taller y en el espacio libre H (`src/tunel.js`: `ESTACIONES`, `TRONCALES`, `RAMALES`, `ANCHOS`; la oficina lo recorre con `desplazar(ALA)`). Los cuartos libres dicen su nombre en el letrero («OESTE 1 · LIBRE»); cuando se les dé uso, se les pone en `espacios` como a los demás.
 
+### Estudio de Clipping (edición de video)
+
+El segundo tramo del Ala Este es el **Estudio de Clipping**, para los agentes que harán clips de video (botón «Clipping» arriba). Piso oscuro de cuarto de edición (`q`) y un lounge con duela (`r`); `estudioClipping()`.
+- **Centro de diseño** (`centro de diseno`, la oficina central; el cuarto de en medio de afuera): cuatro mesas de edición con doble monitor (la línea de tiempo corre cuando alguien está sentado, `mesaEdicion()`), la pantalla grande con el clip vertical y su línea de tiempo, el servidor de render, y un set de pantalla verde con aro de luz y celular en tripié.
+- **Diseño aux 1, 2 y 3** (`diseno aux N`, oficinas auxiliares): mesas de edición y pizarrón con el storyboard; la aux 2 tiene además una tele con pufs para revisar cómo quedaron los clips.
+- **Lounge de diseño** (`lounge de diseno`, el de arriba de adentro): para que descansen los agentes de clipping. Letrero de neón, foquitos, sillón, pufs, futbolito con su pelotita y barra de café.
+- El cuarto de abajo de adentro (Este 11) sigue libre. Cada cuarto tiene su estación del periférico (Centro de diseño, Diseño aux 1–3, Lounge de diseño; terminal: Estudio de Clipping) y lugares para los monitos, así que un agente o una sesión ya puede ir ahí diciendo el cuarto (también entiende «clipping», «edición» y «lounge»).
+
 ### Taller y el droide BB-8
 
 Junto al Cuarto de Agentes está el **Taller** (`taller`, piso `w`, `tallerDeDroides()`): la casa de los droides. Tiene dos bases de carga con su gabinete (la de BB-8 y una libre, con «+», para el próximo droide), la **máquina de reparación** (dos postes, viga y un brazo que suelda), la **compactadora** (donde se tira la basura; su número es lo que hay en la papelera), una mesa de trabajo con un domo de repuesto y, en la pared, el tablero de herramientas y la pantallita con la batería.
