@@ -24,6 +24,8 @@ export function estadoDemo() {
       v('demo-5', 'Script respaldo', 'descanso', 'Esperando instrucciones', 45, { actualizado: hace(45) }),
       v('demo-6', 'Duda de Excel', 'descanso', 'Esperando instrucciones', 600, { actualizado: hace(600), modelo: 'haiku' }),
       v('demo-7', 'Revisión de PR', 'descanso', 'Esperando instrucciones', 22 * 60, { actualizado: hace(22 * 60) }),
+      v('demo-9', 'Clips de GTA 6', 'escritorio', 'Editando corte_01.mp4', 0.2, { modelo: 'sonnet' }),
+      v('demo-10', 'Clipping shorts', 'descanso', 'Esperando instrucciones', 30, { actualizado: hace(30) }),
       v('demo-8', 'Sesión de ayer', 'descanso', 'Esperando instrucciones', 25 * 60, { actualizado: hace(25 * 60) }),
     ],
     monitos: [{
