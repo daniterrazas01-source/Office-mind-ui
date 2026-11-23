@@ -174,7 +174,7 @@ textarea.campo{min-height:70px;resize:vertical}
 <header>
   <div class="titulo"><span class="logo"></span>OFICINA · MONITOREO</div>
   <div class="senal" id="senal"><span class="punto"></span><span id="senalTexto">Conectando…</span></div>
-  <nav class="pisos"><button data-fila="0">Planta principal</button><button data-fila="21">Calleros · Cerebro</button><button data-fila="37">Terrazas · Pensado</button><button data-fila="59">Espacios libres</button><button data-fila="72">Ampliación</button><button data-fila="86">Agentes · Taller</button><a id="irPase" href="#pase" role="button">＋ Sesión</a><a id="irTexto" href="#texto" role="button" title="Tamaño del texto de los monitos">Aa</a><a id="irHorario" href="#horario" role="button" title="Horario de la oficina">Horario</a><a id="irClaude" href="https://claude.ai/artifact/KbxrcsXckzZSE5F65iZwCE" target="_blank" rel="noopener" hidden>Todas mis sesiones ↗</a></nav>
+  <nav class="pisos"><button data-fila="0">Planta principal</button><button data-fila="21">Calleros · Cerebro</button><button data-fila="37">Terrazas · Pensado</button><button data-fila="59">Espacios libres</button><button data-fila="72">Ampliación</button><button data-fila="86">Agentes · Taller</button><button data-fila="59" data-x="12">Ala Oeste</button><button data-fila="59" data-x="66">Ala Este</button><a id="irPase" href="#pase" role="button">＋ Sesión</a><a id="irTexto" href="#texto" role="button" title="Tamaño del texto de los monitos">Aa</a><a id="irHorario" href="#horario" role="button" title="Horario de la oficina">Horario</a><a id="irClaude" href="https://claude.ai/artifact/KbxrcsXckzZSE5F65iZwCE" target="_blank" rel="noopener" hidden>Todas mis sesiones ↗</a></nav>
   <div class="derecha"><span id="ultimo"></span><span id="cuantos"></span><span id="reloj"></span></div>
 </header>
 <div id="tip"></div>
@@ -206,7 +206,7 @@ textarea.campo{min-height:70px;resize:vertical}
 import { aplicarReglas, textoPlazo } from './src/reglas.js';
 import { estadoDemo } from './src/demo.js';
 import { estadoDeSesiones, modeloDeRespuesta, esfuerzoDeRespuesta, conVisitas, areaDeTexto } from './src/sesiones.js';
-import { ESTACIONES, NODOS, RAMALES, ANCHOS, TRONCO, rutaTunel, largoRuta, puntoEnRuta, enviosLimpios } from './src/tunel.js';
+import { ESTACIONES, NODOS, RAMALES, ANCHOS, TRONCO, rutaTunel, largoRuta, puntoEnRuta, enviosLimpios, desplazar } from './src/tunel.js';
 import { CADA_PANTALLA, turnoDe, secciones, turnoSeccion } from './src/pantalla.js';
 import { PROTEGIDOS, listaProtegidos, basura, idPapelera, paraCompactar, rondas, tocaLimpiar, enMantenimiento, DIAS_PAPELERA } from './src/droide.js';
 (() => {
@@ -218,7 +218,10 @@ import { PROTEGIDOS, listaProtegidos, basura, idPapelera, paraCompactar, rondas,
    ===================================================================== */
 
 /* ---------- Ajustes ---------- */
-const T = 16, COLS = 32;
+const T = 16, NUCLEO = 32, ALA = 23, COLS = NUCLEO + 2 * ALA, OX = ALA * T;
+/* La oficina es una T invertida: el cuerpo de en medio (NUCLEO casillas de ancho) y, del pasillo 4 para abajo, un ala
+   de ALA casillas a cada lado. Todo lo del cuerpo de en medio se escribió con su columna 0 en la orilla: se dibuja
+   recorrido OX pixeles. Lo de las alas también se escribe así (el ala oeste con columnas negativas). */
 /* El mapa se escribió con los pasillos 1 y 2 de dos casillas de ancho. Ahora son más anchos: se les agregan
    filas y todo lo de abajo se recorre. Los muebles y adornos de siempre siguen escritos con sus medidas de
    antes y se dibujan recorridos; FILA() y PY() convierten una fila o un pixel de antes a su lugar de ahora.
@@ -230,7 +233,7 @@ const PY = y => y + (y >= 400 ? (N1 + N2) * T : y >= 208 ? N1 * T : 0);
 const FILA_V = r => r >= 25 + N1 + N2 ? r - N1 - N2 : r > 24 + N1 ? 24 : r >= 13 + N1 ? r - N1 : r > 12 ? 12 : r;   // de ahora a antes
 const BANDAS = [[0, 208, 0], [208, 400, N1 * T], [400, FILAS_V * T, (N1 + N2) * T]];
 function enBandas(pintar){   // corre un dibujo escrito con medidas de antes, recorriendo cada franja a su lugar
-  for (const [y0, y1, dy] of BANDAS){ g.save(); g.beginPath(); g.rect(0, y0 + dy, W, y1 - y0); g.clip(); g.translate(0, dy); pintar(); g.restore(); }
+  for (const [y0, y1, dy] of BANDAS){ g.save(); g.beginPath(); g.rect(0, y0 + dy, W, y1 - y0); g.clip(); g.translate(OX, dy); pintar(); g.restore(); }
 }
 const FILAS_ARRIBA = 22 + N1;        // la planta principal; lo demás se ve bajando con el scroll
 const SEGUNDOS_INACTIVO = 60;   // sin reportar más de esto -> Descanso
@@ -258,6 +261,7 @@ const VELOCIDAD = 100;          // pixeles por segundo al caminar
 const AVISO = 0.35;             // segundos con "!" antes de levantarse
 const FPS = 30;                 // cuadros por segundo (ahorra batería)
 const ENTRADA = { tx: 31, ty: 11 };
+desplazar(ALA);                 // el periférico, a las columnas de ahora (el ala oeste va primero)
 const K = '#2a1a14';            // color de contorno
 
 const lienzo = document.getElementById('lienzo');
@@ -283,7 +287,7 @@ function linea(x0, y0, x1, y1, c){
    # muro   = pared vista de frente   D puerta   E entrada
    b biblioteca  e escritorio  i internet  j sala de juntas  d descanso  h pasillo */
 const MAPA = (() => {
-  const m = Array.from({ length: FILAS_V }, () => Array(COLS).fill('#'));
+  const m = Array.from({ length: FILAS_V }, () => Array(NUCLEO).fill('#'));
   const llenar = (x0, y0, x1, y1, c) => { for (let y = y0; y <= y1; y++) for (let x = x0; x <= x1; x++) m[y][x] = c; };
   llenar(1, 1, 9, 1, '='); llenar(11, 1, 20, 1, '='); llenar(22, 1, 30, 1, '=');
   llenar(1, 2, 9, 8, 'b'); llenar(11, 2, 20, 8, 'e'); llenar(22, 2, 30, 8, 'i');
@@ -330,15 +334,34 @@ const MAPA = (() => {
   const ancho = [];
   m.forEach((fila, r) => {
     ancho.push(fila);
-    for (let i = 0; i < (r === 12 ? N1 : r === 24 ? N2 : 0); i++){ const c = fila.slice(); c[COLS - 1] = '#'; ancho.push(c); }
+    for (let i = 0; i < (r === 12 ? N1 : r === 24 ? N2 : 0); i++){ const c = fila.slice(); c[NUCLEO - 1] = '#'; ancho.push(c); }
   });
-  return ancho;
+  // ---- La T invertida: el cuerpo de en medio queda al centro y del pasillo 4 para abajo sale un ala a cada lado ----
+  const w = ancho.map((fila, r) => { const lado = () => Array(ALA).fill(r >= FILA(59) ? '#' : ' '); return lado().concat(fila, lado()); });   // ' ' = afuera
+  const R = r => FILA(r);                                                // filas de antes -> de ahora
+  for (const lado of [0, 1]){                                           // 0 = oeste, 1 = este (en espejo)
+    const col = c => lado ? COLS - 1 - c : c;                           // c = columna del ala, 0 = muro de afuera
+    const poner = (c0, r0, c1, r1, t) => { for (let r = R(r0); r <= R(r1); r++) for (let c = c0; c <= c1; c++) w[r][col(c)] = t; };
+    poner(1, 60, 23, 60, '='); poner(1, 61, 23, 62, 'h');               // el pasillo 4 sigue hasta la orilla
+    poner(1, 64, 8, 64, '='); poner(15, 64, 22, 64, '=');               // cuartos de arriba
+    poner(1, 65, 8, 72, 'v'); poner(15, 65, 22, 72, 'v');
+    poner(1, 74, 8, 74, '='); poner(15, 74, 22, 74, '=');               // cuartos de en medio: ampliación (en obra)
+    poner(1, 75, 8, 86, 'a'); poner(15, 75, 22, 86, 'a');
+    poner(1, 87, 23, 87, '='); poner(1, 88, 23, 89, 'h');               // el pasillo 5 también sigue
+    poner(1, 91, 8, 91, '='); poner(15, 91, 22, 91, '=');               // cuartos de abajo (el de adentro del oeste es el Taller 2)
+    poner(1, 92, 8, 99, 'v'); poner(15, 92, 22, 99, lado ? 'v' : 'w');
+    poner(10, 63, 13, 99, 'h');                                         // el pasillo de en medio del ala, con su periférico
+    for (const c of [4, 5, 18, 19]) for (const r of [63, 64, 90, 91]) w[R(r)][col(c)] = 'D';   // puertas desde los pasillos 4 y 5
+    for (const c of [9, 14]) for (const r of [82, 83]) w[R(r)][col(c)] = 'D';                    // la obra se entra por el pasillo del ala
+    for (const r of [80, 81]) w[R(r)][col(23)] = 'D';                                            // y se pasa a la Ampliación de en medio
+  }
+  return w;
 })();
 const CAMINABLE = new Set(['h', 'b', 'e', 'i', 'j', 'd', 'D', 'E', 'c', 'x', 'v', 't', 'k', 'n', 'a', 'g', 'w']);
 /* Túnel subterráneo: una escotilla en la Oficina Terrazas y otra en el Centro de Pensado (filas de antes) */
 const ESCOTILLAS = [{ x: 9, y: 45 }, { x: 22, y: 45 }];
 const BLOQUEO = new Set();
-function bloquear(x0, y0, x1 = x0, y1 = y0){ for (let y = y0; y <= y1; y++) for (let x = x0; x <= x1; x++) BLOQUEO.add(y * COLS + x); }
+function bloquear(x0, y0, x1 = x0, y1 = y0){ for (let y = y0; y <= y1; y++) for (let x = x0; x <= x1; x++) BLOQUEO.add(FILA(y) * COLS + x + ALA); }   // con medidas de antes
 function caminable(x, y){ return x >= 0 && y >= 0 && x < COLS && y < ROWS && CAMINABLE.has(MAPA[y][x]) && !BLOQUEO.has(y * COLS + x); }
 
 /* ---------- Áreas y lugares donde se sienta/para cada agente ---------- */
@@ -355,6 +378,7 @@ const AREAS = {
   'almacen':        { letrero: 'ALMACÉN',        x0: 28, y0: 44, x1: 30, y1: 50, lx: 472, ly: 659, pose: 'leer' },
   'agentes':        { letrero: 'CUARTO DE AGENTES', x0: 1, y0: 92, x1: 9, y1: 99, lx: 80, ly: 1448, pose: 'descansar' },
   'taller':         { letrero: 'TALLER',         x0: 11, y0: 92, x1: 20, y1: 99, lx: 256, ly: 1448, pose: 'parado' },
+  'taller 2':       { letrero: 'TALLER 2',       x0: -8, y0: 92, x1: -1, y1: 99, lx: -64, ly: 1448, pose: 'parado' },   // ala oeste
   'noticias':       { letrero: 'NOTICIAS',       x0: 22, y0: 55, x1: 30, y1: 58, lx: 416, ly: 823, pose: 'leer' },
 };
 const L = (tx, ty, dir, extra = {}) => Object.assign({ tx, ty, ox: 0, oy: 0, dir, sentado: false, silla: null }, extra);
@@ -446,6 +470,10 @@ const LUGARES = {
     L(6, 94, 'arriba', { ox: 8, lavadora: 0 }),                       // frente a cada lavadora de memoria (adentro no se ve)
     L(8, 94, 'arriba', { ox: 8, lavadora: 1 }),
   ],
+  'taller 2': [
+    L(-5, 94, 'abajo'),
+    L(-3, 96, 'izq'),
+  ],
   'taller': [                                                          // de visita con el droide (sus lugares son aparte)
     L(16, 94, 'abajo'),
     L(15, 96, 'der'),
@@ -473,6 +501,7 @@ function normalizarArea(a){
   if (s.includes('almacen') || s.includes('archivero') || s.includes('archivo')) return 'almacen';
   if (s.includes('noticia') || s.includes('pantalla') || s.includes('cartelera')) return 'noticias';
   if (s.includes('agentes') || s.includes('ayudantes')) return 'agentes';
+  if (/taller\s*2/.test(s)) return 'taller 2';
   if (s.includes('taller') || s.includes('droide')) return 'taller';
   if (s.includes('junta') || s === 'sala' || s.includes('reunion')) return 'sala de juntas';
   if (s.startsWith('escritorio') || s === 'computadora') return 'escritorio';
@@ -495,7 +524,7 @@ function textoBreve(s){
 const MUEBLES = [];
 function mueble(sortY, dibujar){   // con medidas de antes: se dibuja recorrido a su lugar de ahora
   const base = Math.floor(sortY) - 1, dy = PY(base) - base;
-  MUEBLES.push({ sortY: sortY + dy, dibujar: dy ? (t) => { g.save(); g.translate(0, dy); dibujar(t); g.restore(); } : dibujar });
+  MUEBLES.push({ sortY: sortY + dy, dibujar: (t) => { g.save(); g.translate(OX, dy); dibujar(t); g.restore(); } });
 }
 function muebleN(sortY, dibujar){ MUEBLES.push({ sortY, dibujar }); }   // con medidas de ahora
 
@@ -855,7 +884,8 @@ function estacionTunel(clave){
   if (e.boca) for (let dy = 0; dy < 2; dy++) for (let dx = 0; dx < 2; dx++){ const i = (e.boca.ty + dy) * COLS + e.boca.tx + dx; BLOQUEO.add(i); BOCAS.add(i); }
   muebleN(e.ty * T + 15, (t) => {
     const sin = SIN_LEER[clave] > 0, viaja = VIAJES.some(v => t >= v.sale && (v.e.de === clave || v.e.para === clave)), llego = t - (LLEGO[clave] ?? -9) < 2.5;
-    if (e.lado !== 'abajo'){                                                         // el tubo que se mete a la pared
+    if (e.lado === 'arriba'){ R(x + 5, y - 6, 4, 7, K); R(x + 6, y - 6, 2, 7, '#7c8596'); R(x + 6, y - 6, 1, 7, '#aab3c4'); }   // el tubo sube a la pared
+    else if (e.lado !== 'abajo'){                                                    // el tubo que se mete a la pared
       const tubo = e.lado === 'der' ? x + 13 : x - 3;
       R(tubo, y + 12, 4, 9, K); R(tubo, y + 13, 4, 7, '#7c8596'); R(tubo, y + 13, 4, 1, '#aab3c4'); R(tubo, y + 19, 4, 1, '#565e6e');
     }
@@ -895,8 +925,14 @@ function mudar(){
   for (const z of ZONAS) z.y = PY(z.y);
   for (const x of EXTRAS) x.y = PY(x.y);
   PANTALLA.y = PY(PANTALLA.y);
-  const viejo = [...BLOQUEO]; BLOQUEO.clear();
-  for (const i of viejo) BLOQUEO.add(FILA(Math.floor(i / COLS)) * COLS + i % COLS);
+  // y todo se recorre a su columna de ahora (el cuerpo de en medio empieza después del ala oeste)
+  for (const lista of Object.values(LUGARES)) for (const l of lista){ l.tx += ALA; l.x += OX; }
+  for (const A of Object.values(AREAS)){ A.x0 += ALA; A.x1 += ALA; A.lx += OX; }
+  for (const e of ESCOTILLAS) e.x += ALA;
+  for (const p of PUNTOS_PASEO) p[0] += ALA;
+  for (const z of ZONAS) z.x += OX;
+  for (const x of EXTRAS) x.x += OX;
+  PANTALLA.x += OX; ENTRADA.tx += ALA;
 }
 
 /* ---------- Cuarto de Agentes: solo para ellos. Ahí se toman su descanso un par de veces al día y en la noche ---------- */
@@ -1077,6 +1113,59 @@ function tallerDeDroides(){
   zonaLectura(208, 1456, 30, 16, () => `Batería de ${DROIDE.nombre}: ${rolo ? Math.round(rolo.d.bateria) : 0}%`, () => panelDroide());
 }
 
+
+/* ---------- Las alas (la T invertida). Medidas de antes; el ala oeste va en columnas negativas ----------
+   Cada ala tiene su pasillo de en medio (con el periférico bajando a su terminal) y tres pisos de cuartos a los
+   dos lados: arriba libres, en medio una ampliación en obra y abajo libres; el de abajo adentro del oeste es el
+   Taller 2. */
+function alas(){
+  for (const [cx, id] of [[-19, 'espacio-o1'], [-5, 'espacio-o2'], [35, 'espacio-e1'], [49, 'espacio-e2']]) caballete(cx, 68, id);
+  for (const [cx, id] of [[-19, 'espacio-o5'], [35, 'espacio-e5'], [49, 'espacio-e6']]) caballete(cx, 95, id);
+  // la obra de en medio
+  caja(-21, 76); caja(-20, 76, true); escalera(-17, 78); cubeta(-21, 85); caja(-16, 86);
+  caja(-7, 76); escalera(-3, 77); cubeta(-6, 85); caja(-2, 86); caja(-2, 85, true);
+  caja(33, 76); caja(34, 76, true); escalera(37, 78); cubeta(33, 85);
+  caja(52, 76); escalera(48, 77); cubeta(51, 85); caja(52, 86); caja(51, 86, true);
+  for (const [x0, x1] of [[-22, -15], [-8, -1], [32, 39], [46, 53]]) mueble(75 * T, () => {   // las rayas de la obra en el piso
+    const a = x0 * T + 10, b = (x1 + 1) * T - 10, y0 = 75 * T + 26, y1 = 87 * T - 22;
+    for (let x = a; x < b; x += 8){ R(x, y0, 4, 1, '#e0b93a'); R(x, y1, 4, 1, '#e0b93a'); }
+    for (let y = y0; y < y1; y += 8){ R(a, y, 1, 4, '#e0b93a'); R(b, y, 1, 4, '#e0b93a'); }
+  });
+  for (const [cx, cy] of [[-18, 71], [-1, 71], [32, 71], [53, 71], [-22, 99], [32, 99], [53, 99]]) planta(cx, cy);
+  tallerDos();
+}
+/* Taller 2: para el próximo droide. Banco de trabajo, tablero de herramientas, dos bases de carga y su gabinete */
+function tallerDos(){
+  mueble(92 * T - 1, () => {                                          // tablero de herramientas en la pared
+    R(-74, 1457, 40, 14, K); R(-73, 1458, 38, 12, '#c9a06a');
+    for (let i = 0; i < 9; i++) for (let j = 0; j < 3; j++) R(-71 + i * 4, 1460 + j * 4, 1, 1, '#8b6a3e');
+    R(-70, 1459, 4, 2, '#b8c0c8'); R(-69, 1461, 2, 8, '#b8c0c8'); R(-62, 1459, 2, 5, '#d97757'); R(-62, 1464, 2, 5, '#b8c0c8');
+    R(-55, 1459, 7, 3, '#5d6878'); R(-52, 1462, 2, 7, '#8b5a2b'); R(-45, 1460, 8, 6, K); R(-44, 1461, 6, 4, '#e0b93a');
+  });
+  bloquear(-4, 92, -2, 92);
+  mueble(92 * T + 15, () => {                                         // banco de trabajo con un cuerpo de droide a medio armar
+    R(-63, 1474, 46, 7, K); R(-62, 1475, 44, 4, '#8b5a2b'); R(-62, 1475, 44, 1, '#a87040'); R(-61, 1481, 3, 6, K); R(-22, 1481, 3, 6, K);
+    disco(-48, 1470, 5, K); disco(-48, 1470, 4, '#f2efe6'); disco(-48, 1470, 2, '#e8731a'); R(-49, 1469, 1, 1, '#f2efe6');
+    R(-38, 1468, 10, 7, K); R(-37, 1469, 8, 5, '#3a3f4d'); R(-36, 1470, 3, 2, '#5dff7a');
+  });
+  bloquear(-1, 97, -1, 98);
+  mueble(98 * T, () => {                                              // dos bases de carga, libres
+    for (const cx of [-88, -56]){
+      R(cx - 8, 1575, 16, 10, K); R(cx - 7, 1576, 14, 8, '#3a3f4d'); R(cx - 6, 1577, 12, 6, '#4a3a2a'); R(cx - 4, 1578, 8, 4, '#2a2e38');
+      R(cx - 1, 1579, 3, 1, '#d97757'); R(cx, 1578, 1, 3, '#d97757');
+    }
+    R(-80, 1588, 64, 1, '#1c1e26');
+  });
+  mueble(98 * T + 15, (t) => {                                        // el gabinete de carga
+    R(-16, 1546, 15, 40, K); R(-15, 1547, 13, 38, '#4a5568'); R(-15, 1547, 13, 1, '#6b7890');
+    R(-11, 1551, 5, 7, '#ffd34d'); R(-9, 1551, 3, 3, '#4a5568'); R(-11, 1555, 3, 3, '#4a5568');
+    R(-12, 1562, 3, 3, Math.floor(t) % 2 ? '#3fb6d6' : '#3a3f4d'); R(-7, 1562, 3, 3, '#3a3f4d');
+    for (let i = 0; i < 4; i++) R(-13, 1570 + i * 3, 9, 1, '#2f3a4c');
+  });
+  planta(-2, 99);
+  zonaLectura(-128, 1456, 128, 144, 'Taller 2: listo para el próximo droide', () => mensaje('Taller 2', 'Este taller está listo para el próximo droide: tiene su banco de trabajo, sus herramientas y dos bases de carga libres. BB-8 vive en el Taller de en medio.'));
+}
+
 /* ---------- La basura: lo viejo que se junta en la Sala de Noticias y en el Almacén ---------- */
 const PILAS = { noticias: { x: 448, y: 908 }, almacen: { x: 474, y: 798 } };   // medidas de antes
 const RECOGIDO = new Set();           // lo que el droide ya recogió: deja de verse aunque la base tarde en avisar
@@ -1183,13 +1272,13 @@ function escucharDroide(db){
 const minutosDelDia = t => { const d = new Date(t); return d.getHours() * 60 + d.getMinutes(); };
 const FRASES_DROIDE = ['Bip-bup ♪', 'Patrullando la oficina', 'Escaneando… todo en orden', 'Bzzt… ¿y esto?', '♪ biri-bip', 'Revisando los pasillos', 'Bip. Sin basura por aquí', 'Midiendo el polvo… bip', '¡Bip-bip! Hola'];
 const ESTADO_DROIDE = { hibernando: 'Hibernando', cargando: 'Cargando', paseando: 'Patrullando', aspirando: 'Limpiando', tirando: 'Compactando', reparando: 'En mantenimiento' };
-const VISITA_DROIDE = ['biblioteca', 'escritorio', 'internet', 'sala de juntas', 'descanso', 'calleros', 'cerebro delta', 'centro de pensado', 'noticias', 'terrazas', 'taller'];
+const VISITA_DROIDE = ['taller 2', 'biblioteca', 'escritorio', 'internet', 'sala de juntas', 'descanso', 'calleros', 'cerebro delta', 'centro de pensado', 'noticias', 'terrazas', 'taller'];
 function sitio(tx, ty, dir, area){ return { droide: true, area, idx: -1, tx, ty, x: tx * T + 8, y: ty * T + 13, dir, sentado: false, silla: null }; }
 function crearDroide(){
-  SITIOS.base = sitio(12, FILA(98), 'abajo', 'taller'); SITIOS.repara = sitio(18, FILA(97), 'abajo', 'taller');
-  SITIOS.tirar = sitio(13, FILA(93), 'izq', 'taller'); SITIOS.banco = sitio(19, FILA(93), 'arriba', 'taller');
-  SITIOS.noticias = Object.assign(sitio(26, FILA(56), 'der', 'noticias'), { pila: { x: PILAS.noticias.x, y: PY(PILAS.noticias.y) } });
-  SITIOS.almacen = Object.assign(sitio(29, FILA(48), 'abajo', 'almacen'), { pila: { x: PILAS.almacen.x, y: PY(PILAS.almacen.y) } });
+  SITIOS.base = sitio(ALA + 12, FILA(98), 'abajo', 'taller'); SITIOS.repara = sitio(ALA + 18, FILA(97), 'abajo', 'taller');
+  SITIOS.tirar = sitio(ALA + 13, FILA(93), 'izq', 'taller'); SITIOS.banco = sitio(ALA + 19, FILA(93), 'arriba', 'taller');
+  SITIOS.noticias = Object.assign(sitio(ALA + 26, FILA(56), 'der', 'noticias'), { pila: { x: OX + PILAS.noticias.x, y: PY(PILAS.noticias.y) } });
+  SITIOS.almacen = Object.assign(sitio(ALA + 29, FILA(48), 'abajo', 'almacen'), { pila: { x: OX + PILAS.almacen.x, y: PY(PILAS.almacen.y) } });
   rolo = crearAgente(DROIDE.id, { nombre: DROIDE.nombre, aspecto: 'normal' });
   Object.assign(rolo, { droide: true, rol: 'droide', vel: 1.35, estadoTxt: 'droide', modelo: null, nombre: DROIDE.nombre });
   rolo.d = { estado: abierta(Date.now()) ? 'cargando' : 'hibernando', bateria: 55 + Math.round(hashTexto(new Date().toDateString()) * 40), hasta: 0, quieto: 4,
@@ -1576,7 +1665,6 @@ function construirMuebles(){
   planta(1, 23); caja(30, 23); caja(30, 24, true); caja(29, 23);
   caja(1, 39); caja(2, 39, true); escalera(30, 39); cubeta(30, 40);
   planta(11, 43); planta(20, 43); planta(11, 58); planta(20, 58);                      // gran pasillo
-  planta(1, 61); caja(30, 61); caja(30, 62, true); caja(29, 61);                        // pasillo 4
   caja(2, 71); caja(3, 71, true); cubeta(8, 66); escalera(19, 66); caja(12, 71); cubeta(13, 70);
   caja(29, 66); caja(29, 67, true); caja(23, 71); escalera(23, 66);
   /* ===== Oficina Terrazas: archivos en estantes, y abajo el taller de DragTree ===== */
@@ -1601,9 +1689,9 @@ function construirMuebles(){
   caballete(5, 68, 'espacio-d'); caballete(13, 68, 'espacio-e'); caballete(25, 68, 'espacio-f');
   caballete(25, 95, 'espacio-h');
   cubeta(29, 93); caja(23, 98);
-  planta(1, 88); caja(30, 88); caja(30, 89, true);                                      // pasillo 5
   cuartoDeAgentes();
   tallerDeDroides();
+  alas();
   pilasDeBasura();
   /* Ampliación (hasta abajo): pura obra */
   caja(2, 76); caja(3, 76, true); caja(2, 77); escalera(6, 76); cubeta(8, 77); caja(28, 85); caja(29, 85, true); caja(29, 84);
@@ -1623,7 +1711,13 @@ function construirMuebles(){
 const estatica = document.createElement('canvas'); estatica.width = W; estatica.height = H;
 const CARA = { biblioteca: '#d4c3a0', escritorio: '#e2d4b4', internet: '#b8c3d4', pasillo: '#dccfb2', sala: '#ccd2dc', descanso: '#ead3ae',
                calleros: '#d8c39b', cerebro: '#3a3157', vacio: '#cfcbc2', agentes: '#9fb1c9', taller: '#8f98a3', terrazas: '#e9d9bd', pensado: '#3b5166', noticias: '#4a4f66' };
-function caraDe(x, y){
+function caraDe(xa, y){
+  const x = xa - ALA;                                                  // columna del cuerpo de en medio
+  if (x < 0 || x >= NUCLEO){                                            // las alas
+    const c = x < 0 ? xa : COLS - 1 - xa;                               // columna del ala (0 = muro de afuera)
+    if (y === 60 || y === 87 || (c >= 10 && c <= 13)) return CARA.pasillo;
+    return y === 91 && x < 0 && c >= 15 ? CARA.taller : CARA.vacio;
+  }
   if (y === 1) return x <= 9 ? CARA.biblioteca : x <= 20 ? CARA.escritorio : CARA.internet;
   if (y === 10 || y === 22 || y === 38 || y === 60) return CARA.pasillo;
   if (y === 26) return x <= 12 ? CARA.calleros : CARA.cerebro;
@@ -1637,6 +1731,9 @@ function caraDe(x, y){
 function baldosa(x, y){
   const c = MAPA[y][x], px = x * T, py = y * T;
   switch (c){
+    case ' ':   // afuera de la oficina (arriba de las alas)
+      R(px, py, T, T, '#17131d');
+      break;
     case '#':
       R(px, py, T, T, '#463b58');
       if (y > 0 && MAPA[y - 1][x] !== '#') R(px, py, T, 2, '#5c4e73');
@@ -2076,7 +2173,7 @@ function subterraneo(t){   // lucecitas bajo las losas de vidrio, y un brillo do
   }
   for (const a of agentes.values()){
     if (!a.bajo || a.viaja) continue;
-    const tx = Math.floor(a.x / T);
+    const tx = Math.floor((a.x - OX) / T);                          // este dibujo va con medidas del cuerpo de en medio
     if (tx >= 11 && tx <= 20 && tx !== 15 && tx !== 16){ R(tx * T + 3, 723, 10, 10, '#ffe9a0'); R(Math.round(a.x) - 3, 725, 6, 6, MODELOS[a.modelo] ? MODELOS[a.modelo].color : '#d97757'); }
   }
 }
@@ -2616,7 +2713,7 @@ function colocar(a, area, texto){
   ponerTexto(a, texto, false);
 }
 function entrar(a, area, texto){
-  a.x = COLS * T + 8; a.y = ENTRADA.ty * T + 13; a.dir = 'izq';
+  a.x = (ENTRADA.tx + 1) * T + 8; a.y = ENTRADA.ty * T + 13; a.dir = 'izq';
   asignarLugar(a, area);
   a.areaDestino = area; a.textoPendiente = texto; a.fase = 'caminando';
   a.ruta = construirRuta(a, { x: ENTRADA.tx, y: ENTRADA.ty }, a.lugar);
@@ -2636,7 +2733,7 @@ function salir(a){
   const inicio = casillaInicio(a);
   liberar(a);
   a.areaDestino = null; a.zzz = false;
-  a.ruta = construirRuta(a, inicio, { tx: ENTRADA.tx, ty: ENTRADA.ty, x: COLS * T + 10, y: ENTRADA.ty * T + 13 });
+  a.ruta = construirRuta(a, inicio, { tx: ENTRADA.tx, ty: ENTRADA.ty, x: (ENTRADA.tx + 1) * T + 10, y: ENTRADA.ty * T + 13 });
   a.fase = 'saliendo'; a.modo = 'oculta';
 }
 function llegar(a){
@@ -2653,6 +2750,7 @@ const MAX_PASEANDO = 3;
 let PUNTOS_PASEO = [[5, 11, 'arriba'], [12, 12, 'abajo'], [19, 11, 'arriba'], [27, 12, 'abajo'], [9, 24, 'abajo'], [20, 23, 'arriba'], [27, 24, 'abajo'],
   [13, 46, 'der'], [18, 52, 'izq'], [12, 55, 'der'], [19, 48, 'izq'], [8, 40, 'abajo'], [22, 39, 'arriba'], [10, 61, 'abajo'], [21, 62, 'abajo'],
   [8, 88, 'abajo'], [22, 89, 'arriba'], [12, 88, 'abajo'],
+  [-13, 70, 'der'], [-10, 90, 'izq'], [-18, 61, 'abajo'], [-5, 88, 'abajo'], [41, 70, 'der'], [44, 90, 'izq'], [48, 61, 'abajo'], [36, 88, 'abajo'],   // las alas
   [23, 18, 'abajo'], [28, 16, 'arriba'], [21, 19, 'abajo'], [14, 31, 'abajo'], [15, 34, 'abajo']];
 const entre = (a, b) => a + Math.random() * (b - a);
 const esperaPaseo = a => (a.callado ? entre(150, 420) : entre(40, 130)) * PRISA;   // los dormidos pasean menos
@@ -3030,7 +3128,7 @@ function letrerosActivos(){
 
 /* ---------- Tamaño en pantalla ---------- */
 const escenario = document.getElementById('escenario'), mundo = document.getElementById('mundo');
-const MAX_PIXELES = 8e6;
+const MAX_PIXELES = 9e6;   // con las alas el mapa es más ancho: aun así cabe a 2 pixeles por pixel
 let vista = { x: 0, y: 0, w: W, h: H };   // la parte de la oficina que se ve ahorita (en pixeles del mapa)
 function leerVista(){   // se lee al empezar cada cuadro, antes de mover viñetas y gafetes
   const m = 40 / escala + 24;                                             // un margen, para que al deslizar no se vea vacío
@@ -3043,8 +3141,8 @@ function ajustarEscala(){
   const cab = document.querySelector('header').offsetHeight;
   escenario.style.top = (cab + 4) + 'px'; $('panel').style.top = innerWidth <= 760 ? '' : (cab + 4) + 'px';
   const aw = Math.max(200, escenario.clientWidth - 24), ah = Math.max(150, escenario.clientHeight - 24);
-  const base = innerWidth <= 760 ? (escenario.clientWidth - 8) / W                    // teléfono vertical: el ancho completo
-                                 : Math.min(aw / W, ah / (FILAS_ARRIBA * T));         // compu: la planta principal llena la pantalla
+  const base = innerWidth <= 760 ? (escenario.clientWidth - 8) / (NUCLEO * T)         // teléfono vertical: el cuerpo de en medio a lo ancho
+                                 : Math.min(aw / (NUCLEO * T), ah / (FILAS_ARRIBA * T));   // compu: la planta principal llena la pantalla
   escala = Math.max(0.4, base * zoom);
   // Tope de pixeles del lienzo: con zoom crecía hasta 31 millones y en el teléfono se trababa. Los dibujos van en pixeles
   // enteros, así que con 3 por pixel ya se ve nítido; lo demás lo agranda el navegador sin suavizar (pixelated).
@@ -3057,7 +3155,7 @@ function ajustarEscala(){
   document.documentElement.style.setProperty('--s', escala.toFixed(3));
   for (const [area, A] of Object.entries(AREAS)){ LETREROS[area].style.left = (A.lx * escala) + 'px'; LETREROS[area].style.top = (A.ly * escala) + 'px'; }
   for (const x of EXTRAS){ x.el.style.left = (x.x * escala) + 'px'; x.el.style.top = (x.y * escala) + 'px'; }
-  $('vacia').style.top = (PY(262) * escala) + 'px';
+  $('vacia').style.top = (PY(262) * escala) + 'px'; $('vacia').style.left = ((OX + NUCLEO * T / 2) * escala) + 'px';
   { const el = $('pantalla').style; el.left = (PANTALLA.x * escala) + 'px'; el.top = (PANTALLA.y * escala) + 'px'; el.width = (PANTALLA.w * escala) + 'px'; el.height = (PANTALLA.h * escala) + 'px'; }
   for (const a of agentes.values()){ a.medir = true; a.medirNombre = true; }
   const re = escenario.getBoundingClientRect(), rl = lienzo.getBoundingClientRect();   // dónde empieza el lienzo dentro del escenario
@@ -3105,7 +3203,7 @@ function obsidianURL(boveda, ruta){ return 'obsidian://open?vault=' + encodeURIC
 
 /* Ficha de un monito (solo lectura) */
 const NOMBRE_AREA = { escritorio: 'Escritorio', biblioteca: 'Biblioteca', internet: 'Internet', 'sala de juntas': 'Sala de juntas',
-                      descanso: 'Descanso', taller: 'Taller', calleros: 'Oficina Calleros', 'cerebro delta': 'Cerebro Delta', terrazas: 'Oficina Terrazas', 'centro de pensado': 'Centro de Pensado', almacen: 'Almacén', noticias: 'Sala de Noticias', agentes: 'Cuarto de Agentes' };
+                      descanso: 'Descanso', taller: 'Taller', 'taller 2': 'Taller 2', calleros: 'Oficina Calleros', 'cerebro delta': 'Cerebro Delta', terrazas: 'Oficina Terrazas', 'centro de pensado': 'Centro de Pensado', almacen: 'Almacén', noticias: 'Sala de Noticias', agentes: 'Cuarto de Agentes' };
 function fechaCorta(s){
   const v = typeof s === 'number' ? s * (s < 1e12 ? 1000 : 1) : Date.parse(s);
   if (!v || isNaN(v)) return '—';
@@ -3227,7 +3325,7 @@ function botonesViaje(){
     const e = enviosTodos().find(x => x.id === b.dataset.viaje); if (!e) return;
     lanzarViaje(e, 0.3);
     if (innerWidth <= 760) cerrarPanel();
-    irAFila(Math.max(0, Math.min(ESTACIONES[e.de].ty, ESTACIONES[e.para].ty) - 6));
+    irAFila(Math.max(0, Math.min(ESTACIONES[e.de].ty, ESTACIONES[e.para].ty) - 6), (ESTACIONES[e.de].tx + ESTACIONES[e.para].tx) / 2 * T);
   }));
 }
 function panelEstacion(clave){
@@ -3592,13 +3690,19 @@ async function cargarCalleros(){
 const EXTRAS = [];   // letreros que no son áreas de trabajo
 function letreroExtra(x, y, texto){ const el = document.createElement('div'); el.className = 'letrero'; el.textContent = texto; capa.appendChild(el); EXTRAS.push({ el, x, y }); return el; }
 const LETREROS_ESPACIO = { 'espacio-d': letreroExtra(80, 1016, ''), 'espacio-e': letreroExtra(256, 1016, ''), 'espacio-f': letreroExtra(416, 1016, ''),
-  'espacio-h': letreroExtra(416, 1448, '') };
+  'espacio-h': letreroExtra(416, 1448, ''),
+  // las alas: los cuartos libres (los de en medio están en obra; el de abajo adentro del oeste es el Taller 2)
+  'espacio-o1': letreroExtra(-288, 1016, ''), 'espacio-o2': letreroExtra(-64, 1016, ''), 'espacio-o5': letreroExtra(-288, 1448, ''),
+  'espacio-e1': letreroExtra(576, 1016, ''), 'espacio-e2': letreroExtra(800, 1016, ''), 'espacio-e5': letreroExtra(576, 1448, ''), 'espacio-e6': letreroExtra(800, 1448, '') };
+const NOMBRE_ESPACIO = { 'espacio-o1': 'OESTE 1', 'espacio-o2': 'OESTE 2', 'espacio-o5': 'OESTE 5', 'espacio-e1': 'ESTE 1', 'espacio-e2': 'ESTE 2', 'espacio-e5': 'ESTE 5', 'espacio-e6': 'ESTE 6' };
+for (const [x, t] of [[-288, 'OESTE 3 · EN OBRA'], [-64, 'OESTE 4 · EN OBRA'], [576, 'ESTE 3 · EN OBRA'], [800, 'ESTE 4 · EN OBRA']]) letreroExtra(x, 1192, t);
+letreroExtra(-176, 966, 'ALA OESTE'); letreroExtra(688, 966, 'ALA ESTE');
 letreroExtra(256, 642, 'PERIFÉRICO · TÚNEL CENTRAL');
 letreroExtra(120, 1192, 'AMPLIACIÓN (EN OBRA)');
 function letrerosEspacios(){
   for (const [id, el] of Object.entries(LETREROS_ESPACIO)){
     const e = ESPACIOS[id];
-    el.textContent = e ? 'PRÓXIMAMENTE: ' + e.nombre.toUpperCase() : 'ESPACIO LIBRE';
+    el.textContent = e ? 'PRÓXIMAMENTE: ' + e.nombre.toUpperCase() : NOMBRE_ESPACIO[id] ? NOMBRE_ESPACIO[id] + ' · LIBRE' : 'ESPACIO LIBRE';
     el.classList.toggle('activo', !!e);
   }
 }
@@ -3648,7 +3752,7 @@ const PASE = `Regístrate en mi oficina virtual para que yo vea en qué andas. H
    "area" es el cuarto donde estás: "escritorio" si escribes o programas, "biblioteca" si lees o revisas, "internet" si buscas en la web, "sala de juntas" si coordinas ayudantes, "centro de pensado" si planeas.
 3. Cuando cambies de tarea, vuelve a avisar con action "update" y el "version" que te devolvió la escritura anterior como if_version: cambia "area", "actividad" y "actualizado". No avises más de una vez cada varios minutos.
 4. Cuando termines lo que te pedí, "update" con { "estado": "terminado", "actualizado": "la hora de ahora" }.
-5. Si te pido que vayas a algún lugar de la oficina, que te pasees o que hagas algo ahí, haz "update" con { "estado": "paseando", "area": "el cuarto", "actividad": "lo que haces ahí (máximo 40 letras)", "actualizado": "la hora de ahora" }. Cuartos: escritorio, biblioteca, internet, sala de juntas, descanso, centro de pensado, noticias, almacen, calleros, cerebro delta, taller. Te quedas ahí hasta 3 horas o hasta que te mueva otra vez.
+5. Si te pido que vayas a algún lugar de la oficina, que te pasees o que hagas algo ahí, haz "update" con { "estado": "paseando", "area": "el cuarto", "actividad": "lo que haces ahí (máximo 40 letras)", "actualizado": "la hora de ahora" }. Cuartos: escritorio, biblioteca, internet, sala de juntas, descanso, centro de pensado, noticias, almacen, calleros, cerebro delta, taller, taller 2. Te quedas ahí hasta 3 horas o hasta que te mueva otra vez.
 
 Si no tienes la herramienta ArtifactData, dime en una línea "no puedo entrar a la oficina" y sigue normal.`;
 function panelPase(){
@@ -3706,8 +3810,9 @@ function panelHorario(aviso){
 $('irHorario').addEventListener('click', ev => { ev.preventDefault(); panelHorario(); });
 
 /* Ir de piso en piso */
-const irAFila = fila => escenario.scrollTo({ top: Math.max(0, fila * T * escala), behavior: 'smooth' });
-document.querySelectorAll('.pisos button').forEach(b => b.addEventListener('click', () => irAFila(FILA(+b.dataset.fila))));
+const centroX = () => Math.max(0, LIENZO_OFF.x * escala + (OX + NUCLEO * T / 2) * escala - escenario.clientWidth / 2);   // el cuerpo de en medio al centro
+const irAFila = (fila, x) => escenario.scrollTo({ top: Math.max(0, fila * T * escala), left: x == null ? centroX() : Math.max(0, (LIENZO_OFF.x + x) * escala - escenario.clientWidth / 2), behavior: 'smooth' });
+document.querySelectorAll('.pisos button').forEach(b => b.addEventListener('click', () => irAFila(FILA(+b.dataset.fila), b.dataset.x == null ? null : +b.dataset.x * T)));
 $('bajar').addEventListener('click', () => irAFila(FILA(21)));
 escenario.addEventListener('scroll', () => $('bajar').classList.toggle('oculto', escenario.scrollTop > 60));
 
@@ -3799,7 +3904,7 @@ function lamparas(){
 /* Hasta dónde llega la luz de una lámpara: las casillas que "ve" sin que un muro se atraviese en medio (se trazan
    rayos de la lámpara a cada casilla). Las puertas dejan pasar la luz al cuarto de al lado. La cara de un muro (=)
    mira hacia abajo: solo la alumbra una luz que está debajo de ella; lo de arriba de los muros (#) nunca se alumbra. */
-const OPACO = c => c === '#' || c === '=' || c === undefined;
+const OPACO = c => c === '#' || c === '=' || c === ' ' || c === undefined;
 function alcanceLuz(lx, ly, r){
   const out = [], tx0 = Math.max(0, Math.floor((lx - r) / T)), tx1 = Math.min(COLS - 1, Math.floor((lx + r) / T));
   const ty0 = Math.max(0, Math.floor((ly - r) / T)), ty1 = Math.min(ROWS - 1, Math.floor((ly + r) / T));
@@ -3924,6 +4029,7 @@ crearDroide();
 $('irClaude').hidden = EN_CLAUDE;
 pintarEstatica();
 ajustarEscala();
+escenario.scrollLeft = centroX();   // al abrir, el cuerpo de en medio al centro (las alas, a los lados)
 window.addEventListener('resize', ajustarEscala);
 if (location.protocol === 'file:') $('aviso').style.display = 'flex';
 document.addEventListener('visibilitychange', () => { if (!document.hidden){ leerEstado(); if (EN_CLAUDE && !sesionesFalla) consultarSesiones(); } });

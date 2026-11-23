@@ -56,6 +56,14 @@ Debajo de la Ampliación hay un pasillo más (el 5) y tres cuartos. El de la izq
 
 Un encargo de verdad de su jefe le gana al baño de ambiente. El cuarto de en medio es el Taller (abajo) y el de la derecha sigue libre.
 
+### Las alas: la oficina es una T invertida
+
+Del pasillo 4 para abajo la oficina se abre a los dos lados: el **Ala Oeste** y el **Ala Este** (botones «Ala Oeste» y «Ala Este» arriba; al abrir, la vista queda centrada en el cuerpo de en medio). En el código: `NUCLEO` (32 columnas del cuerpo de en medio), `ALA` (23 columnas por lado), `COLS = NUCLEO + 2·ALA`; todo lo del cuerpo de en medio se sigue escribiendo con sus medidas de siempre y se dibuja recorrido `OX` pixeles (`mueble()`, `enBandas()`, `bloquear()` y `mudar()` lo hacen solos). Lo de las alas se escribe igual, con columnas negativas para el oeste.
+
+Cada ala tiene su pasillo de en medio, de arriba a abajo, y tres pisos de cuartos a los dos lados (uno de afuera y uno de adentro): arriba **libres** (Oeste 1 y 2, Este 1 y 2), en medio **ampliación en obra** (Oeste 3 y 4, Este 3 y 4; la de adentro tiene puerta a la Ampliación de en medio) y abajo **libres** (Oeste 5, Este 5 y 6) más el **Taller 2** (abajo adentro del oeste, junto al Cuarto de Agentes: banco de trabajo, herramientas y dos bases de carga libres para el próximo droide). Los pasillos 4 y 5 cruzan todo el ancho.
+
+**El periférico** sigue: en el pasillo 4 se abre en dos ramales anchos (con tapa de vidrio) hacia las alas, baja por el pasillo de en medio de cada ala hasta su terminal (Ala Oeste, Ala Este) y por el pasillo 5 un tramo une las dos alas por abajo. Hay estación en todos los cuartos de las alas, en los tres cuartos libres de en medio (D, E y F), en el Taller y en el espacio libre H (`src/tunel.js`: `ESTACIONES`, `TRONCALES`, `RAMALES`, `ANCHOS`; la oficina lo recorre con `desplazar(ALA)`). Los cuartos libres dicen su nombre en el letrero («OESTE 1 · LIBRE»); cuando se les dé uso, se les pone en `espacios` como a los demás.
+
 ### Taller y el droide BB-8
 
 Junto al Cuarto de Agentes está el **Taller** (`taller`, piso `w`, `tallerDeDroides()`): la casa de los droides. Tiene dos bases de carga con su gabinete (la de BB-8 y una libre, con «+», para el próximo droide), la **máquina de reparación** (dos postes, viga y un brazo que suelda), la **compactadora** (donde se tira la basura; su número es lo que hay en la papelera), una mesa de trabajo con un domo de repuesto y, en la pared, el tablero de herramientas y la pantallita con la batería.

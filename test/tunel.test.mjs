@@ -154,3 +154,24 @@ test('en pantalla las secciones salen por turnos y cada una lleva su cuenta', ()
   assert.deepEqual(orden.filter((t) => secs[t.s].id === 'oficina').map((t) => t.i), [0, 1]);
   assert.equal(turnoSeccion(secciones([], [], HOY), 3), null);
 });
+
+// ---------- Las alas ----------
+test('el periférico llega a los cuartos de las dos alas y a los de abajo', () => {
+  for (const c of ['oeste 1', 'oeste 4', 'taller 2', 'ala oeste', 'este 2', 'este 6', 'ala este', 'espacio d', 'espacio e', 'taller', 'espacio h']){
+    const r = rutaTunel('internet', c);
+    assert.ok(r && r.length > 2, c);
+    for (let i = 1; i < r.length; i++) assert.ok(r[i].x === r[i - 1].x || r[i].y === r[i - 1].y, `${c}: tramo ${i} recto`);
+  }
+  const r = rutaTunel('oeste 1', 'este 1');
+  assert.ok(r.some((p) => p.y === 66 * 16) || r.some((p) => p.y === 93 * 16), 'cruza por el pasillo 4 o el 5');
+});
+
+test('estacionDe entiende los cuartos nuevos', () => {
+  assert.equal(estacionDe('Oeste 3'), 'oeste 3');
+  assert.equal(estacionDe('ala este'), 'ala este');
+  assert.equal(estacionDe('Este 6'), 'este 6');
+  assert.equal(estacionDe('Taller 2'), 'taller 2');
+  assert.equal(estacionDe('el taller'), 'taller');
+  assert.equal(estacionDe('Espacio libre D'), 'espacio d');
+  assert.equal(estacionDe('Oeste 9'), null);
+});
