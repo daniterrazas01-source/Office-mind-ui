@@ -56,6 +56,10 @@ Debajo de la Ampliación hay un pasillo más (el 5) y tres cuartos. El de la izq
 
 Un encargo de verdad de su jefe le gana al baño de ambiente. El cuarto de en medio es el Taller (abajo) y el de la derecha sigue libre.
 
+### Follow: seguir a un monito
+
+El botón **«◎ Follow»** (el primero de arriba) abre la lista de todos los que están en la oficina (sesiones, agentes, ayudantes y el droide); al elegir uno, la vista lo sigue sola por toda la oficina: sus caminatas, sus viajes por el periférico y sus cambios de cuarto (`seguir()`, `camara()`). También se puede desde la ficha de cualquier monito, agente o del droide («◎ Follow: seguir a …»). Mientras lo sigue: un aro verde bajo sus pies y arriba un aviso «◎ Siguiendo a … · el cuarto donde está», con «Ficha» y «✕ Dejar». Deja de seguirlo con «✕ Dejar», si mueves la vista con un dedo o la rueda, o si el monito se va; pellizcar para acercar sí se puede sin perderlo.
+
 ### Agentes que ayudan a una sesión o a un monito
 
 Si una sesión o un monito está usando un agente (subagente), el agente sale como su propio monito, «**Agente**», con «**Ayudando a …**» en el gafete, la burbuja con lo que hace y un **hilo punteado** que lo une a quien ayuda (`ayudantesDe()`, `hilosAyuda()`). Va al cuarto que le toca según lo que hace (leer → Biblioteca, buscar en internet → Internet…) y se va cuando el agente termina (3 minutos sin noticias). Llega por `ayudante_actividad`, `ayudante_area` y `ayudante_visto`: los mandan solos los hooks de las sesiones (relevo y tableta) y un monito los puede escribir en su ficha. Las sesiones que abrió otra sesión (`parent_session_id`, en «Todas mis sesiones») salen como ayudantes de esa sesión mientras trabajan. A los jefes de equipo (DragTree, Calleros) los sigue ayudando su agente de siempre (Nitro, el Ayudante), sin uno extra.

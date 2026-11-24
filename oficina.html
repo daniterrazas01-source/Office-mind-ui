@@ -115,6 +115,11 @@ body.sinTexto .vineta{display:none!important}
 .pisos a{background:var(--naranja);color:#1a120e;font-weight:700;padding:5px 10px;font-size:12px;text-decoration:none;box-shadow:0 2px 0 #120e17;white-space:nowrap}
 #bajar{position:fixed;left:50%;bottom:14px;transform:translateX(-50%);z-index:6;font-size:13px;padding:8px 14px;background:var(--naranja);color:#1a120e;font-weight:700}
 #bajar.oculto{display:none}
+#irSeguir{background:#7fe7ff}#irSeguir.on{background:#5dff7a}
+#siguiendo{position:fixed;left:50%;top:calc(var(--cab, 96px) + 10px);transform:translateX(-50%);z-index:7;display:none;align-items:center;gap:8px;
+  background:rgba(23,19,29,.94);color:var(--texto);border:2px solid #5dff7a;padding:6px 6px 6px 12px;font-size:13px;box-shadow:0 3px 0 #0c090f;max-width:92vw}
+#siguiendo.ver{display:flex}#siguiendo b{color:#5dff7a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#siguiendo button{background:#3a2f48;color:var(--texto);border:0;font:inherit;font-size:12px;padding:5px 9px;cursor:pointer}
 .lado{position:fixed;top:55%;z-index:6;transform:translateY(-50%);background:rgba(58,47,72,.92);color:var(--texto);border:0;font:inherit;font-size:13px;
   padding:12px 10px;cursor:pointer;box-shadow:0 2px 0 #120e17;opacity:0;pointer-events:none;transition:opacity .25s}
 .lado:hover{background:#4a3d5c}
@@ -179,10 +184,11 @@ textarea.campo{min-height:70px;resize:vertical}
 <header>
   <div class="titulo"><span class="logo"></span>OFICINA · MONITOREO</div>
   <div class="senal" id="senal"><span class="punto"></span><span id="senalTexto">Conectando…</span></div>
-  <nav class="pisos"><button data-fila="0">Planta principal</button><button data-fila="21">Calleros · Cerebro</button><button data-fila="37">Terrazas · Pensado</button><button data-fila="59">Espacios libres</button><button data-fila="72">Ampliación</button><button data-fila="86">Agentes · Taller</button><button data-fila="59" data-x="12">Ala Oeste</button><button data-fila="59" data-x="66">Ala Este</button><button data-fila="59" data-x="89">Clipping</button><a id="irPase" href="#pase" role="button">＋ Sesión</a><a id="irTexto" href="#texto" role="button" title="Tamaño del texto de los monitos">Aa</a><a id="irHorario" href="#horario" role="button" title="Horario de la oficina">Horario</a><a id="irClaude" href="https://claude.ai/artifact/KbxrcsXckzZSE5F65iZwCE" target="_blank" rel="noopener" hidden>Todas mis sesiones ↗</a></nav>
+  <nav class="pisos"><a id="irSeguir" href="#seguir" role="button" title="Seguir a un monito por la oficina">◎ Follow</a><button data-fila="0">Planta principal</button><button data-fila="21">Calleros · Cerebro</button><button data-fila="37">Terrazas · Pensado</button><button data-fila="59">Espacios libres</button><button data-fila="72">Ampliación</button><button data-fila="86">Agentes · Taller</button><button data-fila="59" data-x="12">Ala Oeste</button><button data-fila="59" data-x="66">Ala Este</button><button data-fila="59" data-x="89">Clipping</button><a id="irPase" href="#pase" role="button">＋ Sesión</a><a id="irTexto" href="#texto" role="button" title="Tamaño del texto de los monitos">Aa</a><a id="irHorario" href="#horario" role="button" title="Horario de la oficina">Horario</a><a id="irClaude" href="https://claude.ai/artifact/KbxrcsXckzZSE5F65iZwCE" target="_blank" rel="noopener" hidden>Todas mis sesiones ↗</a></nav>
   <div class="derecha"><span id="ultimo"></span><span id="cuantos"></span><span id="reloj"></span></div>
 </header>
 <div id="tip"></div>
+<div id="siguiendo" role="status"><span>◎ Siguiendo a</span><b id="sigNombre"></b><span id="sigHace" style="opacity:.75"></span><button id="sigFicha">Ficha</button><button id="sigDejar">✕ Dejar</button></div>
 <button id="bajar">↓ Baja: Oficina Calleros y Cerebro Delta</button>
 <button id="ladoIzq" class="lado" aria-label="Ir a la izquierda"></button><button id="ladoDer" class="lado" aria-label="Ir a la derecha"></button>
 <div id="zoomTip">Pellizca para acercar</div>
@@ -1688,7 +1694,7 @@ function panelDroide(foco){
   }).join('') : '<p class="vacio">Vacía.</p>';
   if (!real) html += `<p class="meta" style="margin-top:14px">${DEMO ? 'Datos de ejemplo: lo que recoge solo se esconde aquí.' : 'En esta página lo que recoge solo se esconde en este aparato. Se tira de verdad cuando abres la oficina en Claude («Todas mis sesiones»).'}</p>`;
   if (DROIDE_CFG.bitacora.length) html += '<h4 style="margin:16px 0 8px">Últimas limpiezas</h4>' + DROIDE_CFG.bitacora.slice(0, 6).map(x => `<div class="fila"><span>${esc(fechaCorta(x.cuando))}</span><span>${x.recogio || 0} a la papelera${x.compacto ? ` · ${x.compacto} borrados` : ''}</span></div>`).join('');
-  abrirPanel(DROIDE.nombre.toUpperCase() + ' · DROIDE', html);
+  abrirPanel(DROIDE.nombre.toUpperCase() + ' · DROIDE', botonSeguir(rolo) + html); ligarSeguir(rolo);
   $('droideLimpia').addEventListener('click', () => { d.forzar = true; cerrarPanel(); });
   $('droideGuardar').addEventListener('click', () => {
     DROIDE_CFG.protegidos = listaProtegidos($('droideProtegidos').value); cacheBasura = null; guardarDroide(); panelDroide();
@@ -3456,6 +3462,7 @@ function leerVista(){   // se lee al empezar cada cuadro, antes de mover viñeta
 let LIENZO_OFF = { x: 0, y: 0 };
 function ajustarEscala(){
   const cab = document.querySelector('header').offsetHeight;
+  document.documentElement.style.setProperty('--cab', cab + 'px');
   escenario.style.top = (cab + 4) + 'px'; $('panel').style.top = innerWidth <= 760 ? '' : (cab + 4) + 'px';
   const aw = Math.max(200, escenario.clientWidth - 24), ah = Math.max(150, escenario.clientHeight - 24);
   const base = innerWidth <= 760 ? (escenario.clientWidth - 8) / (NUCLEO * T)         // teléfono vertical: el cuerpo de en medio a lo ancho
@@ -3953,7 +3960,7 @@ function fichaMonito(a, cual){
   html += r ? htmlReporte(r) : '<p class="vacio" style="margin-top:14px">Todavía no trae ningún resumen. Aparecerá aquí cuando corra su tarea.</p>';
   if (reportes.length > 1) html += '<h4 style="margin:16px 0 8px">Resúmenes anteriores</h4>' +
     reportes.filter(x => x !== r).map(x => `<button class="item" data-reporte="${esc(x.id)}">${esc(x.titulo || 'Resumen')}<small>${esc(x.fecha || x.id)}</small></button>`).join('');
-  abrirPanel(m.nombre || a.nombre, html);
+  abrirPanel(m.nombre || a.nombre, botonSeguir(a) + html); ligarSeguir(a);
   cuerpo.querySelectorAll('[data-reporte]').forEach(b => b.addEventListener('click', () => fichaMonito(a, b.dataset.reporte)));
   if (reportes[0]) marcarLeido(m.id, reportes[0].id);
 }
@@ -3978,7 +3985,7 @@ function fichaAgente(a){
     html += `<div class="botones"><button class="boton${es ? '' : ' principal'}" id="botonSupervisor">${es ? 'Quitar de supervisores' : '★ Hacer supervisor (no se va)'}</button></div>`;
   }
   if (a.tableta) html += '<h4 style="margin:16px 0 8px">Archivos recientes de la tableta</h4>' + listaArchivos(archivosTableta());
-  abrirPanel(a.nombre, html);
+  abrirPanel(a.nombre, botonSeguir(a) + html); ligarSeguir(a);
   const b = $('botonSupervisor'); if (b) b.addEventListener('click', () => cambiarSupervisor(a));
 }
 
@@ -4088,6 +4095,46 @@ function panelPase(){
   });
 }
 $('irPase').addEventListener('click', ev => { ev.preventDefault(); panelPase(); });
+/* ---------- Follow: la cámara sigue a un monito por toda la oficina ----------
+   Se elige con el botón «◎ Follow» de arriba o desde la ficha de cualquier monito, agente o el droide. La vista lo
+   mantiene al centro mientras camina, viaja por el periférico o cambia de cuarto. Se deja de seguir con «✕ Dejar»,
+   moviendo la vista con un dedo (o la rueda), o si el monito se va de la oficina. Pellizcar para acercar sí se puede. */
+let SIGUIENDO = null;
+const botonSeguir = a => a ? `<div class="botones" style="margin:0 0 10px"><button class="boton principal" id="botonSeguir">${SIGUIENDO === a.id ? '✕ Dejar de seguir' : '◎ Follow: seguir a ' + esc(a.nombre || 'este monito')}</button></div>` : '';
+function ligarSeguir(a){ const b = $('botonSeguir'); if (b && a) b.addEventListener('click', () => { if (SIGUIENDO === a.id) dejarDeSeguir(); else { seguir(a.id); if (innerWidth <= 760) cerrarPanel(); } }); }
+function seguir(id){
+  const a = agentes.get(id); if (!a) return;
+  SIGUIENDO = id; $('irSeguir').classList.add('on');
+  $('sigNombre').textContent = a.nombre || id; $('siguiendo').classList.add('ver');
+}
+function dejarDeSeguir(){ SIGUIENDO = null; $('irSeguir').classList.remove('on'); $('siguiendo').classList.remove('ver'); }
+function camara(){
+  if (!SIGUIENDO) return;
+  const a = agentes.get(SIGUIENDO);
+  if (!a || a.fase === 'saliendo'){ dejarDeSeguir(); return; }
+  regresando = performance.now() + 1500;                             // que no lo regrese al centro mientras lo sigue
+  const meta = { x: (LIENZO_OFF.x + a.x) * escala - escenario.clientWidth / 2, y: (LIENZO_OFF.y + a.y - 20) * escala - escenario.clientHeight / 2 };
+  const dx = meta.x - escenario.scrollLeft, dy = meta.y - escenario.scrollTop;
+  if (Math.abs(dx) > 1 || Math.abs(dy) > 1) escenario.scrollTo({ left: escenario.scrollLeft + dx * 0.2, top: escenario.scrollTop + dy * 0.2, behavior: 'instant' });   // suave, cuadro a cuadro
+  const txt = a.bajo ? ' · por el periférico' : a.lugar && NOMBRE_AREA[a.lugar.area] ? ' · ' + NOMBRE_AREA[a.lugar.area] : '';
+  if ($('sigHace').textContent !== txt) $('sigHace').textContent = txt;
+}
+let dedos = 0;
+escenario.addEventListener('touchstart', e => { dedos = e.touches.length; }, { passive: true });
+escenario.addEventListener('touchmove', e => { if (SIGUIENDO && e.touches.length === 1 && dedos === 1) dejarDeSeguir(); }, { passive: true });   // lo mueves tú: ya no lo sigue
+escenario.addEventListener('wheel', e => { if (SIGUIENDO && !e.ctrlKey) dejarDeSeguir(); }, { passive: true });
+$('sigDejar').addEventListener('click', dejarDeSeguir);
+$('sigFicha').addEventListener('click', () => { const a = agentes.get(SIGUIENDO); if (a) fichaAgente(a); });
+function panelSeguir(){
+  const lista = [...agentes.values()].filter(a => a.fase !== 'saliendo').sort((p, q) => (q.estadoTxt === 'trabajando') - (p.estadoTxt === 'trabajando') || String(p.nombre).localeCompare(String(q.nombre)));
+  let html = '<p>Elige a quién seguir: la vista lo acompaña por toda la oficina (sus caminatas, sus viajes por el periférico y su trabajo). Para dejar de seguirlo, toca «✕ Dejar» o mueve la vista con un dedo.</p>';
+  if (SIGUIENDO) html += '<div class="botones"><button class="boton" id="seguirNadie">✕ Dejar de seguir</button></div>';
+  html += lista.map(a => `<button class="item" data-seguir="${esc(a.id)}">${SIGUIENDO === a.id ? '◎ ' : ''}${esc(a.nombre || a.id)}<small>${esc(a.droide ? 'Droide' : a.ayuda ? 'Ayudando a ' + a.ayuda : a.rol === 'supervisor' ? 'Supervisor' : a.rol === 'programado' ? 'Agente' : 'Sesión')} · ${esc(NOMBRE_AREA[a.lugar && a.lugar.area] || NOMBRE_AREA[a.areaDestino] || '—')} · ${esc(a.textoPendiente || a.estadoTxt || '')}</small></button>`).join('');
+  abrirPanel('◎ FOLLOW', html);
+  cuerpo.querySelectorAll('[data-seguir]').forEach(b => b.addEventListener('click', () => { seguir(b.dataset.seguir); cerrarPanel(); }));
+  const n = $('seguirNadie'); if (n) n.addEventListener('click', () => { dejarDeSeguir(); panelSeguir(); });
+}
+$('irSeguir').addEventListener('click', ev => { ev.preventDefault(); panelSeguir(); });
 
 /* ---------- Tamaño del texto de las viñetas (lo que dice cada monito). Se guarda en este aparato. ---------- */
 const TEXTOS = [['grande', 'Grande', 1], ['mediana', 'Mediana', 0.8], ['chica', 'Chica', 0.62], ['nada', 'Sin texto', 0]];
@@ -4215,6 +4262,9 @@ function dibujar(t){
   dibujarViajes(t);            // lo que va por el periférico
   const items = MUEBLES.filter(m => m.sortY > vy - 4 && m.sortY - 96 < vy + vh);   // lo que queda fuera de la vista no se pinta
   for (const a of agentes.values()) if (a.y > vy - 4 && a.y - 80 < vy + vh) items.push({ sortY: a.y, a });
+  if (SIGUIENDO){ const a = agentes.get(SIGUIENDO); if (a && !a.bajo){            // un aro bajo los pies del que se sigue
+    const r = 9 + Math.sin(t * 4) * 1.5; g.globalAlpha = 0.85; g.strokeStyle = '#5dff7a'; g.lineWidth = 1.5;
+    g.beginPath(); g.ellipse(a.x, a.y, r + 3, (r + 3) * 0.45, 0, 0, 7); g.stroke(); g.globalAlpha = 1; } }
   items.sort((p, q) => p.sortY - q.sortY);
   for (const it of items){ if (!it.a) it.dibujar(t); else if (it.a.droide){ if (!it.a.bajo) dibujarDroide(it.a, t); } else if (!it.a.bajo && !(it.a.fase === 'trabajando' && it.a.lugar && it.a.lugar.lavadora != null)) dibujarAgente(it.a, t); }
   hilosAyuda(t);
@@ -4395,6 +4445,7 @@ function bucle(ms){
   pasear();
   droide(dt);
   for (const a of [...agentes.values()]) moverAgente(a, dt);
+  camara();
   letrerosActivos();
   ubicarVinetas();
   const t0 = DEPURAR ? performance.now() : 0;
