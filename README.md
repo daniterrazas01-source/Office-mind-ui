@@ -56,6 +56,12 @@ Debajo de la Ampliación hay un pasillo más (el 5) y tres cuartos. El de la izq
 
 Un encargo de verdad de su jefe le gana al baño de ambiente. El cuarto de en medio es el Taller (abajo) y el de la derecha sigue libre.
 
+### Detalles de Descanso y de la Oficina Terrazas
+
+**Descanso** tiene dos sillones frente a frente, con la mesita en medio (el rojo de arriba y uno azul de espaldas abajo): ocho lugares para que los que descansan se sienten y no anden por cualquier lado.
+
+En la **Oficina Terrazas**, las dos lámparas de arriba de los lados son **sables de luz** (`prepararSables()`, `sables()`): el azul en la pared izquierda apuntando hacia arriba y el rojo en la derecha apuntando hacia abajo. De día solo se ve la empuñadura; de noche se prenden (la hoja brilla encima de la oscuridad, con un ligero parpadeo) y alumbran su lado del cuarto con su color, en lugar de esas lámparas.
+
 ### Las alas: la oficina es una T invertida
 
 Del pasillo 4 para abajo la oficina se abre a los dos lados: el **Ala Oeste** y el **Ala Este** (botones «Ala Oeste» y «Ala Este» arriba; al abrir, la vista queda centrada en el cuerpo de en medio). En el código: `NUCLEO` (32 columnas del cuerpo de en medio), `ALA` (23 columnas del ala oeste), `ALA_ESTE` (el doble: el Ala Este tiene dos tramos iguales, cada uno con su pasillo), `COLS = ALA + NUCLEO + ALA_ESTE`; todo lo del cuerpo de en medio se sigue escribiendo con sus medidas de siempre y se dibuja recorrido `OX` pixeles (`mueble()`, `enBandas()`, `bloquear()` y `mudar()` lo hacen solos). Lo de las alas se escribe igual, con columnas negativas para el oeste.

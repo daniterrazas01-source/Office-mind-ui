@@ -440,6 +440,10 @@ const LUGARES = {
     L(19, 16, 'abajo', { oy: -15, sentado: true }),
     L(17, 16, 'abajo', { oy: -15, sentado: true }),
     L(20, 16, 'abajo', { oy: -15, sentado: true }),
+    L(18, 19, 'arriba', { oy: 6, sentado: true }),                     // el segundo sillón, frente al primero
+    L(19, 19, 'arriba', { oy: 6, sentado: true }),
+    L(17, 19, 'arriba', { oy: 6, sentado: true }),
+    L(20, 19, 'arriba', { oy: 6, sentado: true }),
     L(27, 18, 'abajo', { sentado: true, puf: '#2bb3a3' }),
     L(29, 18, 'abajo', { sentado: true, puf: '#f2c230' }),
     L(25, 16, 'arriba', {}),
@@ -1812,6 +1816,16 @@ function construirMuebles(){
     const cols = ['#ff5b5b', '#ffd34d', '#5dff7a', '#4fa3ff'];
     R(468, 228, 8, 7, '#0b0b14'); R(469 + Math.floor(t * 4) % 6, 230 + Math.floor(t * 3) % 3, 2, 2, cols[Math.floor(t * 2) % 4]);
     R(467, 238, 10, 4, '#3d2463'); R(469, 238, 1, 2, '#d24040'); R(472, 239, 2, 1, '#ffd34d'); R(475, 239, 1, 1, '#5dff7a');
+  });
+  bloquear(17, 20, 20, 20);
+  mueble(19 * T + 2, () => {                                           // segundo sillón, de espaldas, frente al primero: los cojines
+    R(271, 304, 66, 12, K); R(272, 305, 64, 10, '#3f6fb0'); R(272, 305, 64, 1, '#5f8fd0');
+    R(288, 305, 1, 10, '#335a90'); R(304, 305, 1, 10, '#335a90'); R(320, 305, 1, 10, '#335a90');
+  });
+  mueble(20 * T + 15, () => {                                          // respaldo y brazos (delante de quien se sienta)
+    R(271, 314, 66, 13, K); R(272, 315, 64, 11, '#36609a'); R(272, 315, 64, 1, '#4f7fc0'); R(272, 324, 64, 2, '#284a78');
+    R(267, 304, 6, 23, K); R(268, 305, 4, 21, '#284a78'); R(335, 304, 6, 23, K); R(336, 305, 4, 21, '#284a78');
+    R(278, 311, 8, 5, '#f2c230'); R(322, 311, 8, 5, '#d97757');
   });
   planta(16, 20); planta(30, 20);
 
@@ -4153,6 +4167,7 @@ function dibujar(t){
   for (const it of items){ if (!it.a) it.dibujar(t); else if (it.a.droide){ if (!it.a.bajo) dibujarDroide(it.a, t); } else if (!it.a.bajo && !(it.a.fase === 'trabajando' && it.a.lugar && it.a.lugar.lavadora != null)) dibujarAgente(it.a, t); }
   tallos();
   noche();
+  sables(t);
   if (zonaEncima){   // marco punteado sobre lo que se puede picar
     const z = zonaEncima, c = Math.floor(t * 4) % 2 ? '#ffe066' : '#fff6c2';
     for (let i = 0; i < z.w; i += 4){ R(z.x + i, z.y, 2, 1, c); R(z.x + i, z.y + z.h - 1, 2, 1, c); }
@@ -4185,7 +4200,38 @@ function lamparas(){
     });
     y += n;
   }
+  // Oficina Terrazas: las dos lámparas de arriba de los lados son sables de luz (azul a la izquierda, rojo a la derecha)
+  for (const l of L){
+    const tx = Math.floor(l[0] / T), ty = Math.floor(l[1] / T);
+    if (l[5] !== 'frente' && MAPA[ty] && MAPA[ty][tx] === 't' && ty < FILA(51)) l[6] = l[5] === 'izq' ? 'azul' : 'rojo';
+  }
   return L;
+}
+/* Los sables de luz de la Oficina Terrazas: de día solo se ve la empuñadura en la pared; de noche se prenden y
+   alumbran su lado del cuarto en lugar de las lámparas (el azul apunta hacia arriba y el rojo hacia abajo). */
+const COLOR_SABLE = { azul: ['#4fa8ff', 'rgba(80,165,255,'], rojo: ['#ff4040', 'rgba(255,64,64,'] };
+let SABLES = [];
+function prepararSables(){
+  SABLES = lamparas().filter(l => l[6]).map(l => ({ x: Math.round(l[3]), y: Math.round(l[4]), lado: l[5], color: l[6], arriba: l[6] === 'azul' }));
+  for (const s of SABLES) muebleN(s.y - 20, () => {                   // la empuñadura, colgada en la pared
+    const x = s.lado === 'izq' ? s.x - 1 : s.x - 3, h0 = s.arriba ? s.y + 2 : s.y - 16;
+    R(x - 1, h0 - 1, 6, 16, K); R(x, h0, 4, 14, '#b8c0c8'); R(x, h0, 1, 14, '#e4e8ee');
+    for (let i = 0; i < 3; i++) R(x, h0 + 5 + i * 2, 4, 1, '#2a2e38');               // el agarre
+    R(x, s.arriba ? h0 : h0 + 12, 4, 2, '#5d6878');                                 // la boca por donde sale la hoja
+    R(x + 3, h0 + 3, 1, 2, s.color === 'azul' ? '#5dff7a' : '#ff5b5b');             // el botón
+  });
+}
+function sables(t){   // las hojas, encima de la noche: brillan
+  if (nivelNoche <= 0) return;
+  for (const s of SABLES){
+    const [c, rgba] = COLOR_SABLE[s.color], x = s.lado === 'izq' ? s.x - 1 : s.x - 3, largo = 40;
+    const y0 = s.arriba ? s.y + 2 - largo : s.y - 2, brillo = nivelNoche * (0.9 + 0.1 * Math.sin(t * 37 + x));
+    g.globalAlpha = 0.18 * brillo; g.fillStyle = rgba + '1)'; g.fillRect(x - 5, y0 - 3, 14, largo + 6);
+    g.globalAlpha = 0.45 * brillo; R(x - 1, y0, 6, largo, c);
+    g.globalAlpha = brillo; R(x, y0 + (s.arriba ? 0 : 0), 4, largo, c); R(x + 1, y0 + 1, 2, largo - 2, '#ffffff');
+    R(x + 1, s.arriba ? y0 : y0 + largo - 1, 2, 1, c);                              // la punta redonda
+    g.globalAlpha = 1;
+  }
 }
 /* Hasta dónde llega la luz de una lámpara: las casillas que "ve" sin que un muro se atraviese en medio (se trazan
    rayos de la lámpara a cada casilla). Las puertas dejan pasar la luz al cuarto de al lado. La cara de un muro (=)
@@ -4252,17 +4298,19 @@ function armarNoche(){
   L.forEach(([lx, ly, r, , , lado], i) => enZona(zonas[i], () => abanico(lx, ly, r, lado, [[0, 1], [0.2, 0.8], [0.55, 0.35], [1, 0]], 1.05)));
   x.globalCompositeOperation = 'destination-out'; x.globalAlpha = LUZ_MAX; x.drawImage(luz, 0, 0); x.globalAlpha = 1;
   x.globalCompositeOperation = 'source-over';
-  L.forEach(([lx, ly, r, fx, fy], i) => {                              // el tono cálido del foco, y el resplandor en la pared
+  L.forEach(([lx, ly, r, fx, fy, , sable], i) => {                    // el tono cálido del foco (o el color del sable), y el resplandor en la pared
     x.save(); recorte(zonas[i]);
-    const gr = x.createRadialGradient(fx, fy, 0, fx, fy, r);
-    gr.addColorStop(0, 'rgba(255,210,122,0.2)'); gr.addColorStop(1, 'rgba(255,210,122,0)');
-    x.fillStyle = gr; x.fillRect(fx - r, fy - r, r * 2, r * 2);
+    const tono = sable ? COLOR_SABLE[sable][1] : 'rgba(255,210,122,', fuerza = sable ? 0.32 : 0.2;
+    const gr = x.createRadialGradient(fx, fy, 0, fx, fy, r * (sable ? 1.3 : 1));
+    gr.addColorStop(0, tono + fuerza + ')'); gr.addColorStop(1, tono + '0)');
+    x.fillStyle = gr; x.fillRect(fx - r * 1.3, fy - r * 1.3, r * 2.6, r * 2.6);
     const gp = x.createRadialGradient(fx, fy, 0, fx, fy, 12);
-    gp.addColorStop(0, 'rgba(255,210,122,0.45)'); gp.addColorStop(1, 'rgba(255,210,122,0)');
+    gp.addColorStop(0, tono + '0.45)'); gp.addColorStop(1, tono + '0)');
     x.fillStyle = gp; x.fillRect(fx - 12, fy - 12, 24, 24);
     x.restore();
   });
-  for (const [lx, ly, r, fx, fy, lado] of L){
+  for (const [lx, ly, r, fx, fy, lado, sable] of L){
+    if (sable) continue;                                               // los sables se dibujan aparte
     x.globalAlpha = 1; const X = Math.round(fx), Y = Math.round(fy);
     if (lado === 'frente'){                                                                          // aplique visto de frente
       x.fillStyle = K; x.fillRect(X - 4, Y - 3, 8, 7); x.fillStyle = '#8a6a3a'; x.fillRect(X - 1, Y + 3, 2, 2);
@@ -4314,6 +4362,7 @@ PUNTOS_PASEO = PUNTOS_PASEO.filter(p => caminable(p[0], p[1]));
 crearDroide();
 $('irClaude').hidden = EN_CLAUDE;
 pintarEstatica();
+prepararSables();
 ajustarEscala();
 escenario.scrollLeft = centroX();   // al abrir, el cuerpo de en medio al centro (las alas, a los lados)
 vigilarLados();
