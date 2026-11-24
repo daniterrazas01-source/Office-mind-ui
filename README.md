@@ -56,9 +56,9 @@ Debajo de la Ampliación hay un pasillo más (el 5) y tres cuartos. El de la izq
 
 Un encargo de verdad de su jefe le gana al baño de ambiente. El cuarto de en medio es el Taller (abajo) y el de la derecha sigue libre.
 
-### Calleros: supervisor con su propia sesión
+### Calleros: supervisor con su sesión de la laptop
 
-El supervisor **Calleros** ya no es un monito sin sesión: es la sesión de Claude Code en la nube «Calleros» (abierta el 24 nov; en la página web se amarra por el id del relevo `ses-67efb19c4b6d` en `config/oficina.json`, y en «Todas mis sesiones» está fijado como supervisor en `oficina/supervisores`). Como supervisor no se va, y vive en la **Oficina Calleros** (si espera, descansa o trabaja «en el escritorio», se queda en su oficina). Su **Ayudante** (Sonnet) es un agente dentro de esa misma sesión: cuando Calleros delega con la herramienta Agent, la oficina pone al Ayudante a hacerlo (`encargoReal`), sin abrir otra sesión.
+El supervisor **Calleros** es la sesión «Calleros» de Claude Code en su laptop (avisa por el relevo; en `config/oficina.json` se amarra por su id `ses-aca7aa7650e2`). Como supervisor no se va y vive en la **Oficina Calleros**. Ya no hay un monito «Ayudante» fijo: la sesión orquesta a sus propios agentes y cada uno sale en la oficina como «Agente · Ayudando a Calleros» mientras trabaja (ver abajo). Si se abre otra sesión para Calleros, hay que cambiar ese id.
 
 ### Follow: seguir a un monito
 

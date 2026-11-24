@@ -7,10 +7,10 @@
   "supervisores": [
     {
       "nombre": "Calleros",
-      "id": "ses-67efb19c4b6d",
-      "titulo": "calleros:",
+      "id": "ses-aca7aa7650e2",
       "modelo": "opus",
-      "equipo": "Sesión en la nube"
+      "dispositivo": "laptop",
+      "equipo": "Calleros — Laptop"
     },
     {
       "nombre": "DragTree",
