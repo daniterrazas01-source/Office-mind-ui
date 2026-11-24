@@ -3452,7 +3452,7 @@ function letrerosActivos(){
 
 /* ---------- Tamaño en pantalla ---------- */
 const escenario = document.getElementById('escenario'), mundo = document.getElementById('mundo');
-const MAX_PIXELES = 1.1e7;   // con las alas el mapa es más ancho: aun así cabe a 2 pixeles por pixel
+const MAX_PIXELES = 5e6;   // con las alas el mapa es 3 veces más ancho: el lienzo va a 1 pixel por pixel (el dibujo es pixel art y se agranda sin suavizar), así no se acaba la memoria del teléfono o la tableta
 let vista = { x: 0, y: 0, w: W, h: H };   // la parte de la oficina que se ve ahorita (en pixeles del mapa)
 function leerVista(){   // se lee al empezar cada cuadro, antes de mover viñetas y gafetes
   const m = 40 / escala + 24;                                             // un margen, para que al deslizar no se vea vacío
@@ -4345,7 +4345,7 @@ function alcanceLuz(lx, ly, r){
   const out = [], tx0 = Math.max(0, Math.floor((lx - r) / T)), tx1 = Math.min(COLS - 1, Math.floor((lx + r) / T));
   const ty0 = Math.max(0, Math.floor((ly - r) / T)), ty1 = Math.min(ROWS - 1, Math.floor((ly + r) / T));
   const ve = (tx, ty, ox, oy) => {
-    const n = Math.max(1, Math.ceil(Math.hypot(ox - lx, oy - ly) / 2));
+    const n = Math.max(1, Math.ceil(Math.hypot(ox - lx, oy - ly) / 4));
     for (let i = 1; i < n; i++){
       const sx = Math.floor((lx + (ox - lx) * i / n) / T), sy = Math.floor((ly + (oy - ly) * i / n) / T);
       if ((sx === tx && sy === ty) || (sx === Math.floor(lx / T) && sy === Math.floor(ly / T))) continue;
@@ -4432,7 +4432,10 @@ function noche(){
   nivelNoche += (meta - nivelNoche) * 0.04;                           // se prende y se apaga poco a poco
   if (Math.abs(meta - nivelNoche) < 0.01) nivelNoche = meta;
   if (nivelNoche <= 0) return;
-  if (!capaNoche) capaNoche = armarNoche();
+  if (!capaNoche){                                                    // se arma aparte, sin trabar la oficina al abrir
+    if (!noche.armando && !noche.falla){ noche.armando = true; setTimeout(() => { try { capaNoche = armarNoche(); } catch (e) { noche.falla = true; } noche.armando = false; }, 60); }   // si no se puede, la oficina sigue sin la capa de noche
+    return;
+  }
   const v = vista, vx = Math.floor(v.x), vy = Math.floor(v.y), vw = Math.ceil(v.w) + 1, vh = Math.ceil(v.h) + 1;
   ctx.globalAlpha = nivelNoche; ctx.drawImage(capaNoche, vx, vy, vw, vh, vx, vy, vw, vh); ctx.globalAlpha = 1;
 }
