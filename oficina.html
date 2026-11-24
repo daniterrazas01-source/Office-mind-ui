@@ -2831,13 +2831,17 @@ const ESFUERZOS = { low: ['bajo', 1], medium: ['medio', 2], high: ['alto', 3], x
 const esfuerzoDe = v => ESFUERZOS[sinAcentos(v).toLowerCase().trim().split(/\s+/)[0]] || null;
 function ponerNombre(a, nombre){
   const plazo = a.seVaPronto && a.vence ? 'se va ' + textoPlazo(a.vence - Date.now()) : '';
-  const clave = nombre + '|' + (a.modelo || '') + '|' + !!a.ultra + '|' + (a.dispositivo || '') + '|' + (a.rol || '') + '|' + plazo + '|' + (a.esfuerzo ? a.esfuerzo[0] : '');
+  // Con la oficina cerrada, quien no está trabajando de verdad lleva el gafete corto: solo su nombre (sin modelo ni renglón
+  // de abajo), para que no se amontonen cuando todos descansan juntos.
+  const corto = !abierta(Date.now()) && a.estadoTxt !== 'trabajando' && !a.ultra;
+  const clave = (corto ? 'corto|' : '') + nombre + '|' + (a.modelo || '') + '|' + !!a.ultra + '|' + (a.dispositivo || '') + '|' + (a.rol || '') + '|' + plazo + '|' + (a.esfuerzo ? a.esfuerzo[0] : '');
   if (a.gafete === clave) return;
   a.gafete = clave; a.nombre = nombre; a.elNombre.textContent = nombre; a.medirNombre = true;
   a.elNombre.classList.toggle('pronto', !!plazo);
   if (a.rol === 'supervisor'){ const j = document.createElement('span'); j.className = 'jefe'; j.textContent = '★'; a.elNombre.prepend(j); }
   if (a.rol === 'programado'){ const j = document.createElement('span'); j.className = 'reloj'; j.textContent = '◆'; a.elNombre.prepend(j); }
   const m = MODELOS[a.modelo];
+  if (corto){ a.elNombre.appendChild(document.createElement('b')); a.elNombre.style.setProperty('--c', a.tableta ? '#3ddc84' : ASPECTOS[a.aspecto].etiqueta); return; }
   if (m){ const i = document.createElement('i'); i.textContent = m.nombre; i.style.color = m.etiqueta; a.elNombre.appendChild(i); }
   if (a.ultra){ const u = document.createElement('span'); u.className = 'ultra'; u.textContent = 'ULTRA'; a.elNombre.appendChild(u); }
   a.elNombre.appendChild(document.createElement('b'));
