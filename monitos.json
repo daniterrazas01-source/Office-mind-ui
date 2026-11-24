@@ -3150,53 +3150,6 @@
           "id": "ya-contado"
         }
       ]
-    },
-    {
-      "actividad": "",
-      "actualizado": "2026-11-16T15:00:00Z",
-      "area": "calleros",
-      "aspecto": "lentes",
-      "casa": "calleros",
-      "descripcion": "El agente de Calleros (nombre provisional). Vive en la Oficina Calleros y trabaja cuando la sesión de Calleros usa un ayudante. Entre encargos anda por la Oficina Calleros y el Cerebro Delta.",
-      "estado": "listo",
-      "frases": [
-        "A la orden, jefe.",
-        "Lo busco en el Cerebro.",
-        "Ya quedó archivado."
-      ],
-      "jefe": "Calleros",
-      "modelo": "sonnet",
-      "nombre": "Ayudante",
-      "principal": true,
-      "rutina": [
-        {
-          "actividad": "Ordenando papeles",
-          "area": "calleros"
-        },
-        {
-          "actividad": "Revisando el buzón del túnel",
-          "area": "calleros"
-        },
-        {
-          "actividad": "Consultando el Cerebro",
-          "area": "cerebro delta"
-        },
-        {
-          "actividad": "Acomodando notas en el Cerebro",
-          "area": "cerebro delta"
-        },
-        {
-          "actividad": "Buscando un libro",
-          "area": "biblioteca"
-        },
-        {
-          "actividad": "Preparando la sala",
-          "area": "sala de juntas"
-        }
-      ],
-      "id": "ayudante-calleros",
-      "reportes": [],
-      "memoria": []
     }
   ],
   "avisos": [
