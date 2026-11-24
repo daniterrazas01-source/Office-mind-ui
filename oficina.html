@@ -4212,7 +4212,7 @@ function lamparas(){
 const COLOR_SABLE = { azul: ['#4fa8ff', 'rgba(80,165,255,'], rojo: ['#ff4040', 'rgba(255,64,64,'] };
 let SABLES = [];
 function prepararSables(){
-  SABLES = lamparas().filter(l => l[6]).map(l => ({ x: Math.round(l[3]), y: Math.round(l[4]), lado: l[5], color: l[6], arriba: l[6] === 'azul' }));
+  SABLES = lamparas().filter(l => l[6]).map(l => ({ x: Math.round(l[3]), y: Math.round(l[4]) - (l[6] === 'rojo' ? 56 : 0), lado: l[5], color: l[6], arriba: l[6] === 'azul' }));   // el rojo, más arriba: no queda sobre la estación del periférico
   for (const s of SABLES) muebleN(s.y - 20, () => {                   // la empuñadura, colgada en la pared
     const x = s.lado === 'izq' ? s.x - 1 : s.x - 3, h0 = s.arriba ? s.y + 2 : s.y - 16;
     R(x - 1, h0 - 1, 6, 16, K); R(x, h0, 4, 14, '#b8c0c8'); R(x, h0, 1, 14, '#e4e8ee');
@@ -4224,7 +4224,7 @@ function prepararSables(){
 function sables(t){   // las hojas, encima de la noche: brillan
   if (nivelNoche <= 0) return;
   for (const s of SABLES){
-    const [c, rgba] = COLOR_SABLE[s.color], x = s.lado === 'izq' ? s.x - 1 : s.x - 3, largo = 40;
+    const [c, rgba] = COLOR_SABLE[s.color], x = s.lado === 'izq' ? s.x - 1 : s.x - 3, largo = 58;
     const y0 = s.arriba ? s.y + 2 - largo : s.y - 2, brillo = nivelNoche * (0.9 + 0.1 * Math.sin(t * 37 + x));
     g.globalAlpha = 0.18 * brillo; g.fillStyle = rgba + '1)'; g.fillRect(x - 5, y0 - 3, 14, largo + 6);
     g.globalAlpha = 0.45 * brillo; R(x - 1, y0, 6, largo, c);
