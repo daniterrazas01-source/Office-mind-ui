@@ -56,6 +56,10 @@ Debajo de la Ampliación hay un pasillo más (el 5) y tres cuartos. El de la izq
 
 Un encargo de verdad de su jefe le gana al baño de ambiente. El cuarto de en medio es el Taller (abajo) y el de la derecha sigue libre.
 
+### Calleros: supervisor con su propia sesión
+
+El supervisor **Calleros** ya no es un monito sin sesión: es la sesión de Claude Code en la nube «Calleros» (abierta el 24 nov; en la página web se amarra por el id del relevo `ses-67efb19c4b6d` en `config/oficina.json`, y en «Todas mis sesiones» está fijado como supervisor en `oficina/supervisores`). Como supervisor no se va, y vive en la **Oficina Calleros** (si espera, descansa o trabaja «en el escritorio», se queda en su oficina). Su **Ayudante** (Sonnet) es un agente dentro de esa misma sesión: cuando Calleros delega con la herramienta Agent, la oficina pone al Ayudante a hacerlo (`encargoReal`), sin abrir otra sesión.
+
 ### Follow: seguir a un monito
 
 El botón **«◎ Follow»** (el primero de arriba) abre la lista de todos los que están en la oficina (sesiones, agentes, ayudantes y el droide); al elegir uno, la vista lo sigue sola por toda la oficina: sus caminatas, sus viajes por el periférico y sus cambios de cuarto (`seguir()`, `camara()`). También se puede desde la ficha de cualquier monito, agente o del droide («◎ Follow: seguir a …»). Mientras lo sigue: un aro verde bajo sus pies y arriba un aviso «◎ Siguiendo a … · el cuarto donde está», con «Ficha» y «✕ Dejar». Deja de seguirlo con «✕ Dejar», si mueves la vista con un dedo o la rueda, o si el monito se va; pellizcar para acercar sí se puede sin perderlo.

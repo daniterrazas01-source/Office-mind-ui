@@ -3091,7 +3091,7 @@ function ayudantesDe(lista, ahora){
     area: normalizarArea(area) || areaDeTexto(hace), actividad: hace, estado: 'trabajando', modelo: modelo || null, fijo: true, suelto: true, rol: 'ayudante',
     actualizado: new Date(ahora).toISOString() });
   for (const r of porId.values()){
-    if (r.padre){                                                     // sesión abierta por otra sesión
+    if (r.padre && r.rol !== 'supervisor'){                            // sesión abierta por otra sesión (un supervisor es independiente)
       const p = porId.get(String(r.padre).toLowerCase());
       if (p && String(r.estado || '').toLowerCase() === 'trabajando'){ r.ayuda = String(p.nombre || p.id).slice(0, 18); r.ayudaId = llave(p); }
     }
@@ -3182,6 +3182,7 @@ function procesar(datos){
     const quiereTubo = !!r.tubo || (!!ESTACIONES[area] && ES_DEL_TUNEL.test(String(r.actividad || '')));
     if (inactivo){ area = enTerrazas ? 'terrazas' : 'descanso'; texto = 'Esperando instrucciones'; }   // Terrazas espera en su cuarto
     else if (area === 'descanso' && !texto) texto = 'Esperando instrucciones';
+    if (r.rol === 'supervisor' && r.casa === 'calleros' && (inactivo || area === 'escritorio' || area === 'descanso')) area = 'calleros';   // Calleros vive en su oficina
     if (!enTerrazas && esDeClipping(r)) area = EN_ESTUDIO[area] || (/diseno/.test(area) ? area : 'centro de diseno');   // los de clipping viven en su estudio
     const quiereLavar = !!r.lavar && area === 'agentes' && !inactivo, quiereCama = area === 'agentes' && !inactivo && /durm/i.test(String(r.actividad || ''));
     const cambiaLavar = quiereLavar !== !!a.quiereLavar || quiereCama !== !!a.quiereCama;

@@ -1,9 +1,22 @@
 {
   "venceHoras": 24,
   "avisoHoras": 3,
-  "nube": { "relevo": "https://oficina-relevo.kalleros.workers.dev" },
+  "nube": {
+    "relevo": "https://oficina-relevo.kalleros.workers.dev"
+  },
   "supervisores": [
-    { "nombre": "Calleros", "id": "calleros", "modelo": "opus", "dispositivo": "laptop-windows" },
-    { "nombre": "DragTree", "titulo": "dragtree", "dispositivo": "tableta-android", "persona": "Alberto Terrazas" }
+    {
+      "nombre": "Calleros",
+      "id": "ses-67efb19c4b6d",
+      "titulo": "calleros:",
+      "modelo": "opus",
+      "equipo": "Sesión en la nube"
+    },
+    {
+      "nombre": "DragTree",
+      "titulo": "dragtree",
+      "dispositivo": "tableta-android",
+      "persona": "Alberto Terrazas"
+    }
   ]
 }
