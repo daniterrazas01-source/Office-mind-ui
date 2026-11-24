@@ -76,6 +76,7 @@ export function agenteDeSesion(s, ahora = Date.now(), modelo = null) {
     origen: limpio(s.origin),
     actualizado: cuando,
     ultima_actividad: cuando,
+    padre: limpio(s.parent_session_id),   // si otra sesión la abrió: la oficina la pone como su ayudante mientras trabaja
     te_pide: limpio(resumen.needs_action),
     lo_ultimo: limpio(resumen.recent_action),
   };

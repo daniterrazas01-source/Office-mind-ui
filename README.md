@@ -56,6 +56,10 @@ Debajo de la Ampliación hay un pasillo más (el 5) y tres cuartos. El de la izq
 
 Un encargo de verdad de su jefe le gana al baño de ambiente. El cuarto de en medio es el Taller (abajo) y el de la derecha sigue libre.
 
+### Agentes que ayudan a una sesión o a un monito
+
+Si una sesión o un monito está usando un agente (subagente), el agente sale como su propio monito, «**Agente**», con «**Ayudando a …**» en el gafete, la burbuja con lo que hace y un **hilo punteado** que lo une a quien ayuda (`ayudantesDe()`, `hilosAyuda()`). Va al cuarto que le toca según lo que hace (leer → Biblioteca, buscar en internet → Internet…) y se va cuando el agente termina (3 minutos sin noticias). Llega por `ayudante_actividad`, `ayudante_area` y `ayudante_visto`: los mandan solos los hooks de las sesiones (relevo y tableta) y un monito los puede escribir en su ficha. Las sesiones que abrió otra sesión (`parent_session_id`, en «Todas mis sesiones») salen como ayudantes de esa sesión mientras trabajan. A los jefes de equipo (DragTree, Calleros) los sigue ayudando su agente de siempre (Nitro, el Ayudante), sin uno extra.
+
 ### Detalles de Descanso y de la Oficina Terrazas
 
 **Descanso** tiene dos sillones frente a frente, con la mesita en medio (el rojo de arriba y uno azul de espaldas abajo): ocho lugares para que los que descansan se sienten y no anden por cualquier lado.

@@ -17,7 +17,7 @@ export function estadoDemo() {
     agentes: [
       v('calleros', 'Calleros', 'calleros', 'Revisando pendientes', Math.floor(ahora / 600000) % 3 === 1 ? 0.1 : 5, { modelo: 'opus', dispositivo: 'laptop-windows' }),
       v('terrazas-demo', 'DragTree demo', 'terrazas', 'Pidiendo ayuda a un ayudante', Math.floor(ahora / 600000) % 3 ? 5 : 0.1, { dispositivo: 'tableta-android', origen: 'tableta-android', persona: 'Alberto Terrazas', modelo: 'opus', esfuerzo: 'high' }),
-      v('demo-1', 'Arreglar login', 'escritorio', 'Editando login.js', 0.1, { modelo: 'fable', modo: 'ultra' }),
+      v('demo-1', 'Arreglar login', 'escritorio', 'Editando login.js', 0.1, { modelo: 'fable', modo: 'ultra', ayudante_actividad: 'Buscando dónde falla el login', ayudante_area: 'biblioteca', ayudante_visto: hace(0) }),
       v('demo-2', 'Precios de envío', 'internet', 'Buscando en internet', 0.2, { modelo: 'haiku' }),
       v('demo-3', 'Resumen correos', 'biblioteca', 'Leyendo notas.md', 0.3),
       v('demo-4', 'Plan de la app', 'sala de juntas', 'Pidiendo ayuda a un ayudante', 0.4, { modelo: 'opus' }),

@@ -2834,7 +2834,7 @@ function ponerNombre(a, nombre){
   // Con la oficina cerrada, quien no está trabajando de verdad lleva el gafete corto: solo su nombre (sin modelo ni renglón
   // de abajo), para que no se amontonen cuando todos descansan juntos.
   const corto = !abierta(Date.now()) && a.estadoTxt !== 'trabajando' && !a.ultra;
-  const clave = (corto ? 'corto|' : '') + nombre + '|' + (a.modelo || '') + '|' + !!a.ultra + '|' + (a.dispositivo || '') + '|' + (a.rol || '') + '|' + plazo + '|' + (a.esfuerzo ? a.esfuerzo[0] : '');
+  const clave = (corto ? 'corto|' : '') + (a.ayuda || '') + '|' + nombre + '|' + (a.modelo || '') + '|' + !!a.ultra + '|' + (a.dispositivo || '') + '|' + (a.rol || '') + '|' + plazo + '|' + (a.esfuerzo ? a.esfuerzo[0] : '');
   if (a.gafete === clave) return;
   a.gafete = clave; a.nombre = nombre; a.elNombre.textContent = nombre; a.medirNombre = true;
   a.elNombre.classList.toggle('pronto', !!plazo);
@@ -2847,7 +2847,7 @@ function ponerNombre(a, nombre){
   a.elNombre.appendChild(document.createElement('b'));
   // Renglón de abajo: con qué trabaja ("Opus en alto" y sus rayitas) si se sabe; si no, en qué aparato está
   const conQue = m && a.esfuerzo ? m.nombre + ' en ' + a.esfuerzo[0] : a.tableta && m ? 'Modelo ' + m.nombre : '';
-  const abajo = [conQue, !conQue && a.rol !== 'programado' ? a.dispositivo : '', plazo].filter(Boolean).join(' · ');   // a los agentes no se les pone su horario: está en su ficha
+  const abajo = a.ayuda ? 'Ayudando a ' + a.ayuda : [conQue, !conQue && a.rol !== 'programado' ? a.dispositivo : '', plazo].filter(Boolean).join(' · ');   // a los agentes no se les pone su horario: está en su ficha
   if (abajo){
     const s = document.createElement('small'); s.textContent = abajo;
     if (conQue && a.esfuerzo){ const p = document.createElement('span'); p.className = 'pips'; p.style.color = m.etiqueta; p.textContent = ' ' + '▮'.repeat(a.esfuerzo[1]) + '▯'.repeat(5 - a.esfuerzo[1]); s.appendChild(p); }
@@ -3070,6 +3070,52 @@ const ES_CLIPPING = /\bclip/i;
 const esDeClipping = r => ES_CLIPPING.test([r.nombre, r.titulo, r.sesion_nombre, r.proyecto, r.casa, r.seccion].filter(Boolean).join(' '));
 const EN_ESTUDIO = { escritorio: 'centro de diseno', biblioteca: 'diseno aux 1', internet: 'diseno aux 2', 'sala de juntas': 'diseno aux 3', 'centro de pensado': 'diseno aux 1',
   descanso: 'lounge de diseno', agentes: 'lounge de diseno' };
+/* Agentes (subagentes) en la oficina: si una sesión o un monito está usando un agente, el agente sale como su propio
+   monito («Agente», con «Ayudando a …» en el gafete y un hilo que lo une a quien ayuda) y hace lo que el agente hace.
+   Llega por los campos ayudante_actividad / ayudante_area / ayudante_visto (los ponen los hooks de las sesiones y los
+   puede escribir un monito en su ficha). Las sesiones que otra sesión abrió (parent_session_id) también se marcan
+   como ayudantes de esa sesión mientras trabajan. A los jefes de un equipo (DragTree, Calleros) los ayuda su agente
+   de siempre (Nitro, el Ayudante), así que para ellos no sale uno extra. */
+const AYUDA_FRESCA = 3 * 60000;
+function ayudantesDe(lista, ahora){
+  const llave = r => String(r.id ?? r.nombre ?? '').trim().toLowerCase();
+  const porId = new Map(lista.filter(r => r && typeof r === 'object').map(r => [llave(r), r]));
+  const out = [];
+  const agente = (padre, id, hace, area, modelo) => ({ id: id + '~agente', nombre: 'Agente', ayuda: String(padre.nombre || padre.id || '').slice(0, 18), ayudaId: id,
+    area: normalizarArea(area) || areaDeTexto(hace), actividad: hace, estado: 'trabajando', modelo: modelo || null, fijo: true, suelto: true, rol: 'ayudante',
+    actualizado: new Date(ahora).toISOString() });
+  for (const r of porId.values()){
+    if (r.padre){                                                     // sesión abierta por otra sesión
+      const p = porId.get(String(r.padre).toLowerCase());
+      if (p && String(r.estado || '').toLowerCase() === 'trabajando'){ r.ayuda = String(p.nombre || p.id).slice(0, 18); r.ayudaId = llave(p); }
+    }
+    if (r.rol === 'programado' || r.rol === 'ayudante') continue;
+    const hace = String(r.ayudante_actividad || ''), visto = fecha(r.ayudante_visto) || fecha(r.actualizado) || 0;
+    if (!hace || ahora - visto > AYUDA_FRESCA) continue;
+    const plan = r.casa && PLANES.get(r.casa);
+    if (plan && plan.real) continue;                                  // a este jefe lo ayuda su agente del equipo
+    out.push(agente(r, llave(r), hace, r.ayudante_area, r.ayudante_modelo));
+  }
+  for (const m of monitosTodos()){                                    // un monito que usa un agente en su tarea
+    const hace = String(m.ayudante_actividad || ''), visto = fecha(m.ayudante_visto) || 0;
+    if (hace && ahora - visto < AYUDA_FRESCA) out.push(agente(m, String(m.id).toLowerCase(), hace, m.ayudante_area, m.ayudante_modelo));
+  }
+  return out;
+}
+/* El hilo entre un agente y quien lo usa (si están cerca): se ve a quién está ayudando */
+function hilosAyuda(t){
+  for (const a of agentes.values()){
+    if (!a.ayudaId || a.bajo || a.fase === 'saliendo') continue;
+    const p = agentes.get(a.ayudaId);
+    if (!p || p.bajo || p.fase === 'saliendo') continue;
+    const x0 = a.x, y0 = a.y - 10, x1 = p.x, y1 = p.y - 10, d = Math.hypot(x1 - x0, y1 - y0);
+    if (d < 12 || d > 360) continue;
+    const n = Math.floor(d / 4), corre = (t * 8) % 4;
+    g.globalAlpha = 0.75;
+    for (let i = 0; i < n; i++){ const u = (i * 4 + corre) / d; if (u > 1) break; R(Math.round(x0 + (x1 - x0) * u), Math.round(y0 + (y1 - y0) * u), 2, 1, i % 2 ? '#7fe7ff' : '#ffffff'); }
+    g.globalAlpha = 1;
+  }
+}
 function procesar(datos){
   const ahora = Date.now();
   if (datos && Array.isArray(datos.visitas)) VISITAS_DEMO = datos.visitas;
@@ -3080,6 +3126,7 @@ function procesar(datos){
   if (datos && Array.isArray(datos.envios)) ENVIOS_DEMO = datos.envios;
   organizarEquipos(lista, ahora);                                     // quién manda a quién ahorita
   for (const m of monitosTodos()) lista.push(registroProgramado(m, ahora));   // monitos con tarea programada: siempre están
+  lista.push(...ayudantesDe(lista, ahora));                          // los agentes que una sesión o un monito está usando
   const raizTs = fecha(datos && datos.actualizado);
   ARCHIVOS = Array.isArray(datos && datos.archivos_recientes) ? datos.archivos_recientes.filter(f => f && f.nombre) : [];
   let masReciente = raizTs || 0;
@@ -3100,6 +3147,7 @@ function procesar(datos){
     a.rol = r.rol; a.vence = r.vence || 0; a.seVaPronto = !!r.se_va_pronto; a.monito = r.monito || ''; a.enTarea = !!r.tarea; a.plan = r.plan || '';
     a.sesionId = String(r.sesion_id || r.id || ''); a.tePide = r.te_pide || ''; a.loUltimo = r.lo_ultimo || '';
     a.sesionNombre = r.sesion_nombre || ''; a.sesionesExtra = r.sesiones_extra || 0; a.proyecto = r.proyecto || '';
+    a.ayuda = r.ayuda || ''; a.ayudaId = r.ayudaId || '';          // a quién está ayudando (si es el agente de alguien)
     a.persona = r.persona || (a.tableta ? 'Alberto Terrazas' : 'Calleros');
     a.dispositivo = r.equipo ? String(r.equipo) : a.tableta ? 'Tableta Android' : (r.dispositivo || r.origen) ? 'Calleros — Laptop' : '';
     a.ultraPedido = String(r.modo || '').toLowerCase() === 'ultra' || !!r.ultra;
@@ -4169,6 +4217,7 @@ function dibujar(t){
   for (const a of agentes.values()) if (a.y > vy - 4 && a.y - 80 < vy + vh) items.push({ sortY: a.y, a });
   items.sort((p, q) => p.sortY - q.sortY);
   for (const it of items){ if (!it.a) it.dibujar(t); else if (it.a.droide){ if (!it.a.bajo) dibujarDroide(it.a, t); } else if (!it.a.bajo && !(it.a.fase === 'trabajando' && it.a.lugar && it.a.lugar.lavadora != null)) dibujarAgente(it.a, t); }
+  hilosAyuda(t);
   tallos();
   noche();
   sables(t);
