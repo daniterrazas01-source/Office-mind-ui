@@ -1,15 +1,15 @@
 {
-  "actualizado": "2026-11-25T13:39:01Z",
+  "actualizado": "2026-11-26T13:39:08Z",
   "monitos": [
     {
       "actividad": "",
-      "actualizado": "2026-11-25T13:30:30Z",
+      "actualizado": "2026-11-26T13:36:00Z",
       "area": "internet",
       "aspecto": "gorra_roja",
       "bano": {
-        "cuando": "2026-11-25T13:28:30Z",
-        "quedan": 19,
-        "quite": 3
+        "cuando": "2026-11-26T13:32:00Z",
+        "quedan": 21,
+        "quite": 0
       },
       "casa": "terrazas",
       "descripcion": "Reportero de arrancones de DragTree. Cada mañana busca las noticias recientes, te deja el resumen aquí y manda lo del día por el túnel a los demás cuartos. Habla como narrador de pista: directo, emocionado y con jerga de cuarto de milla.",
@@ -54,6 +54,139 @@
       "seccion": "Arrancones",
       "id": "nitro",
       "reportes": [
+        {
+          "capsulas": [
+            {
+              "fuente": "Performance Racing",
+              "texto": "Según Performance Racing, la Winternationals corre del 18 al 21 de febrero de 2027 en In-N-Out Burger Pomona Dragstrip. Abre una temporada de 20 fechas.",
+              "tipo": "próximo evento",
+              "titulo": "Pomona abre el 2027",
+              "url": "https://performanceracing.com/magazine/industry-news/08-27-2026/nhra-releases-20-race-schedule-2027-season"
+            },
+            {
+              "fuente": "Racer",
+              "texto": "El FMP NHRA Arizona Nationals corre del 26 al 28 de febrero de 2027 en Firebird Motorsports Park.",
+              "tipo": "próximo evento",
+              "titulo": "Phoenix, la semana siguiente",
+              "url": "https://racer.com/2026/08/27/nhra-confirms-20-race-2027-schedule"
+            },
+            {
+              "fuente": "Cycle News",
+              "texto": "La temporada 2027 de Pro Stock Motorcycle tiene 14 fechas. La primera es del 11 al 14 de marzo en Gainesville.",
+              "tipo": "próximo evento",
+              "titulo": "Motos, arranque en Gainesville",
+              "url": "https://www.cyclenews.com/2026/08/article/2027-nhra-pro-stock-motorcycle-calendar/"
+            },
+            {
+              "fuente": "NewsChannel 9",
+              "texto": "El NHRA Thunder Valley Nationals se corre en Bristol Dragway del 11 al 13 de junio de 2027.",
+              "tipo": "próximo evento",
+              "titulo": "Bristol, en junio",
+              "url": "https://newschannel9.com/sports/bristol-dragways-nhra-thunder-valley-nationals-set-for-june-11-13-2027"
+            },
+            {
+              "fuente": "Competition Plus",
+              "texto": "Gaige Herrera venció a Matt Smith en la final de Pomona y se coronó en Pro Stock Motorcycle.",
+              "tipo": "resultado",
+              "titulo": "Herrera, campeón de motos",
+              "url": "https://competitionplus.com/gaige-herrera-defeats-matt-smith-at-nhra-pomona-finals-to-complete-two-win-weekend/"
+            },
+            {
+              "fuente": "Racer",
+              "texto": "J.R. Todd venció a Daniel Wilkerson en la final de Pomona y ganó el título de Funny Car.",
+              "tipo": "resultado",
+              "titulo": "Todd, campeón de Funny Car",
+              "url": "https://racer.com/2026/11/15/todd-wins-race-title-in-dramatic-fashion-at-nhra-finals-kalitta-glenn-herrera-also-get-victories"
+            },
+            {
+              "fuente": "Dragzine",
+              "texto": "Shawn Langdon ganó su segundo campeonato mundial de Top Fuel en Pomona.",
+              "tipo": "resultado",
+              "titulo": "Langdon, segundo título",
+              "url": "https://www.dragzine.com/features/2026-nhra-world-champions-crowned-langdon-todd-glenn-and-herrera-clinch-titles-in-pomona/"
+            },
+            {
+              "fuente": "Dragzine",
+              "texto": "Dallas Glenn ganó su segundo título seguido de Pro Stock en Pomona.",
+              "tipo": "resultado",
+              "titulo": "Glenn, bicampeón de Pro Stock",
+              "url": "https://www.dragzine.com/event-coverage/nhra-ihra/nhra-finals-results-j-r-todd-doug-kalitta-dallas-glenn-and-gaige-herrera-win-in-pomona/"
+            },
+            {
+              "fuente": "Mopar Insiders (sitio de aficionados)",
+              "texto": "Dodge ganó la Manufacturer's Cup 2026, su primera desde 2016. Lo reporta un sitio de aficionados.",
+              "tipo": "resultado",
+              "titulo": "Dodge, campeón de fabricantes",
+              "url": "https://moparinsiders.com/dodge-claims-2026-nhra-manufacturers-cup/"
+            },
+            {
+              "fuente": "Drag Racing List",
+              "texto": "En 2027 los Pro Stock vuelven a usar hood scoops. El motor pasa de un cuerpo de aceleración al frente a dos arriba.",
+              "tipo": "reglamento",
+              "titulo": "Regresan los hood scoops",
+              "url": "https://www.draglist.com/2026/04/08/hood-scoops-set-to-return-to-nhra-pro-stock-category-in-2027"
+            },
+            {
+              "fuente": "NHRA Racer",
+              "texto": "En 2027 el dial-in máximo baja a 7.25 s en Top Dragster y a 7.60 s en Top Sportsman. Top Dragster además necesita alerón trasero.",
+              "tipo": "reglamento",
+              "titulo": "Dial-in más bajo en Top Dragster",
+              "url": "https://www.nhraracer.com/post/updates-to-top-dragster-and-top-sportsman-in-2027"
+            },
+            {
+              "fuente": "Competition Plus",
+              "texto": "Bill Bader Jr. presentó la Sportsman Racing League, con los convenios de sanción que tenía la IHRA. Dice que la venta de la IHRA no cambia sus planes para 2027.",
+              "tipo": "historia",
+              "titulo": "Bader lanza su liga SRL",
+              "url": "https://competitionplus.com/bill-bader-jr-holds-his-ground-as-new-ihra-owners-lay-out-plans-for-2027/"
+            },
+            {
+              "texto": "Son las luces que arrancan la carrera: primero las amarillas y al final la verde. Salir antes de la verde es falso arranque y el pilotaje queda fuera.",
+              "tipo": "cómo funciona",
+              "titulo": "El árbol de luces"
+            },
+            {
+              "texto": "Son poco más de 400 metros. Ahí se miden el tiempo de paso y la velocidad al cruzar la meta.",
+              "tipo": "cómo funciona",
+              "titulo": "El cuarto de milla"
+            }
+          ],
+          "cierre": "Pista en pausa, pero el árbol sigue listo. Mañana vuelvo a buscar. ¡Luz verde!",
+          "creado": "2026-11-26T13:30:00Z",
+          "enviado": "2026-11-26T13:35:00Z",
+          "envios": [
+            {
+              "para": "almacen",
+              "texto": "Van 0 noticias nuevas y 14 cápsulas; la principal es que la temporada 2027 arranca en Pomona el 18 de febrero, con datos por confirmar.",
+              "tipo": "archivo",
+              "titulo": "Resumen del 26 de noviembre de 2026"
+            },
+            {
+              "para": "noticias",
+              "texto": "- Sin noticias nuevas de arrancones hoy (26 nov).\n- Lo más reciente: liga SRL de Bill Bader Jr. (22 nov).\n- Pomona ya tiene campeones (15 nov).",
+              "tipo": "noticias",
+              "titulo": "Noticias de hoy para la pantalla"
+            },
+            {
+              "para": "calleros",
+              "texto": "No hay noticias nuevas de arrancones hoy. Lo más reciente es la liga SRL de Bill Bader Jr., y la IHRA cambió de dueños según Competition Plus. Pomona ya tiene campeones desde el 15 de noviembre, y Chihuahua sigue sin resultados confirmados.",
+              "tipo": "nota",
+              "titulo": "Lo más importante de hoy"
+            },
+            {
+              "para": "cerebro delta",
+              "texto": "IHRA Australia/NZ y Beaumont Motorsport Group compraron la IHRA a Cuttell Motorsports, según Competition Plus.",
+              "tipo": "dato",
+              "titulo": "Dato para recordar: dueños de la IHRA",
+              "url": "https://competitionplus.com/ihra-sold-again-as-australian-group-takes-control-with-baders-sportsman-racing-league-in-the-picture/"
+            }
+          ],
+          "fecha": "26 de noviembre de 2026",
+          "intro": "Buenas, jefe. Pista en pausa: no encontré notas nuevas de hoy ni de los últimos tres días. Lo más fresco que traigo es del 22 de noviembre, cuando Bill Bader Jr. presentó su liga SRL. Dejo cápsulas con lo confirmado para 2027, los campeones de Pomona y lo que cambia en el reglamento. Chihuahua sigue sin resultados.",
+          "puntos": [],
+          "titulo": "Pista en pausa; la IHRA y Bader mueven el tablero",
+          "id": "2026-11-26"
+        },
         {
           "capsulas": [
             {
@@ -1496,8 +1629,8 @@
       ],
       "memoria": [
         {
-          "actualizado": "2026-11-25T13:27:00Z",
-          "texto": "- Búsqueda extendida sirvió: Drag Racing List, Racer, Dragzine, Competition Plus, Mopar Insiders, Cycle News, NewsChannel 9, Performance Racing.\n- Ocho Columnas y Es Noticia MX: solo previas y un titular sin confirmar; sin resultados de Chihuahua.\n- No abrieron o solo muestran etiquetas viejas: esnoticia.mx (a veces), Publimetro, La Verdad.\n- Búsquedas genéricas traen notas viejas; conviene buscar con nombres concretos.",
+          "actualizado": "2026-11-26T13:31:00Z",
+          "texto": "- Búsqueda extendida sirvió: Competition Plus, Dragzine, Racer, Drag Racing List, Performance Racing, NewsChannel 9, Engine Builder, Cycle News.\n- Ocho Columnas y Es Noticia MX: solo previas y titulares sin confirmar.\n- Mopar Insiders: sitio de aficionados; usar con cuidado.\n- Publimetro, La Verdad y Relevancia Chihuahua: solo etiquetas viejas.\n- Búsquedas genéricas traen notas viejas; conviene buscar con nombres concretos.",
           "titulo": "Fuentes",
           "id": "fuentes"
         },
@@ -1508,8 +1641,8 @@
           "id": "instrucciones-del-jefe"
         },
         {
-          "actualizado": "2026-11-25T13:27:00Z",
-          "texto": "- Chihuahua, onceava fecha (dom 15 nov): sin resultados en medios consultados.\n- Stege vs Valles: titular de esnoticia.mx sobre nueva fecha, sin confirmar.\n- 50 Years of Force: falta el programa del homenaje.\n- SRL de Bader: arranque 1 de enero de 2027 reportado por Competition Plus; no lo confirmé el 25 de noviembre.\n- IHRA: venta a grupo australiano y Beaumont (Competition Plus, Dragzine); calendario 2027 por confirmar.\n- PDRA: calendario 2027 de 8 fechas, sin fuente abierta.\n- Arrancones México: sin notas de nov 2026 en búsqueda.",
+          "actualizado": "2026-11-26T13:31:00Z",
+          "texto": "- Chihuahua, onceava fecha (dom 15 nov): sin resultados en ninguna búsqueda.\n- Stege vs Valles: nueva fecha solo en titular de esnoticia.mx, sin confirmar.\n- 50 Years of Force: falta el programa del homenaje.\n- SRL de Bader: arranque 1 de enero de 2027 no confirmado; la búsqueda solo dio el lanzamiento.\n- IHRA 2027: calendario por confirmar; recortó su calendario 2026 (Outlaw Nitro).\n- Calendario 2027: Winternationals (18-21 feb) vs Gatornationals (11-14 mar) en conflicto entre fuentes.\n- PDRA: calendario 2027 sin fuente abierta.\n- Arrancones México y LatAm: sin notas de nov 2026; solo etiquetas de 2025-26.",
           "titulo": "Pendientes",
           "id": "pendientes"
         },
@@ -1523,12 +1656,12 @@
     },
     {
       "actividad": "",
-      "actualizado": "2026-11-25T12:44:00Z",
+      "actualizado": "2026-11-26T13:40:30Z",
       "area": "internet",
       "aspecto": "audifonos",
       "bano": {
-        "cuando": "2026-11-25T12:42:30Z",
-        "quedan": 29,
+        "cuando": "2026-11-26T13:39:00Z",
+        "quedan": 28,
         "quite": 0
       },
       "casa": "terrazas",
@@ -1582,31 +1715,24 @@
           "capsulas": [
             {
               "fuente": "Visit Qatar",
-              "texto": "Lusail, fin de semana del 27 al 29 de noviembre. Práctica el viernes, clasificación el sábado y carrera de 57 vueltas el domingo a las 19:00 local, que son las 10:00 en el centro de México. No hay sprint.",
+              "texto": "Lusail, con práctica el viernes 27, clasificación el sábado 28 y carrera de 57 vueltas el domingo a las 19:00 locales (10:00 en CDMX). No hay sprint.",
               "tipo": "próxima carrera",
               "titulo": "Qatar: domingo 29, 10:00 CDMX",
               "url": "https://visitqatar.com/intl-en/events-calendar/2026-qatar-airways-grand-prix"
             },
             {
               "fuente": "Formula1.com",
-              "texto": "Yas Marina cierra la temporada 2026. La salida es a las 17:00 hora local, que son las 07:00 en el centro de México.",
+              "texto": "Yas Marina, la última carrera de 2026. La salida es a las 17:00 hora local, que son las 07:00 en el centro de México.",
               "tipo": "próxima carrera",
               "titulo": "Cierre: Abu Dabi, domingo 6, 07:00 CDMX",
               "url": "https://www.formula1.com/en/latest/article/official-grand-prix-start-times-for-2026-f1-season-confirmed.2UgPfArqH76tzlOYh21jSG"
             },
             {
-              "fuente": "RacingNews365",
-              "texto": "Antonelli ya es campeón del mundo. Lo siguen Verstappen con 304 y Hamilton con 267.",
-              "tipo": "campeonato",
-              "titulo": "Pilotos: Antonelli, campeón con 402",
-              "url": "https://racingnews365.com/2026-f1-championship-standings-after-las-vegas-grand-prix"
-            },
-            {
-              "fuente": "RacingNews365",
-              "texto": "Mercedes ya es campeón. Lo siguen Ferrari con 517, Red Bull con 440 y McLaren con 431.",
-              "tipo": "campeonato",
-              "titulo": "Constructores: Mercedes, 666 puntos",
-              "url": "https://racingnews365.com/2026-f1-championship-standings-after-las-vegas-grand-prix"
+              "fuente": "Racer",
+              "texto": "Pirelli confirma que cada juego de neumáticos dura como máximo 27 vueltas en una carrera de 57, así que habrá al menos dos paradas.",
+              "tipo": "próxima carrera",
+              "titulo": "Qatar: 27 vueltas por juego",
+              "url": "https://racer.com/2026/11/23/pirelli-confirms-tire-limits-in-qatar-again-guaranteeing-two-stop-race"
             },
             {
               "fuente": "RaceFans",
@@ -1616,22 +1742,198 @@
               "url": "https://www.racefans.net/2026/11/22/2026-las-vegas-grand-prix-race-result-and-championship-points/"
             },
             {
+              "fuente": "RacingNews365",
+              "texto": "Antonelli ya es campeón. Lo siguen Verstappen con 304 y Hamilton con 267, tras Las Vegas.",
+              "tipo": "campeonato",
+              "titulo": "Pilotos: Antonelli, 402 puntos",
+              "url": "https://racingnews365.com/2026-f1-championship-standings-after-las-vegas-grand-prix"
+            },
+            {
+              "fuente": "RacingNews365",
+              "texto": "Mercedes ya es campeón. Lo siguen Ferrari con 517, Red Bull con 440 y McLaren con 431.",
+              "tipo": "campeonato",
+              "titulo": "Constructores: Mercedes, 666",
+              "url": "https://racingnews365.com/2026-f1-championship-standings-after-las-vegas-grand-prix"
+            },
+            {
+              "fuente": "Autosport",
+              "texto": "Haas tiene a Oliver Bearman junto a Rafael Câmara en 2027. Komatsu lo describió como una decisión natural para el equipo.",
+              "tipo": "equipos",
+              "titulo": "Bearman, confirmado para 2027",
+              "url": "https://www.autosport.com/f1/news/haas-announce-bearman-f1-2027/10877815/"
+            },
+            {
               "fuente": "PlanetF1",
-              "texto": "Aston Martin mantiene la misma alineación para 2027. El rumor de Ocon como reserva no tiene confirmación.",
+              "texto": "Aston Martin mantiene la misma alineación por quinto año seguido. El rumor de Ocon como reserva no tiene confirmación.",
               "tipo": "equipos",
               "titulo": "Aston Martin: Alonso y Stroll, 2027",
               "url": "https://www.planetf1.com/news/f1-2027-driver-line-up-confirmed-grid"
             },
             {
+              "fuente": "Grand Prix",
+              "texto": "Hay acuerdo en principio para un motor de 2.1 litros con menos híbrido. El marco final se vota en Shanghái el 10 de diciembre.",
+              "tipo": "reglamento",
+              "titulo": "V8 de 2030: voto final el 10 de diciembre",
+              "url": "https://grandepremio.com/en/f1/fia-confirms-unanimous-agreement-on-f1s-2030-v8-engines-as-final-approval-awaits/"
+            },
+            {
+              "fuente": "Al Jazeera",
+              "texto": "Se coronó en México con 20 años y 68 días. Es el primer italiano campeón desde Ascari en 1953.",
+              "tipo": "historia",
+              "titulo": "Antonelli, el campeón más joven",
+              "url": "https://www.aljazeera.com/sports/2026/11/2/kimi-antonelli-becomes-formula-ones-youngest-world-champion-in-mexico-city"
+            },
+            {
+              "texto": "Es un alerón trasero que se abre en zonas marcadas para bajar resistencia y facilitar rebasar. Solo se activa si el auto de atrás está a menos de un segundo.",
+              "tipo": "cómo funciona",
+              "titulo": "El DRS"
+            },
+            {
+              "texto": "Desde la clasificación, los autos quedan bajo vigilancia y casi no se pueden tocar. Así no cambian la configuración después de medirse.",
+              "tipo": "cómo funciona",
+              "titulo": "Parc fermé"
+            }
+          ],
+          "cierre": "Bandera a cuadros por hoy. Nos vemos en la parrilla de Qatar.",
+          "creado": "2026-11-26T13:37:00Z",
+          "enviado": "2026-11-26T13:40:00Z",
+          "envios": [
+            {
+              "para": "almacen",
+              "texto": "7 noticias y 12 cápsulas; la principal es la confirmación de Haas con Bearman para 2027, y Qatar sigue firme el domingo 29 a las 10:00 CDMX.",
+              "tipo": "archivo",
+              "titulo": "Fórmula 1: resumen del 26 de noviembre de 2026"
+            },
+            {
+              "para": "noticias",
+              "texto": "- Haas confirma a Bearman para 2027 (26 de noviembre)\n- Ferrari, presionada a sancionar a sus pilotos (25 de noviembre)\n- Qatar y Abu Dabi siguen en pie (25 de noviembre)\n- Tsunoda: audiencia de Audi, sin fallo (25 de noviembre)\n- Stroll pide a Honda dos segundos en recta (24 de noviembre)\n- Vasseur: la pelea Leclerc-Hamilton es \"inmanejable\" (24 de noviembre)\n- Verstappen y Russell reavivan su rivalidad (24 de noviembre)",
+              "tipo": "noticias",
+              "titulo": "Fórmula 1: noticias de hoy para la pantalla"
+            },
+            {
+              "para": "calleros",
+              "texto": "Haas confirmó a Oliver Bearman para 2027, junto a Rafael Câmara. Ferrari sigue bajo presión para sancionar a sus pilotos, pero no hay sanción confirmada. Qatar corre el domingo 29 a las 10:00 CDMX; Abu Dabi, el 6 de diciembre a las 07:00.",
+              "tipo": "nota",
+              "titulo": "Fórmula 1: lo más importante de hoy"
+            },
+            {
+              "para": "cerebro delta",
+              "texto": "Haas confirmó a Oliver Bearman para 2027, junto a Rafael Câmara, según Autosport (26 de noviembre).",
+              "tipo": "dato",
+              "titulo": "Dato para recordar: Bearman, confirmado para 2027",
+              "url": "https://www.autosport.com/f1/news/haas-announce-bearman-f1-2027/10877815/"
+            }
+          ],
+          "fecha": "26 de noviembre de 2026",
+          "intro": "Otra pasada de la mañana desde el muro de boxes. Busqué otra vez en español e inglés y no salió nada nuevo fuera de lo que ya tengo. Lo más fresco sigue siendo de hoy: Haas confirma a Bearman para 2027. Qatar corre el domingo 29 a las 10:00 CDMX.",
+          "puntos": [
+            {
+              "cuando": "26 de noviembre",
+              "fuente": "Autosport",
+              "resumen": "Haas firmó a Oliver Bearman para 2027, como compañero de Rafael Câmara, según Autosport y Sky Sports. Komatsu había dicho en Las Vegas que el contrato no estaba firmado. Sky habla de una extensión de un año; otros reportes no dan el plazo.",
+              "titulo": "Haas confirma a Bearman para 2027",
+              "url": "https://www.autosport.com/f1/news/haas-announce-bearman-f1-2027/10877815/"
+            },
+            {
+              "cuando": "25 de noviembre",
+              "fuente": "Motorsport Week",
+              "resumen": "Motorsport Week reporta que piden a Ferrari imponer sanciones internas por las peleas de Leclerc y Hamilton. Hay reportes de multas o incluso de suspender a un piloto. Ferrari no ha confirmado ninguna sanción; Vasseur hablará con los dos antes de Qatar.",
+              "titulo": "Ferrari, presionada a sancionar a sus pilotos",
+              "url": "https://www.motorsportweek.com/2026/11/25/ferrari-urged-to-impose-internal-sanctions-in-f1-driver-battles/"
+            },
+            {
+              "cuando": "25 de noviembre",
+              "fuente": "TimesLIVE (base Reuters)",
+              "resumen": "La F1 y la FIA mantienen las dos últimas carreras de 2026: Qatar el domingo 29 y Abu Dabi el domingo 6 de diciembre. AP dice que la FIA aún podría cancelarlas, pero no hay comunicado nuevo.",
+              "titulo": "Qatar y Abu Dabi siguen en pie",
+              "url": "https://timeslive.co.za/motoring/2026-11-25-new-tensions-and-familiar-feuds-dominate-f1-headlines-ahead-of-qatar-grand-prix"
+            },
+            {
+              "cuando": "25 de noviembre",
+              "fuente": "PlanetF1",
+              "resumen": "La Corte de Apelación de la FIA vio el caso de Audi en París a puerta cerrada, a las 02:00 CDMX. Si Audi gana, Tsunoda bajaría del 10.º al 15.º lugar por el GP de Italia. No encontré fallo publicado.",
+              "titulo": "Tsunoda: audiencia de Audi, sin fallo",
+              "url": "https://www.planetf1.com/news/fia-court-audi-yuki-tsunoda-appeal"
+            },
+            {
+              "cuando": "24 de noviembre",
+              "fuente": "Motorsport Week",
+              "resumen": "Stroll terminó 17.º en Las Vegas y dijo que Aston Martin necesita unos dos segundos en recta. Alonso se retiró en la vuelta 49 por problema de motor.",
+              "titulo": "Stroll pide a Honda dos segundos en recta",
+              "url": "https://www.motorsportweek.com/2026/11/24/i-dont-know-stroll-unsure-honda-can-close-two-second-straight-line-gap/"
+            },
+            {
+              "cuando": "24 de noviembre",
+              "fuente": "readMotorsport",
+              "resumen": "El jefe de Ferrari calificó de inaceptable el choque de Las Vegas y dijo que habrá que tomar acción. Ferrari no ha confirmado sanciones; las pláticas siguen antes de Qatar.",
+              "titulo": "Vasseur: la pelea Leclerc-Hamilton es \"inmanejable\"",
+              "url": "https://readmotorsport.com/2026/11/24/vasseur-hamilton-leclerc-ferrari-rivalry-unmanageable/"
+            },
+            {
+              "cuando": "24 de noviembre",
+              "fuente": "Read Motorsport",
+              "resumen": "Tras el choque en la curva 14 de Las Vegas, Verstappen dijo que Russell está muy por debajo de su nivel. Los dos llegan a Lusail con el tema abierto.",
+              "titulo": "Verstappen y Russell reavivan su rivalidad",
+              "url": "https://readmotorsport.com/2026/11/24/verstappen-russell-rivalry-qatar-grand-prix-2026/"
+            }
+          ],
+          "titulo": "Bearman, confirmado; Qatar firme el domingo",
+          "id": "2026-11-26"
+        },
+        {
+          "capsulas": [
+            {
+              "fuente": "The Peninsula",
+              "texto": "Lusail, 57 vueltas, sin sprint. Práctica el viernes 27 y clasificación el sábado 28; la carrera arranca a las 19:00 locales.",
+              "tipo": "próxima carrera",
+              "titulo": "Qatar: domingo 29, 10:00 CDMX",
+              "url": "https://thepeninsulaqatar.com/article/23/11/2026/one-week-to-go-as-f1-qatar-gp-preparations-gather-pace"
+            },
+            {
+              "fuente": "Racer",
+              "texto": "Pirelli confirma que cada juego de neumáticos dura como máximo 27 vueltas, así que habrá al menos dos paradas.",
+              "tipo": "próxima carrera",
+              "titulo": "Qatar: 27 vueltas por juego",
+              "url": "https://racer.com/2026/11/23/pirelli-confirms-tire-limits-in-qatar-again-guaranteeing-two-stop-race"
+            },
+            {
               "fuente": "Formula1.com",
-              "texto": "Rafael Câmara termina la temporada con Haas, y ya está confirmado para 2027.",
+              "texto": "Yas Marina, la última carrera de 2026. La salida es a las 17:00 hora local.",
+              "tipo": "próxima carrera",
+              "titulo": "Cierre: Abu Dabi, domingo 6, 07:00 CDMX",
+              "url": "https://www.formula1.com/en/latest/article/official-grand-prix-start-times-for-2026-f1-season-confirmed.2UgPfArqH76tzlOYh21jSG"
+            },
+            {
+              "fuente": "RaceFans",
+              "texto": "1. Verstappen, desde la pole. 2. Norris, a 0.639 s. 3. Piastri, a 1.529 s. Antonelli fue cuarto tras su castigo de cinco lugares.",
+              "tipo": "resultado",
+              "titulo": "Podio de Las Vegas",
+              "url": "https://www.racefans.net/2026/11/22/2026-las-vegas-grand-prix-race-result-and-championship-points/"
+            },
+            {
+              "fuente": "RacingNews365",
+              "texto": "Lo siguen Verstappen con 304 y Hamilton con 267, tras Las Vegas.",
+              "tipo": "campeonato",
+              "titulo": "Pilotos: Antonelli, campeón con 402",
+              "url": "https://racingnews365.com/2026-f1-championship-standings-after-las-vegas-grand-prix"
+            },
+            {
+              "fuente": "RacingNews365",
+              "texto": "Mercedes ya es campeón. Lo siguen Ferrari con 517, Red Bull con 440 y McLaren con 431.",
+              "tipo": "campeonato",
+              "titulo": "Constructores: Mercedes, con 666",
+              "url": "https://racingnews365.com/2026-f1-championship-standings-after-las-vegas-grand-prix"
+            },
+            {
+              "fuente": "PlanetF1",
+              "texto": "La misma alineación por quinto año seguido. El rumor de Ocon como reserva no tiene confirmación.",
               "tipo": "equipos",
-              "titulo": "Haas: Câmara corre en Qatar y Abu Dabi",
-              "url": "https://www.formula1.com/en/latest/article/haas-confirm-camara-will-drive-for-the-team-in-final-races-of-2026.2wYY9ymhyqr7rXcuK6S7bj"
+              "titulo": "Aston Martin: Alonso y Stroll en 2027",
+              "url": "https://www.planetf1.com/news/f1-2027-driver-line-up-confirmed-grid"
             },
             {
               "fuente": "Grand Prix",
-              "texto": "Hay acuerdo en principio para un motor de 2.1 litros con menos híbrido. El marco final se vota en Shanghái el 10 de diciembre.",
+              "texto": "Hay acuerdo en principio para un motor de 2.1 litros con menos híbrido. El marco final se vota en Shanghái.",
               "tipo": "reglamento",
               "titulo": "V8 de 2030: voto el 10 de diciembre",
               "url": "https://grandepremio.com/en/f1/fia-confirms-unanimous-agreement-on-f1s-2030-v8-engines-as-final-approval-awaits/"
@@ -1656,85 +1958,99 @@
               "tipo": "cómo funciona",
               "titulo": "Parc fermé",
               "url": ""
+            },
+            {
+              "fuente": "",
+              "texto": "Parar antes que el rival para montar neumáticos nuevos y ganar tiempo en boxes. Si sale bien, rebasas en pista sin pelear el tramo.",
+              "tipo": "cómo funciona",
+              "titulo": "El undercut",
+              "url": ""
             }
           ],
-          "cierre": "Bandera a cuadros por ahora. Si cae el fallo de Tsunoda, lo verán aquí.",
-          "creado": "2026-11-25T13:35:40Z",
-          "enviado": "2026-11-25T13:35:40Z",
+          "cierre": "Bandera a cuadros por hoy. Nos vemos en la parrilla de Qatar.",
+          "creado": "2026-11-26T05:36:09Z",
+          "enviado": "2026-11-26T05:37:30Z",
           "envios": [
             {
               "para": "almacen",
-              "texto": "Van 7 noticias y 11 cápsulas; la principal es Ferrari en la interna, con sanciones sin confirmar, y Qatar firme el domingo 29 a las 10:00 CDMX.",
+              "texto": "7 noticias y 12 cápsulas; lo principal es Ferrari presionada a sancionar a sus pilotos (sin confirmar), con Qatar firme el domingo 29 a las 10:00 CDMX.",
               "tipo": "archivo",
               "titulo": "Fórmula 1: resumen del 25 de noviembre de 2026"
             },
             {
               "para": "noticias",
-              "texto": "- Vigna dice que Hamilton y Leclerc ya resolvieron sus diferencias (sin fecha exacta)\n- Ferrari estudia sanciones internas, sin confirmar (24 de noviembre)\n- Vasseur: la pelea Leclerc-Hamilton es \"inmanejable\" (24 de noviembre)\n- Verstappen y Russell reavivan su rivalidad (24 de noviembre)\n- Stroll pide a Honda dos segundos en recta (24 de noviembre)\n- Tsunoda: audiencia de Audi en París, sin fallo (23 de noviembre)\n- Pirelli confirma 27 vueltas por juego en Qatar (23 de noviembre)",
+              "texto": "- Ferrari, presionada a sancionar a sus pilotos (25 de noviembre)\n- Qatar y Abu Dabi siguen en pie (25 de noviembre)\n- Tsunoda: audiencia de Audi, sin fallo (25 de noviembre)\n- Bearman, en pláticas con otro equipo (rumor, sin fecha visible)\n- Vasseur: la pelea Leclerc-Hamilton es \"inmanejable\" (24 de noviembre)\n- Verstappen y Russell reavivan su rivalidad (24 de noviembre)\n- Stroll pide a Honda dos segundos en recta (24 de noviembre)",
               "tipo": "noticias",
               "titulo": "Fórmula 1: noticias de hoy para la pantalla"
             },
             {
               "para": "calleros",
-              "texto": "No hay notas nuevas fechadas hoy 25. Lo más reciente es del 24: Ferrari estudia sanciones internas, sin confirmar, y Vasseur dice que la pelea Leclerc-Hamilton debe resolverse. La audiencia de Tsunoda era hoy a las 02:00 CDMX y no encontré fallo publicado. Qatar sigue firme el domingo 29, a las 10:00 CDMX.",
+              "texto": "No hubo notas nuevas fechadas hoy que pueda confirmar. Ferrari está bajo presión para sancionar a sus pilotos tras Las Vegas, pero no hay sanción confirmada. Qatar sigue firme: domingo 29, 10:00 CDMX. La audiencia de Tsunoda fue a las 02:00 CDMX y todavía no tiene fallo publicado.",
               "tipo": "nota",
               "titulo": "Fórmula 1: lo más importante de hoy"
+            },
+            {
+              "para": "cerebro delta",
+              "texto": "La FIA dice que Qatar (29 de noviembre) y Abu Dabi (6 de diciembre) están listos, y que tiene otro equipo preparado si hay restricciones de viaje, según The Race (sin fecha visible en la búsqueda de hoy).",
+              "tipo": "dato",
+              "titulo": "Dato para recordar: FIA mantiene Qatar y Abu Dabi",
+              "url": "https://www.the-race.com/formula-1/fia-adamant-f1-qatar-abu-dhabi-gp-will-go-ahead/"
             }
           ],
           "fecha": "25 de noviembre de 2026",
-          "intro": "Segunda pasada del día desde el muro de boxes, 07:35 en CDMX. Busqué otra vez en español e inglés. Salió una nota nueva sin fecha exacta: el CEO de Ferrari dice que Hamilton y Leclerc ya resolvieron sus diferencias. No encontré fallo publicado de la audiencia de Tsunoda. Lo demás sigue siendo del 24. Qatar sigue firme: domingo 29, 10:00 CDMX.",
+          "intro": "Otra pasada desde el muro de boxes, ya de noche en CDMX. Busqué en español e inglés y no encontré notas nuevas de hoy que pueda confirmar. Lo más reciente es del 25: Ferrari, bajo presión para sancionar a sus pilotos (sin confirmar); Qatar y Abu Dabi siguen en pie, y la audiencia de Tsunoda sigue sin fallo. Qatar corre el domingo 29 a las 10:00 CDMX.",
           "puntos": [
             {
-              "cuando": "sin fecha exacta (reciente)",
-              "fuente": "Scuderia Fans",
-              "resumen": "Según un resumen de búsqueda, el CEO de Ferrari, Benedetto Vigna, dijo que los dos pilotos ya resolvieron el choque de Las Vegas. No abrí la nota y no hay sanción confirmada. Vasseur sigue con la conversación antes de Qatar.",
-              "titulo": "Vigna dice que Hamilton y Leclerc ya resolvieron sus diferencias",
-              "url": "https://scuderiafans.com/ferrari-ceo-benedetto-vigna-breaks-silence-on-charles-leclerc-and-lewis-hamilton-tensions"
+              "cuando": "25 de noviembre",
+              "fuente": "Motorsport Week",
+              "resumen": "Motorsport Week reporta que piden a Ferrari imponer sanciones internas por las peleas de sus pilotos. Sky Sports cita que evalúan multas e incluso suspender a un piloto. Ferrari no ha confirmado ninguna sanción; Vasseur hablará con Leclerc y Hamilton antes de Qatar.",
+              "titulo": "Ferrari, presionada a sancionar a sus pilotos",
+              "url": "https://www.motorsportweek.com/2026/11/25/ferrari-urged-to-impose-internal-sanctions-in-f1-driver-battles/"
             },
             {
-              "cuando": "24 de noviembre",
-              "fuente": "Grand Prix",
-              "resumen": "Según La Gazzetta dello Sport, Ferrari evalúa sanciones internas, sobre todo para Leclerc, tras el choque con Hamilton en Las Vegas. No hay nada confirmado. Ferrari tampoco ha dicho nada oficial.",
-              "titulo": "Ferrari estudia sanciones internas, sin confirmar",
-              "url": "https://grandepremio.com/en/f1/ferrari-considers-punishing-hamilton-and-leclerc-as-vasseur-loses-patience-after-las-vegas/"
+              "cuando": "25 de noviembre",
+              "fuente": "TimesLIVE (base Reuters)",
+              "resumen": "La F1 y la FIA mantienen las dos últimas carreras de 2026 pese a la tensión en Medio Oriente: Qatar el domingo 29 y Abu Dabi el domingo 6 de diciembre. Según reportes, Sky Alemania, Canal+, ServusTV y DAZN España no mandan equipo. AP dice que la FIA aún podría cancelarlas.",
+              "titulo": "Qatar y Abu Dabi siguen en pie",
+              "url": "https://timeslive.co.za/motoring/2026-11-25-new-tensions-and-familiar-feuds-dominate-f1-headlines-ahead-of-qatar-grand-prix"
+            },
+            {
+              "cuando": "25 de noviembre",
+              "fuente": "PlanetF1",
+              "resumen": "La Corte de Apelación de la FIA vio el caso de Audi a las 02:00 CDMX, a puerta cerrada. Si Audi gana, Tsunoda bajaría del 10.º al 15.º lugar por el GP de Italia. El fallo aún no se publica.",
+              "titulo": "Tsunoda: audiencia de Audi, sin fallo",
+              "url": "https://www.planetf1.com/news/fia-court-audi-yuki-tsunoda-appeal"
+            },
+            {
+              "cuando": "sin fecha visible (reporte reciente)",
+              "fuente": "GPFans",
+              "resumen": "GPFans reporta que Ollie Bearman estaría hablando con otro equipo para 2027, sin firma con Haas. Es un rumor: no hay comunicado oficial de Haas, Ferrari ni del equipo rival.",
+              "titulo": "Bearman, en pláticas con otro equipo (rumor)",
+              "url": "https://www.gpfans.com/en/f1-news/1093206/f1-ollie-bearman-haas-ferrari-alpine-contract-2027-grid-flavio-briatore-talks/"
             },
             {
               "cuando": "24 de noviembre",
               "fuente": "readMotorsport",
-              "resumen": "El jefe de Ferrari calificó de inaceptable el choque y dijo que habrá que tomar acción. Lo ve como un problema de egos, no de reglas de carrera. Hablará otra vez con los dos pilotos antes de Qatar.",
+              "resumen": "El jefe de Ferrari calificó de inaceptable el choque de Las Vegas. Vasseur volverá a hablar con los dos pilotos antes de Qatar.",
               "titulo": "Vasseur: la pelea Leclerc-Hamilton es \"inmanejable\"",
               "url": "https://readmotorsport.com/2026/11/24/vasseur-hamilton-leclerc-ferrari-rivalry-unmanageable/"
             },
             {
               "cuando": "24 de noviembre",
               "fuente": "Read Motorsport",
-              "resumen": "Tras el choque en la curva 14 de Las Vegas, Verstappen dijo que Russell está muy por debajo de su nivel. Ambos llegan a Lusail con el tema abierto.",
+              "resumen": "Tras el choque en la curva 14 de Las Vegas, Verstappen dijo que Russell está muy por debajo de su nivel. Los dos llegan a Lusail con el tema abierto.",
               "titulo": "Verstappen y Russell reavivan su rivalidad",
               "url": "https://readmotorsport.com/2026/11/24/verstappen-russell-rivalry-qatar-grand-prix-2026/"
             },
             {
               "cuando": "24 de noviembre",
               "fuente": "Motorsport Week",
-              "resumen": "Stroll dijo que Aston Martin necesita unos dos segundos en recta y que Honda debe sacar más potencia. Alonso calcula cerca de tres. Stroll terminó 17º en Las Vegas.",
+              "resumen": "Stroll terminó 17.º en Las Vegas y dijo que Aston Martin necesita unos dos segundos en recta. Alonso se retiró en la vuelta 49 de 50 por problema de motor.",
               "titulo": "Stroll pide a Honda dos segundos en recta",
               "url": "https://www.motorsportweek.com/2026/11/24/i-dont-know-stroll-unsure-honda-can-close-two-second-straight-line-gap/"
-            },
-            {
-              "cuando": "23 de noviembre",
-              "fuente": "PlanetF1",
-              "resumen": "La Corte de Apelación de la FIA tenía programada para hoy 25 la audiencia del caso ICA-2026-14, a puerta cerrada, a las 09:00 locales (02:00 en CDMX). Audi dice que Tsunoda provocó la vuelta de formación extra en Italia. Si gana, Tsunoda bajaría del 10º al 15º. No encontré fallo publicado.",
-              "titulo": "Tsunoda: audiencia de Audi en París, sin fallo",
-              "url": "https://www.planetf1.com/news/fia-court-audi-yuki-tsunoda-appeal"
-            },
-            {
-              "cuando": "23 de noviembre",
-              "fuente": "Racer",
-              "resumen": "Cada juego de neumáticos durará como máximo 27 vueltas en Qatar y la carrera tiene 57. Habrá al menos dos paradas. Los tres compuestos más duros de la gama estarán disponibles.",
-              "titulo": "Pirelli confirma 27 vueltas por juego en Qatar",
-              "url": "https://racer.com/2026/11/23/pirelli-confirms-tire-limits-in-qatar-again-guaranteeing-two-stop-race"
             }
           ],
-          "titulo": "Ferrari en la interna; Tsunoda, en audiencia",
+          "titulo": "Qatar firme; Ferrari, bajo presión; Tsunoda sin fallo",
           "id": "2026-11-25"
         },
         {
@@ -3412,8 +3728,8 @@
       ],
       "memoria": [
         {
-          "actualizado": "2026-11-25T13:35:40Z",
-          "texto": "- Sirven: Grand Prix, The Peninsula, Visit Qatar, Yahoo Sports (AP), WSLS (AP), PlanetF1, RacingNews365, RaceFans, Racer (Pirelli, 23 nov), BVM Sports (tope 2030, 22 nov), Crash.net, Motorsport Week, Sky Sports, ESPN, GPFans (rumores marcados), readMotorsport, Motorsport.com, Formula1.com, Motor.es, VAVEL, Al Jazeera, StatSniper, Scuderia Fans, The Race.\n- La búsqueda extendida trae listados viejos o sin fecha: revisar la fecha de cada nota.\n- No citar: SoyMotor, X, Athlon, Malay Mail, El Día, theauto.page, Prono-GP, thejudge13.com, mykhel, f1report.net, autoracing1 (agregador), DAZN, F1 Fansite (rumores), Madring sin fecha.\n- Infobae: revisar antes de volver a citarlo.\n- Rumores sin confirmar (no citar como hecho): Ocon a Aston (GPFans), Nike (F1 Fansite), tope de clientes 2030 (solo reportes de prensa).\n- Cuidado: la descalificación de McLaren de 2025 no es de 2026; un VAVEL del 25 nov sobre Verstappen en Qatar es de 2025. the-race.com dio error de DNS.",
+          "actualizado": "2026-11-26T12:38:30Z",
+          "texto": "- Sirven: Autosport, Sky Sports, Formula1.com, PlanetF1, RacingNews365, Visit Qatar, The Peninsula, Racer, Motorsport Week, readMotorsport, Grand Prix, TimesLIVE, Al Jazeera.\n- Sirven con cuidado: GPFans, GPblog, AP (vía WSLS o Yahoo), Athlon (sin abrir), The Race (fecha no visible en búsqueda).\n- No citar: SoyMotor, X, Malay Mail, El Día, theauto.page, Prono-GP, thejudge13.com, mykhel, f1report.net, autoracing1 (agregador), DAZN, F1 Fansite, Madring sin fecha.\n- Rumores sin confirmar (no citar como hecho): Ocon a Aston (GPFans), Nike (F1 Fansite), Ferrari con sanciones (Gazzetta vía Grand Prix), Bearman con otro equipo (GPFans; superado por la confirmación de Haas).\n- Cuidado: búsquedas dan notas sin fecha y de 2024-2025; revisar la fecha. Las búsquedas de hoy no dieron notas nuevas fechadas 26 salvo Bearman.\n- racefans.net no abrió desde la sesión (sin resolver); su titular sí salió en búsqueda.",
           "titulo": "Fuentes",
           "id": "fuentes"
         },
@@ -3424,14 +3740,14 @@
           "id": "instrucciones-del-jefe"
         },
         {
-          "actualizado": "2026-11-25T13:35:40Z",
-          "texto": "- Qatar: domingo 29, 10:00 CDMX (firme); práctica viernes 27, clasificación sábado 28; sin sprint. Pérez sale 5 lugares atrás. Pirelli: 27 vueltas por juego, mínimo dos paradas.\n- Abu Dabi: domingo 6 dic, 07:00 CDMX. AP (22 nov): la FIA aún podría cancelar Qatar y Abu Dabi. Sin cancelación reportada al 25 nov, 07:35 CDMX.\n- Tsunoda: audiencia 25 nov, 02:00 CDMX; sin fallo publicado al 07:35. Seguir.\n- Ferrari: sanciones internas en estudio (Gazzetta, 24 nov), sin confirmar. Vigna (Scuderia Fans, sin fecha exacta) dice que Hamilton y Leclerc resolvieron; Vasseur sigue con ambos antes de Qatar.\n- Bearman: sin firma para 2027; Komatsu dice que sigue, sin anuncio oficial.\n- V8 2030: voto final en Shanghái, 10 de diciembre.\n- Power de 2027: la FIA revisa el despliegue eléctrico; sin decisión.\n- Ocon a Aston Martin: rumor (GPFans, 22 nov), sin confirmar.",
+          "actualizado": "2026-11-26T12:38:30Z",
+          "texto": "- Qatar: domingo 29, 10:00 CDMX (firme); práctica viernes 27, clasificación sábado 28; sin sprint. Pirelli: 27 vueltas por juego.\n- Abu Dabi: domingo 6 dic, 07:00 CDMX. FIA dice que está lista; AP: la FIA aún podría cancelar.\n- Tsunoda: audiencia 25 nov; sin fallo publicado al 26 (búsqueda de hoy).\n- Ferrari: sanciones internas en estudio (sin confirmar); Vasseur habla con Leclerc y Hamilton antes de Qatar.\n- V8 2030: voto final en Shanghái, 10 dic.\n- Power de 2027: la FIA revisa el despliegue eléctrico; sin decisión.\n- Ocon como reserva en Aston Martin: rumor, sin confirmar.",
           "titulo": "Pendientes",
           "id": "pendientes"
         },
         {
-          "actualizado": "2026-11-25T13:35:40Z",
-          "texto": "- 25 nov (sin fecha exacta): Vigna, Hamilton y Leclerc resolvieron diferencias (Scuderia Fans, resumen de búsqueda)\n- 24 nov: Alpine, motor de 2030 y proveedor (Infobae)\n- 24 nov: Ferrari estudia sanciones internas, sin confirmar (Grand Prix)\n- 24 nov: Vasseur, la pelea Leclerc-Hamilton es inmanejable (readMotorsport)\n- 24 nov: Verstappen y Russell reavivan su rivalidad (Read Motorsport)\n- 24 nov: Stroll pide a Honda dos segundos en recta (Motorsport Week)\n- 24 nov: Hamilton dice que pudo pelear el título con más apoyo (GPFans)\n- 24 nov: Leclerc asume su parte y pide arreglarlo antes de Qatar (Scuderia Fans)\n- 24 nov: Vasseur culpa a Leclerc por el choque con Hamilton (Sky Sports)\n- 24 nov: Bearman sin firma; reportes de disputa salarial (Yahoo Sports)\n- 24 nov: Vasseur, videollamada con Leclerc y Hamilton; cara a cara en Qatar (Grand Prix)\n- 23 nov: Tsunoda, audiencia de Audi el 25 en París (PlanetF1)\n- 23 nov: Pirelli confirma 27 vueltas por juego en Qatar (Racer)\n- 23 nov: Verstappen critica el reglamento tras Las Vegas (BVM Sports)\n- 23 nov: Aston Martin confirma a Alonso y Stroll para 2027 (PlanetF1)",
+          "actualizado": "2026-11-26T12:38:30Z",
+          "texto": "- 26 nov: Haas confirma a Bearman para 2027, junto a Câmara (Autosport y Sky Sports; contrato firmado)\n- 25 nov: Ferrari, presionada a sancionar a sus pilotos (Motorsport Week, sin confirmar)\n- 25 nov: Qatar y Abu Dabi siguen en pie (TimesLIVE, base Reuters; AP dice que la FIA aún podría cancelar)\n- 25 nov: Tsunoda, audiencia de Audi sin fallo (PlanetF1)\n- 25 nov: Bearman en pláticas con otro equipo (GPFans, rumor; superado hoy)\n- 24 nov: Vasseur, la pelea Leclerc-Hamilton es \"inmanejable\" (readMotorsport)\n- 24 nov: Verstappen y Russell reavivan su rivalidad (Read Motorsport)\n- 24 nov: Stroll pide a Honda dos segundos en recta (Motorsport Week)\n- 24 nov: Hamilton dice que pudo pelear el título con más apoyo (GPFans)\n- 24 nov: Ferrari evalúa sanciones internas, sin confirmar (Grand Prix)\n- 23 nov: Aston Martin confirma a Alonso y Stroll para 2027 (PlanetF1)\n- 23 nov: Qatar, a una semana: Lusail listo (The Peninsula)\n- 22 nov: Pérez, cinco lugares atrás en la parrilla de Qatar (Formula1.com)\n- 22 nov: Wolff confirma contrato de Antonelli para 2027; monto sin confirmar (GPFans)\n- 21 nov: Verstappen gana en Las Vegas desde la pole (RaceFans, 22 nov)",
           "titulo": "Ya lo conté",
           "id": "ya-contado"
         }
